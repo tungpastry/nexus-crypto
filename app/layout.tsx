@@ -14,9 +14,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "⚡ Nexus Crypto Dashboard",
-  description: "Real-time BTC/USDT Dashboard using Next.js 16 + TradingView + AutoChecklist",
+  description:
+    "Real-time BTC/USDT Dashboard built with Next.js 16, TradingView, and AutoChecklist AI.",
+  openGraph: {
+    title: "⚡ Nexus Crypto Dashboard",
+    description:
+      "Real-time BTC/USDT Dashboard built with Next.js 16, TradingView, and AutoChecklist AI.",
+    url: "https://nexus-crypto.vercel.app",
+    siteName: "Nexus Crypto Dashboard",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Nexus Crypto Dashboard Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
   icons: {
-    icon: "/favicon.png",        // ✅ favicon chính
+    icon: "/favicon.png",
     shortcut: "/favicon.png",
     apple: "/favicon.png",
   },
@@ -30,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
         {children}
       </body>

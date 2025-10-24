@@ -21,8 +21,8 @@ export default function Home() {
     trend === "Uptrend"
       ? "ring-2 ring-emerald-500/70 shadow-lg shadow-emerald-500/20"
       : trend === "Downtrend"
-      ? "ring-2 ring-red-500/70 shadow-lg shadow-red-500/20"
-      : "ring-1 ring-slate-600/30";
+        ? "ring-2 ring-red-500/70 shadow-lg shadow-red-500/20"
+        : "ring-1 ring-slate-600/30";
 
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center p-6 space-y-6">
@@ -50,11 +50,10 @@ export default function Home() {
             <button
               key={pair}
               onClick={() => setSymbol(pair)}
-              className={`px-4 py-1 rounded-md text-xs font-semibold ${
-                symbol === pair
+              className={`px-4 py-1 rounded-md text-xs font-semibold ${symbol === pair
                   ? "bg-emerald-600 text-white"
                   : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-              }`}
+                }`}
             >
               {pair.replace("BINANCE:", "")}
             </button>
@@ -68,9 +67,8 @@ export default function Home() {
           <button
             key={t}
             onClick={() => setTf(t)}
-            className={`px-3 py-1 text-xs rounded-md ${
-              tf === t ? "bg-emerald-500 text-white" : "bg-gray-800 text-gray-300"
-            }`}
+            className={`px-3 py-1 text-xs rounded-md ${tf === t ? "bg-emerald-500 text-white" : "bg-gray-800 text-gray-300"
+              }`}
           >
             {t}
           </button>
