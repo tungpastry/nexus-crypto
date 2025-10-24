@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ Nexus Crypto Dashboard  
+> Real-time BTC/USDT Dashboard using **Next.js 16 + TradingView + AutoChecklist**
 
-## Getting Started
+![Banner](https://raw.githubusercontent.com/tungpastry/nexus-crypto/main/public/banner_nexus_crypto.png)
+> *Visualize the market. Stay in sync. Trade with confidence.*
 
-First, run the development server:
+---
 
+## 📊 Overview
+
+**Nexus Crypto** là dashboard realtime hiển thị dữ liệu Bitcoin (BTC/USDT) theo thời gian thực,  
+kết hợp giữa **TradingView Chart**, **Auto Checklist (MA Trend)**, và **Manual Checklist** để hỗ trợ đánh giá xu hướng kỹ thuật.
+
+---
+
+## 🚀 Features
+
+| Module | Description |
+|--------|--------------|
+| 📈 **TradingView Chart** | Realtime candlestick chart (Zoom, Crosshair, Horizontal Lines, Timeframe switch) |
+| 🤖 **Auto Checklist** | Tự động tính toán xu hướng theo MA20 / MA50 / MA200 (H4, D, W) |
+| 🧠 **Manual Checklist** | Đánh dấu thủ công các điều kiện setup (pullback, tín hiệu, tâm lý, RR) |
+| 🧩 **Dynamic TF Sync** | Chart, AutoChecklist và ManualChecklist đồng bộ timeframe |
+| 🔄 **Auto Refresh** | Làm mới dữ liệu mỗi 60 giây |
+| 💡 **Visual FX** | Viền glow theo trend (Uptrend / Downtrend / Sideway) |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Next.js 16 (App Router, Turbopack)**
+- **Tailwind CSS 3**
+- **TypeScript**
+- **TradingView Charting Library**
+- **Binance API**
+- **Framer Motion** (animation)
+- **Lucide-react** (icons)
+
+---
+
+## 🧰 Project Structure
+
+nexus-crypto/
+├── app/
+│ ├── api/
+│ │ ├── btc-klines/route.ts # Fetch OHLC data from Binance
+│ │ └── btc-price/route.ts # Realtime price
+│ ├── components/
+│ │ ├── TradingViewChart.tsx # Main chart component
+│ │ ├── AutoChecklist.tsx # MA trend analyzer
+│ │ ├── ManualChecklist.tsx # Manual trading checklist
+│ │ └── PriceWidget.tsx # Realtime BTC price box
+│ └── page.tsx # Dashboard layout
+├── public/
+│ └── banner_nexus_crypto.png
+├── package.json
+├── next.config.mjs
+└── tsconfig.json
+
+yaml
+Sao chép mã
+
+---
+
+## ⚙️ Local Development
+
+### 1️⃣ Clone repo
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+git clone https://github.com/tungpastry/nexus-crypto.git
+cd nexus-crypto
+2️⃣ Install dependencies
+bash
+Sao chép mã
+npm install
+3️⃣ Run dev
+bash
+Sao chép mã
+npm run dev -p 3200
+➡️ Truy cập tại: http://localhost:3200
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+☁️ Deploy on Ubuntu Server (Production)
+Build static
+bash
+Sao chép mã
+npm run build
+npm start -p 3200
+systemd Service (Auto-start on boot)
+Tạo file service:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+bash
+Sao chép mã
+sudo nano /etc/systemd/system/nexus-crypto.service
+Nội dung:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+ini
+Sao chép mã
+[Unit]
+Description=Nexus Crypto Next.js App
+After=network.target
 
-## Learn More
+[Service]
+Type=simple
+User=nexus
+WorkingDirectory=/home/nexus/projects/nexus-crypto
+ExecStart=/home/nexus/.nvm/versions/node/v22.18.0/bin/npm start -- -p 3200
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+StandardOutput=append:/home/nexus/projects/nexus-crypto/nexus-crypto.log
+StandardError=append:/home/nexus/projects/nexus-crypto/nexus-crypto-error.log
 
-To learn more about Next.js, take a look at the following resources:
+[Install]
+WantedBy=multi-user.target
+Lưu & khởi động:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+bash
+Sao chép mã
+sudo systemctl daemon-reload
+sudo systemctl enable --now nexus-crypto
+sudo systemctl status nexus-crypto --no-pager
+🖼️ Preview
+Chart	Auto Checklist	Manual Checklist
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🧭 Shortcuts (Mac)
+Action	Shortcut
+➕ Add Horizontal Line	Option (⌥) + Click hoặc Right Click
+❌ Delete Line	Double Click
+🔍 Zoom / Pan	Scroll / Drag
+🕓 Change Timeframe	Selector trên Chart
 
-## Deploy on Vercel
+🧠 Dev Tips
+Các dữ liệu MA được tính trực tiếp từ Binance API, có thể thay bằng nguồn nội bộ /api/btc-klines
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Khi đổi TF (Timeframe), AutoChecklist sẽ tự động fetch lại dữ liệu và cập nhật trend
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Có thể mở rộng cho altcoins khác (ETHUSDT, SOLUSDT…) bằng cách thêm param symbol
+
+🧾 License
+MIT License © 2025 tungpastry
+
+💬 Made with ⚡ passion by Mike Nguyen
