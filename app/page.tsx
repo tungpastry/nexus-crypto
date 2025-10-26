@@ -63,7 +63,7 @@ export default function Home() {
 
       {/* 🕒 Timeframe Selector */}
       <div className="flex gap-2 mt-2">
-        {["15", "60", "240", "D", "W"].map((t) => (
+        {["15", "30", "60", "240", "D", "W"].map((t) => (
           <button
             key={t}
             onClick={() => setTf(t)}
