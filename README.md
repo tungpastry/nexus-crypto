@@ -139,3 +139,24 @@ Có thể mở rộng cho altcoins khác (ETHUSDT, SOLUSDT…) bằng cách thê
 MIT License © 2025 tungpastry
 
 💬 Made with ⚡ passion by Mike Nguyen
+
+## Zenora BTC Price Contract
+
+`GET /api/btc-price` returns the existing `price` field plus `updated_at`, a UTC ISO-8601 timestamp captured when the Nexus-Crypto server receives the Binance ticker response.
+
+Example:
+
+```json
+{
+  "price": "80169.73000000",
+  "updated_at": "2026-05-13T13:55:00.000Z"
+}
+```
+
+The `price` field remains backward-compatible for existing clients. The `updated_at` field satisfies the Zenora provider-health timestamp contract for `nexus_crypto`.
+
+Smoke check:
+
+```bash
+./scripts/smoke_btc_price_contract.sh
+```
