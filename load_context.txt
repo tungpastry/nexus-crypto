@@ -1,0 +1,29 @@
+# SELECTIVE CONTEXT — Nexus Crypto
+# Repo metadata
+README.md
+package.json
+package-lock.json
+next.config.ts
+tsconfig.json
+eslint.config.mjs
+postcss.config.mjs
+# Next.js app shell
+app/layout.tsx
+app/page.tsx
+app/globals.css
+# API routes
+app/api/btc-price/route.ts
+app/api/btc-klines/route.ts
+# UI components
+app/components/PriceWidget.tsx
+app/components/AutoChecklist.tsx
+app/components/ManualChecklist.tsx
+app/components/TradingViewChart.tsx
+app/components/utils/indicators.ts
+# Scripts
+scripts/smoke_btc_price_contract.sh
+# Notes:
+# - Do not assume files outside this list exist.
+# - If a task needs another file, inspect it explicitly first.
+# - Keep context minimal per slice.
+# - This repo is a Next.js dashboard, not a Python report pipeline.
