@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
-import { LineChart, Shield } from "lucide-react";
-import type { NexusAsset } from "../../config/assets";
+import { ArrowRight, LineChart, Shield } from "lucide-react";
 import { NEXUS_ASSETS } from "../../config/assets";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "./DataFreshnessBadge";
@@ -20,11 +20,6 @@ type SnapshotAsset = {
 type Snapshot = {
   updated_at: string;
   assets: SnapshotAsset[];
-};
-
-type AssetWatchlistProps = {
-  selectedAsset: NexusAsset;
-  onSelectAsset: (asset: NexusAsset) => void;
 };
 
 function formatPrice(value?: number | null) {
@@ -52,10 +47,8 @@ function Percent({ value }: { value?: number | null }) {
   );
 }
 
-export default function AssetWatchlist({
-  selectedAsset,
-  onSelectAsset,
-}: AssetWatchlistProps) {
+export default function AssetWatchlist() {
+  const router = useRouter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
 
   useEffect(() => {
@@ -79,11 +72,14 @@ export default function AssetWatchlist({
   }, []);
 
   const snapshotById = new Map(snapshot?.assets.map((asset) => [asset.id, asset]));
+  const openWorkspace = (assetId: string) => {
+    router.push(`/asset/${assetId}`);
+  };
 
   return (
     <RetroPanel title="Asset Watchlist" eyebrow="Top 10 Nexus universe">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="border-b border-pink-500/10 text-xs uppercase tracking-[0.16em] text-pink-200/55">
             <tr>
               <th className="px-4 py-3">Asset</th>
@@ -92,12 +88,12 @@ export default function AssetWatchlist({
               <th className="px-4 py-3">7d</th>
               <th className="px-4 py-3">Volume</th>
               <th className="px-4 py-3">Mode</th>
+              <th className="px-4 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
             {NEXUS_ASSETS.map((asset) => {
               const row = snapshotById.get(asset.id);
-              const active = asset.id === selectedAsset.id;
 
               return (
                 <tr
@@ -105,14 +101,12 @@ export default function AssetWatchlist({
                   data-testid={`asset-row-${asset.symbol}`}
                   role="button"
                   tabIndex={0}
-                  className={`cursor-pointer border-b border-pink-500/10 transition hover:bg-pink-500/10 ${
-                    active ? "bg-pink-500/15" : "bg-transparent"
-                  }`}
-                  onClick={() => onSelectAsset(asset)}
+                  className="cursor-pointer border-b border-pink-500/10 bg-transparent transition hover:bg-pink-500/10 focus:outline-none focus-visible:bg-pink-500/10"
+                  onClick={() => openWorkspace(asset.id)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      onSelectAsset(asset);
+                      openWorkspace(asset.id);
                     }
                   }}
                 >
@@ -143,6 +137,12 @@ export default function AssetWatchlist({
                         <Shield className="h-3 w-3 text-amber-300" />
                       )}
                       {asset.enableChecklist ? "Nexus" : "Market"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center gap-2 rounded-lg border border-pink-500/20 bg-black/40 px-3 py-2 text-xs font-semibold text-pink-100">
+                      Open Workspace
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </td>
                 </tr>

@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import type { NexusAsset } from "../../config/assets";
+import { NEXUS_TIMEFRAMES } from "../../config/timeframes";
+import type { NexusSignal } from "../../lib/nexusAlgorithm";
+import PriceWidget from "../PriceWidget";
+import TradingViewChart from "../TradingViewChart";
+import NexusAutoChecklist from "../checklist/NexusAutoChecklist";
+import ManualDisciplineChecklist from "../checklist/ManualDisciplineChecklist";
+import ClientErrorBoundary from "../layout/ClientErrorBoundary";
+import RetroPanel from "../layout/RetroPanel";
+import AssetWorkspaceHeader from "./AssetWorkspaceHeader";
+import TimeframeSelector from "./TimeframeSelector";
+
+type AssetWorkspaceShellProps = {
+  asset: NexusAsset;
+};
+
+export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps) {
+  const [selectedTimeframe, setSelectedTimeframe] = useState(NEXUS_TIMEFRAMES[2]);
+  const [trend, setTrend] = useState<NexusSignal["trend"] | "SIDEWAY" | "DISABLED">("SIDEWAY");
+
+  const trendRing =
+    trend === "UPTREND"
+      ? "ring-2 ring-emerald-400/60 shadow-[0_0_24px_rgba(56,255,156,0.16)]"
+      : trend === "DOWNTREND"
+        ? "ring-2 ring-red-400/60 shadow-[0_0_24px_rgba(255,79,109,0.16)]"
+        : "ring-1 ring-pink-500/20";
+
+  return (
+    <main className="min-h-screen bg-[#050008] px-4 py-6 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-2 rounded-lg border border-pink-500/20 bg-black/45 px-3 py-2 text-sm font-semibold text-pink-100 transition hover:bg-pink-500/10"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Top 10 Nexus Universe
+        </Link>
+
+        <ClientErrorBoundary>
+          <AssetWorkspaceHeader asset={asset} />
+        </ClientErrorBoundary>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
+          <ClientErrorBoundary>
+            <PriceWidget asset={asset} />
+          </ClientErrorBoundary>
+
+          <ClientErrorBoundary>
+            <RetroPanel title="Timeframe Selector" eyebrow={`${asset.symbol} workspace`}>
+              <div className="space-y-4 p-5">
+                <TimeframeSelector
+                  selectedTimeframe={selectedTimeframe}
+                  onSelectTimeframe={setSelectedTimeframe}
+                />
+                <p className="text-xs leading-5 text-pink-100/55">
+                  Timeframe controls chart interval, Nexus MA context, and manual discipline
+                  storage namespace. Market data only; no trade execution or recommendations.
+                </p>
+              </div>
+            </RetroPanel>
+          </ClientErrorBoundary>
+        </div>
+
+        <ClientErrorBoundary>
+          <RetroPanel
+            title="TradingView Chart"
+            eyebrow={`${asset.symbol} ${selectedTimeframe.label}`}
+          >
+            <div className="p-4">
+              <TradingViewChart
+                asset={asset}
+                timeframe={selectedTimeframe}
+                theme="dark"
+                height={680}
+              />
+            </div>
+          </RetroPanel>
+        </ClientErrorBoundary>
+
+        <div className="grid gap-6 xl:grid-cols-2">
+          <ClientErrorBoundary>
+            <div className={`rounded-2xl transition-all duration-700 ${trendRing}`}>
+              <NexusAutoChecklist
+                asset={asset}
+                timeframe={selectedTimeframe}
+                onTrendChange={setTrend}
+              />
+            </div>
+          </ClientErrorBoundary>
+
+          <ClientErrorBoundary>
+            <ManualDisciplineChecklist asset={asset} timeframe={selectedTimeframe} />
+          </ClientErrorBoundary>
+        </div>
+
+        <p className="pb-4 text-center text-xs text-pink-100/40">
+          Workspace data is informational only. Nexus does not execute trades or provide trading
+          recommendations.
+        </p>
+      </div>
+    </main>
+  );
+}
