@@ -28,6 +28,11 @@ type CachedFetchOptions<T extends object> = {
 const valueCache = new Map<string, CacheEntry<object>>();
 const inFlightCache = new Map<string, Promise<object>>();
 
+export function clearServerCacheForTests() {
+  valueCache.clear();
+  inFlightCache.clear();
+}
+
 function withCacheMetadata<T extends object>(
   value: T,
   status: CacheStatus,

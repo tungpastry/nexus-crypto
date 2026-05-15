@@ -185,7 +185,8 @@ nexus-crypto/
 │   │   ├── crypto-klines/route.ts
 │   │   ├── crypto-price/route.ts
 │   │   ├── market-snapshot/route.ts
-│   │   └── provider-health/route.ts
+│   │   ├── provider-health/route.ts
+│   │   └── version/route.ts
 │   ├── asset/[id]/page.tsx
 │   ├── components/
 │   │   ├── asset/AssetWorkspaceHeader.tsx
@@ -247,10 +248,11 @@ Ubuntu path: /home/nexus/projects/nexus-crypto
 
 ## Validation
 
-Run lint and build:
+Run local validation:
 
 ```bash
 npm run lint
+npm run test
 npm run build
 ```
 
@@ -283,13 +285,32 @@ CRYPTO_KLINES_ETHUSDT=PASS
 PROVIDER_HEALTH=PASS
 ```
 
+Health and version checks:
+
+```bash
+curl -sS "http://127.0.0.1:3200/api/provider-health" | python3 -m json.tool
+curl -sS "http://127.0.0.1:3200/api/version" | python3 -m json.tool
+```
+
+`npm audit` may still report moderate advisories from bundled Next/PostCSS metadata. Do not use `npm audit fix --force`; review framework upgrades explicitly.
+
 ## Production Deployment On Ubuntu
+
+Preferred deploy flow:
+
+```bash
+NEXUS_CRYPTO_REPO_DIR="/home/nexus/projects/nexus-crypto" ./scripts/deploy_ubuntu_server.sh
+```
+
+The deploy script fetches/pulls `main`, installs dependencies, runs lint/test/build, restarts `nexus-crypto.service`, waits for `/api/provider-health`, runs smoke checks, and exits non-zero if the repo is dirty after deploy.
 
 Build:
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
 npm install
+npm run lint
+npm run test
 npm run build
 ```
 
