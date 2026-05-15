@@ -87,7 +87,12 @@ Returns a validated Binance price payload.
   "provider": "binance",
   "symbol": "BTCUSDT",
   "price": "80457.17000000",
-  "updated_at": "2026-05-15T00:00:00.000Z"
+  "updated_at": "2026-05-15T00:00:00.000Z",
+  "cache": {
+    "status": "miss",
+    "age_ms": 0,
+    "ttl_ms": 5000
+  }
 }
 ```
 
@@ -122,17 +127,22 @@ Returns validated Binance OHLCV candles.
       "close": 68500,
       "volume": 1234.56
     }
-  ]
+  ],
+  "cache": {
+    "status": "miss",
+    "age_ms": 0,
+    "ttl_ms": 60000
+  }
 }
 ```
 
 ### `GET /api/market-snapshot`
 
-Returns CoinGecko-style global market data and the 10 Nexus assets.
+Returns CoinGecko-style global market data and the 10 Nexus assets. The route keeps a server-side TTL cache plus a persistent last-good snapshot so production can serve stale market data during provider rate limits.
 
 ### `GET /api/provider-health`
 
-Returns Zenora/Nexus provider health:
+Returns Zenora/Nexus provider health. The market snapshot check calls the live `/api/market-snapshot` route and reports cache state:
 
 ```json
 {
@@ -142,10 +152,14 @@ Returns Zenora/Nexus provider health:
   "checks": {
     "binance_price": { "status": "ok", "latency_ms": 120 },
     "binance_klines": { "status": "ok", "latency_ms": 180 },
-    "market_snapshot": { "status": "ok", "latency_ms": 240 }
+    "market_snapshot": { "status": "ok", "latency_ms": 240 },
+    "market_snapshot_cache_status": { "status": "ok", "value": "hit" },
+    "market_snapshot_age_ms": { "status": "ok", "value": 1240 }
   }
 }
 ```
+
+Binance price responses use a 5 second server TTL cache. Binance klines use a 60 second server TTL cache. If Binance is temporarily unavailable and stale data exists, those routes return HTTP 200 with `status: "degraded"` and `cache.status: "stale"` while preserving the normal response shape.
 
 ### Legacy BTC Routes
 
@@ -194,6 +208,7 @@ nexus-crypto/
 │   ├── lib/
 │   │   ├── binance.ts
 │   │   ├── nexusAlgorithm.ts
+│   │   ├── serverCache.ts
 │   │   └── validators.ts
 │   └── page.tsx
 ├── scripts/

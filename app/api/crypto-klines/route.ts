@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCryptoKlines } from "../../lib/binance";
+import { getCachedOrFetch } from "../../lib/serverCache";
 import { validateBinanceSymbol, validateBinanceTimeframe } from "../../lib/validators";
+
+const KLINES_CACHE_TTL_MS = 60_000;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -17,7 +20,14 @@ export async function GET(req: NextRequest) {
 
   try {
     const limit = tfValidation.tf === "1w" ? 500 : 400;
-    const data = await getCryptoKlines(symbolValidation.symbol, tfValidation.tf, limit);
+    const data = await getCachedOrFetch({
+      key: `${symbolValidation.symbol}:${tfValidation.tf}:${limit}`,
+      ttlMs: KLINES_CACHE_TTL_MS,
+      fetcher: () =>
+        getCryptoKlines(symbolValidation.symbol, tfValidation.tf, limit),
+      staleErrorCode: "KLINES_PROVIDER_STALE",
+    });
+
     return NextResponse.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch klines";

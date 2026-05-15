@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCryptoPrice } from "../../lib/binance";
+import { getCachedOrFetch } from "../../lib/serverCache";
 import { validateBinanceSymbol } from "../../lib/validators";
+
+const PRICE_CACHE_TTL_MS = 5_000;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -11,7 +14,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const data = await getCryptoPrice(validation.symbol);
+    const data = await getCachedOrFetch({
+      key: validation.symbol,
+      ttlMs: PRICE_CACHE_TTL_MS,
+      fetcher: () => getCryptoPrice(validation.symbol),
+      staleErrorCode: "PRICE_PROVIDER_STALE",
+    });
+
     return NextResponse.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to fetch price";

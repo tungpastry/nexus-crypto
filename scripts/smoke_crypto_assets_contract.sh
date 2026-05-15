@@ -58,6 +58,42 @@ print(f"CRYPTO_KLINES_{symbol}=PASS")
 PY
 done
 
+negative_symbol_file="$TMP_DIR/negative-unsupported-symbol.json"
+negative_symbol_code="$(
+  curl -sS \
+    -o "$negative_symbol_file" \
+    -w "%{http_code}" \
+    "${BASE_URL}/api/crypto-price?symbol=INVALID"
+)"
+test "$negative_symbol_code" = "400"
+python3 - "$negative_symbol_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("error", {}).get("code") == "UNSUPPORTED_SYMBOL"
+print("NEGATIVE_UNSUPPORTED_SYMBOL=PASS")
+PY
+
+negative_timeframe_file="$TMP_DIR/negative-unsupported-timeframe.json"
+negative_timeframe_code="$(
+  curl -sS \
+    -o "$negative_timeframe_file" \
+    -w "%{http_code}" \
+    "${BASE_URL}/api/crypto-klines?symbol=BTCUSDT&tf=2h"
+)"
+test "$negative_timeframe_code" = "400"
+python3 - "$negative_timeframe_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("error", {}).get("code") == "UNSUPPORTED_TIMEFRAME"
+print("NEGATIVE_UNSUPPORTED_TIMEFRAME=PASS")
+PY
+
 health_file="$TMP_DIR/provider-health.json"
 curl -sS "${BASE_URL}/api/provider-health" -o "$health_file"
 python3 - "$health_file" <<'PY'
@@ -70,7 +106,13 @@ payload = json.loads(Path(sys.argv[1]).read_text())
 assert payload.get("provider") == "nexus_crypto", "provider mismatch"
 assert payload.get("status") in ("ok", "degraded"), "invalid health status"
 assert isinstance(payload.get("checks"), dict), "missing checks"
-for key in ("binance_price", "binance_klines", "market_snapshot"):
+for key in (
+    "binance_price",
+    "binance_klines",
+    "market_snapshot",
+    "market_snapshot_cache_status",
+    "market_snapshot_age_ms",
+):
     assert key in payload["checks"], f"missing {key}"
     assert "status" in payload["checks"][key], f"missing {key}.status"
 datetime.fromisoformat(payload["updated_at"].replace("Z", "+00:00"))
