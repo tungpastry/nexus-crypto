@@ -8,6 +8,10 @@ import DataFreshnessBadge from "./DataFreshnessBadge";
 
 type MarketSnapshotData = {
   updated_at: string;
+  cache?: {
+    status: "hit" | "miss" | "stale";
+    age_ms: number;
+  };
   error?: { message: string };
   global: {
     market_cap_usd: number | null;
@@ -84,6 +88,13 @@ export default function MarketSnapshot() {
     [data]
   );
 
+  const statusText =
+    data?.cache?.status === "stale"
+      ? "Snapshot using cached data because provider is rate-limited"
+      : error || data?.error?.message
+        ? `Snapshot degraded: ${error || data?.error?.message}`
+        : "Global market data synced";
+
   return (
     <RetroPanel title="Market Snapshot" eyebrow="CoinGecko-style global tape">
       <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -101,11 +112,7 @@ export default function MarketSnapshot() {
         ))}
       </div>
       <div className="flex items-center justify-between border-t border-pink-500/10 px-4 py-3 text-xs text-pink-100/60">
-        <span>
-          {error || data?.error?.message
-            ? `Snapshot degraded: ${error || data?.error?.message}`
-            : "Global market data synced"}
-        </span>
+        <span>{statusText}</span>
         <DataFreshnessBadge updatedAt={data?.updated_at} />
       </div>
     </RetroPanel>
