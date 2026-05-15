@@ -10,6 +10,7 @@ import PriceWidget from "../PriceWidget";
 import TradingViewChart from "../TradingViewChart";
 import NexusAutoChecklist from "../checklist/NexusAutoChecklist";
 import ClientErrorBoundary from "../layout/ClientErrorBoundary";
+import NexusFooter from "../layout/NexusFooter";
 import RetroPanel from "../layout/RetroPanel";
 import AssetWorkspaceHeader from "./AssetWorkspaceHeader";
 import TimeframeSelector from "./TimeframeSelector";
@@ -91,10 +92,7 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
           </div>
         </ClientErrorBoundary>
 
-        <p className="pb-4 text-center text-xs text-[var(--text-soft)]">
-          Workspace data is informational only. Nexus does not execute trades or provide trading
-          recommendations.
-        </p>
+        <NexusFooter />
       </div>
     </main>
   );

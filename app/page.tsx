@@ -3,8 +3,7 @@ import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import ProviderHealthPanel from "./components/insights/ProviderHealthPanel";
-import VersionBadge from "./components/insights/VersionBadge";
-import LogoutButton from "./components/auth/LogoutButton";
+import NexusFooter from "./components/layout/NexusFooter";
 
 export default function Home() {
   return (
@@ -49,19 +48,7 @@ export default function Home() {
           <ProviderHealthPanel />
         </ClientErrorBoundary>
 
-        <footer className="flex flex-col items-center gap-3 pb-4">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <ClientErrorBoundary>
-              <VersionBadge />
-            </ClientErrorBoundary>
-            <ClientErrorBoundary>
-              <LogoutButton />
-            </ClientErrorBoundary>
-          </div>
-          <p className="text-center text-xs text-[var(--text-soft)]">
-            Market data only. Nexus does not execute trades or provide trading recommendations.
-          </p>
-        </footer>
+        <NexusFooter />
       </div>
     </main>
   );
