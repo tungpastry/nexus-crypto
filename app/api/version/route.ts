@@ -13,15 +13,22 @@ function firstEnvValue(keys: string[]) {
   return "unknown";
 }
 
+function shortCommit(commit: string) {
+  return commit === "unknown" ? "unknown" : commit.slice(0, 7);
+}
+
 export async function GET() {
+  const commit = firstEnvValue([
+    "NEXT_PUBLIC_GIT_COMMIT_SHA",
+    "GIT_COMMIT_SHA",
+    "VERCEL_GIT_COMMIT_SHA",
+  ]);
+
   return NextResponse.json({
     app: packageJson.name,
     version: packageJson.version,
-    commit: firstEnvValue([
-      "NEXT_PUBLIC_GIT_COMMIT_SHA",
-      "GIT_COMMIT_SHA",
-      "VERCEL_GIT_COMMIT_SHA",
-    ]),
+    commit,
+    short_commit: shortCommit(commit),
     build_time: firstEnvValue(["NEXT_PUBLIC_BUILD_TIME", "BUILD_TIME"]),
     next: packageJson.dependencies.next,
     node: process.version,

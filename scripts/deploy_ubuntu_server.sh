@@ -55,6 +55,22 @@ git fetch origin
 section "PULL"
 git pull --ff-only origin "$BRANCH"
 
+GIT_COMMIT_SHA="$(git rev-parse HEAD)"
+GIT_SHORT_SHA="$(git rev-parse --short HEAD)"
+BUILD_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+section "RELEASE METADATA"
+echo "RELEASE_COMMIT=$GIT_SHORT_SHA"
+echo "RELEASE_BUILD_TIME=$BUILD_TIME"
+(umask 077 && cat > .env.production.local <<EOF
+GIT_COMMIT_SHA=$GIT_COMMIT_SHA
+NEXT_PUBLIC_GIT_COMMIT_SHA=$GIT_COMMIT_SHA
+BUILD_TIME=$BUILD_TIME
+NEXT_PUBLIC_BUILD_TIME=$BUILD_TIME
+EOF
+)
+chmod 600 .env.production.local
+
 section "INSTALL"
 npm install
 
@@ -89,6 +105,33 @@ if [[ "$app_ready" != "1" ]]; then
   show_runtime_diagnostics
   exit 1
 fi
+
+section "VERSION CHECK"
+version_file="$(mktemp)"
+curl -sS "$BASE_URL/api/version" -o "$version_file"
+GIT_COMMIT_SHA="$GIT_COMMIT_SHA" \
+GIT_SHORT_SHA="$GIT_SHORT_SHA" \
+BUILD_TIME="$BUILD_TIME" \
+python3 - "$version_file" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+expected_commit = os.environ["GIT_COMMIT_SHA"]
+expected_short = os.environ["GIT_SHORT_SHA"]
+expected_build_time = os.environ["BUILD_TIME"]
+
+assert payload.get("app") == "nexus-crypto", "version app mismatch"
+assert payload.get("commit") == expected_commit, "version commit mismatch"
+assert payload.get("short_commit") == expected_short, "short commit mismatch"
+assert payload.get("build_time") == expected_build_time, "build time mismatch"
+assert payload.get("next"), "missing next version"
+assert str(payload.get("node", "")).startswith("v"), "missing node version"
+print("VERSION_METADATA=PASS")
+PY
+rm -f "$version_file"
 
 section "SMOKE"
 NEXUS_CRYPTO_BASE_URL="$BASE_URL" ./scripts/smoke_crypto_assets_contract.sh

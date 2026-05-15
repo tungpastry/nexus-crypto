@@ -3,6 +3,7 @@ import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import ProviderHealthPanel from "./components/insights/ProviderHealthPanel";
+import VersionBadge from "./components/insights/VersionBadge";
 
 export default function Home() {
   return (
@@ -47,9 +48,14 @@ export default function Home() {
           <ProviderHealthPanel />
         </ClientErrorBoundary>
 
-        <p className="pb-4 text-center text-xs text-pink-100/40">
-          Market data only. Nexus does not execute trades or provide trading recommendations.
-        </p>
+        <footer className="flex flex-col items-center gap-3 pb-4">
+          <ClientErrorBoundary>
+            <VersionBadge />
+          </ClientErrorBoundary>
+          <p className="text-center text-xs text-pink-100/40">
+            Market data only. Nexus does not execute trades or provide trading recommendations.
+          </p>
+        </footer>
       </div>
     </main>
   );
