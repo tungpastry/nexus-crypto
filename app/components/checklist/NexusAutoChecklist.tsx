@@ -5,6 +5,7 @@ import axios from "axios";
 import { AlertTriangle, CheckCircle2, Circle, XCircle } from "lucide-react";
 import type { NexusAsset } from "../../config/assets";
 import type { NexusTimeframe } from "../../config/timeframes";
+import { safeReadJson, safeWriteJson } from "../../lib/clientStorage";
 import { buildNexusSignal, type NexusChecklistRule, type NexusSignal } from "../../lib/nexusAlgorithm";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "../market/DataFreshnessBadge";
@@ -70,6 +71,13 @@ function formatNumber(value: number) {
   return value.toLocaleString("en-US", { maximumFractionDigits: value < 1 ? 6 : 2 });
 }
 
+function isPlainUserChecks(value: unknown): value is UserChecks {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  return Object.values(value).every((item) => typeof item === "boolean");
+}
+
 function RuleIcon({ rule, checked }: { rule: NexusChecklistRule; checked?: boolean }) {
   if (rule.type !== "auto") {
     return checked ? (
@@ -125,17 +133,19 @@ export default function NexusAutoChecklist({
 }: NexusAutoChecklistProps) {
   const [signal, setSignal] = useState<NexusSignal | null>(null);
   const [checks, setChecks] = useState<UserChecks>({});
+  const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const storageKey = `nexusAutoChecklist:${asset.symbol}:${timeframe.binance}`;
 
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    setChecks(saved ? JSON.parse(saved) : {});
+    setChecks(safeReadJson<UserChecks>(storageKey, {}, isPlainUserChecks));
+    setLoadedStorageKey(storageKey);
   }, [storageKey]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(checks));
-  }, [checks, storageKey]);
+    if (loadedStorageKey !== storageKey) return;
+    safeWriteJson(storageKey, checks);
+  }, [checks, loadedStorageKey, storageKey]);
 
   useEffect(() => {
     if (!asset.enableChecklist || !asset.binanceSymbol) {

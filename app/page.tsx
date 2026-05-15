@@ -6,6 +6,7 @@ import PriceWidget from "./components/PriceWidget";
 import NexusAutoChecklist from "./components/checklist/NexusAutoChecklist";
 import ManualChecklist from "./components/ManualChecklist";
 import TradingViewChart from "./components/TradingViewChart";
+import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import RetroPanel from "./components/layout/RetroPanel";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import AssetWatchlist from "./components/market/AssetWatchlist";
@@ -54,55 +55,67 @@ export default function Home() {
           </div>
         </header>
 
-        <MarketSnapshot />
+        <ClientErrorBoundary>
+          <MarketSnapshot />
+        </ClientErrorBoundary>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-          <AssetWatchlist selectedAsset={selectedAsset} onSelectAsset={setSelectedAsset} />
+          <ClientErrorBoundary>
+            <AssetWatchlist selectedAsset={selectedAsset} onSelectAsset={setSelectedAsset} />
+          </ClientErrorBoundary>
 
-          <RetroPanel title="Selected Workspace" eyebrow={selectedAsset.name}>
-            <div className="space-y-4 p-4">
-              <PriceWidget asset={selectedAsset} />
+          <ClientErrorBoundary>
+            <RetroPanel title="Selected Workspace" eyebrow={selectedAsset.name}>
+              <div className="space-y-4 p-4">
+                <PriceWidget asset={selectedAsset} />
 
-              <div className="flex flex-wrap gap-2">
-                {NEXUS_TIMEFRAMES.map((timeframe) => (
-                  <button
-                    key={timeframe.binance}
-                    type="button"
-                    onClick={() => setSelectedTimeframe(timeframe)}
-                    className={`rounded-lg border px-3 py-2 font-mono text-xs transition ${
-                      selectedTimeframe.binance === timeframe.binance
-                        ? "border-pink-400 bg-pink-500/20 text-pink-50"
-                        : "border-pink-500/15 bg-black/35 text-pink-100/60 hover:bg-pink-500/10"
-                    }`}
-                  >
-                    {timeframe.label}
-                  </button>
-                ))}
+                <div className="flex flex-wrap gap-2">
+                  {NEXUS_TIMEFRAMES.map((timeframe) => (
+                    <button
+                      key={timeframe.binance}
+                      type="button"
+                      onClick={() => setSelectedTimeframe(timeframe)}
+                      className={`rounded-lg border px-3 py-2 font-mono text-xs transition ${
+                        selectedTimeframe.binance === timeframe.binance
+                          ? "border-pink-400 bg-pink-500/20 text-pink-50"
+                          : "border-pink-500/15 bg-black/35 text-pink-100/60 hover:bg-pink-500/10"
+                      }`}
+                    >
+                      {timeframe.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-xl border border-pink-500/10 bg-black/35 p-3 text-xs leading-5 text-pink-100/55">
+                  {selectedAsset.note ||
+                    `${selectedAsset.symbol} uses the Nexus trading workflow with Binance price, TradingView chart, and MA checklist context.`}
+                </div>
               </div>
+            </RetroPanel>
+          </ClientErrorBoundary>
+        </div>
 
-              <div className="rounded-xl border border-pink-500/10 bg-black/35 p-3 text-xs leading-5 text-pink-100/55">
-                {selectedAsset.note ||
-                  `${selectedAsset.symbol} uses the Nexus trading workflow with Binance price, TradingView chart, and MA checklist context.`}
-              </div>
+        <ClientErrorBoundary>
+          <div className={`rounded-2xl transition-all duration-700 ${trendRing}`}>
+            <NexusAutoChecklist
+              asset={selectedAsset}
+              timeframe={selectedTimeframe}
+              onTrendChange={setTrend}
+            />
+          </div>
+        </ClientErrorBoundary>
+
+        <ClientErrorBoundary>
+          <RetroPanel title="TradingView Chart" eyebrow={`${selectedAsset.symbol} ${selectedTimeframe.label}`}>
+            <div className="p-4">
+              <TradingViewChart asset={selectedAsset} timeframe={selectedTimeframe} theme="dark" height={620} />
             </div>
           </RetroPanel>
-        </div>
+        </ClientErrorBoundary>
 
-        <div className={`rounded-2xl transition-all duration-700 ${trendRing}`}>
-          <NexusAutoChecklist
-            asset={selectedAsset}
-            timeframe={selectedTimeframe}
-            onTrendChange={setTrend}
-          />
-        </div>
-
-        <RetroPanel title="TradingView Chart" eyebrow={`${selectedAsset.symbol} ${selectedTimeframe.label}`}>
-          <div className="p-4">
-            <TradingViewChart asset={selectedAsset} timeframe={selectedTimeframe} theme="dark" height={620} />
-          </div>
-        </RetroPanel>
-
-        <ManualChecklist asset={selectedAsset} timeframe={selectedTimeframe} />
+        <ClientErrorBoundary>
+          <ManualChecklist asset={selectedAsset} timeframe={selectedTimeframe} />
+        </ClientErrorBoundary>
 
         <p className="pb-4 text-center text-xs text-pink-100/40">
           Data via Binance and CoinGecko. TradingView chart widget renders client-side.

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle, RotateCcw, XCircle } from "lucide-react";
 import type { NexusAsset } from "../config/assets";
 import type { NexusTimeframe } from "../config/timeframes";
+import { safeReadJson, safeWriteJson } from "../lib/clientStorage";
 import RetroPanel from "./layout/RetroPanel";
 
 interface ChecklistItem {
@@ -27,21 +28,38 @@ const initialChecklist: ChecklistItem[] = [
   { id: "psych", label: "Calm mindset; no FOMO or overtrade impulse", checked: false, group: "Discipline" },
 ];
 
+function isChecklistItem(value: unknown): value is ChecklistItem {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.label === "string" &&
+    typeof item.checked === "boolean" &&
+    typeof item.group === "string"
+  );
+}
+
+function isChecklistItems(value: unknown): value is ChecklistItem[] {
+  return Array.isArray(value) && value.every(isChecklistItem);
+}
+
 export default function ManualChecklist({ asset, timeframe }: ManualChecklistProps) {
   const [items, setItems] = useState<ChecklistItem[]>(initialChecklist);
-  const [progress, setProgress] = useState(0);
+  const [loadedStorageKey, setLoadedStorageKey] = useState<string | null>(null);
   const storageKey = `manualChecklist:${asset.symbol}:${timeframe.binance}`;
+  const progress = Math.round(
+    (items.filter((item) => item.checked).length / items.length) * 100
+  );
 
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    setItems(saved ? JSON.parse(saved) : initialChecklist);
+    setItems(safeReadJson<ChecklistItem[]>(storageKey, initialChecklist, isChecklistItems));
+    setLoadedStorageKey(storageKey);
   }, [storageKey]);
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(items));
-    const done = items.filter((i) => i.checked).length;
-    setProgress(Math.round((done / items.length) * 100));
-  }, [items, storageKey]);
+    if (loadedStorageKey !== storageKey) return;
+    safeWriteJson(storageKey, items);
+  }, [items, loadedStorageKey, storageKey]);
 
   const toggleItem = (id: string) => {
     setItems((prev) =>
