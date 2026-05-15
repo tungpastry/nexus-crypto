@@ -53,7 +53,7 @@ export default function LogoutButton() {
       type="button"
       onClick={logout}
       disabled={loading}
-      className="rounded-full border border-pink-500/15 bg-black/40 px-3 py-1 font-mono text-xs text-pink-100/45 transition hover:border-cyan-300/40 hover:text-cyan-100 disabled:opacity-60"
+      className="rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-1 font-mono text-xs text-[var(--text-muted)] transition hover:border-[rgba(125,211,252,0.4)] hover:text-[var(--cyan-accent)] disabled:opacity-60"
     >
       {loading ? "Leaving" : "Logout"}
     </button>

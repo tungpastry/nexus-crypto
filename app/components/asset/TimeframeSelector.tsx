@@ -21,8 +21,8 @@ export default function TimeframeSelector({
           onClick={() => onSelectTimeframe(timeframe)}
           className={`rounded-lg border px-3 py-2 font-mono text-xs transition ${
             selectedTimeframe.binance === timeframe.binance
-              ? "border-pink-400 bg-pink-500/20 text-pink-50"
-              : "border-pink-500/15 bg-black/35 text-pink-100/60 hover:bg-pink-500/10"
+              ? "border-[rgba(255,95,162,0.5)] bg-[rgba(255,95,162,0.2)] text-[var(--text-main)]"
+              : "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)] hover:bg-[rgba(255,95,162,0.1)]"
           }`}
         >
           {timeframe.label}

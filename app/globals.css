@@ -1,8 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050008;
-  --foreground: #fff4fb;
+  --bg-main: #0b0710;
+  --bg-surface: #15101c;
+  --bg-surface-soft: #1d1627;
+  --bg-card: rgba(255, 255, 255, 0.055);
+  --bg-card-hover: rgba(255, 255, 255, 0.085);
+  --text-main: #f8f4ff;
+  --text-muted: #b8adc8;
+  --text-soft: #8f839f;
+  --pink-primary: #ff5fa2;
+  --pink-soft: #ff8fbd;
+  --pink-muted: #d96c9f;
+  --pink-glow: rgba(255, 95, 162, 0.28);
+  --cyan-accent: #7dd3fc;
+  --mint-positive: #5eead4;
+  --red-negative: #fb7185;
+  --amber-warning: #fbbf24;
+  --border-soft: rgba(255, 255, 255, 0.12);
+  --background: var(--bg-main);
+  --foreground: var(--text-main);
 }
 
 @theme inline {
@@ -15,10 +32,15 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  background-image:
+    radial-gradient(circle at top left, rgba(255, 95, 162, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(125, 211, 252, 0.1), transparent 28%),
+    linear-gradient(180deg, #0b0710 0%, #100a17 45%, #08060c 100%);
+  background-attachment: fixed;
 }
 
 ::selection {
-  background: rgba(255, 79, 216, 0.35);
-  color: #fff4fb;
+  background: rgba(255, 95, 162, 0.35);
+  color: #f8f4ff;
 }

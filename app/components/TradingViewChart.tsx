@@ -102,7 +102,7 @@ export default function TradingViewChart({
           theme,
           style: "1",
           locale: "en",
-          toolbar_bg: theme === "dark" ? "#050008" : "#f8fafc",
+          toolbar_bg: theme === "dark" ? "#0b0710" : "#f8fafc",
           enable_publishing: false,
           hide_legend: false,
           hide_top_toolbar: false,
@@ -127,7 +127,7 @@ export default function TradingViewChart({
 
   if (!asset.enableChart) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-pink-500/20 bg-black/70 p-6 text-center text-pink-100/70">
+      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] p-6 text-center text-[var(--text-muted)]">
         {asset.symbol} is configured as market data only, so TradingView charting is disabled.
       </div>
     );
@@ -135,7 +135,7 @@ export default function TradingViewChart({
 
   if (loadFailed) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-pink-500/20 bg-black/70 p-6 text-center text-pink-100/70">
+      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] p-6 text-center text-[var(--text-muted)]">
         TradingView unavailable. Please refresh or check network access.
       </div>
     );
@@ -144,7 +144,7 @@ export default function TradingViewChart({
   return (
     <div
       ref={hostRef}
-      className="overflow-hidden rounded-2xl border border-pink-500/20 shadow-[0_0_30px_rgba(255,47,166,0.12)]"
+      className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.14)] shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
       style={{ width: "100%", height }}
     />
   );

@@ -43,22 +43,22 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-pink-500/20 bg-black/60 p-5 shadow-[0_0_32px_rgba(236,72,153,0.14)]"
+      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
     >
-      <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-pink-100/55">
+      <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--text-soft)]">
         Username
         <input
-          className="rounded-lg border border-pink-500/20 bg-[#09010f] px-3 py-3 text-sm normal-case tracking-normal text-pink-50 outline-none transition focus:border-cyan-300/70"
+          className="rounded-lg border border-[rgba(255,255,255,0.16)] bg-[rgba(0,0,0,0.35)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[rgba(125,211,252,0.7)]"
           autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-pink-100/55">
+      <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--text-soft)]">
         Password
         <input
-          className="rounded-lg border border-pink-500/20 bg-[#09010f] px-3 py-3 text-sm normal-case tracking-normal text-pink-50 outline-none transition focus:border-cyan-300/70"
+          className="rounded-lg border border-[rgba(255,255,255,0.16)] bg-[rgba(0,0,0,0.35)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[rgba(125,211,252,0.7)]"
           type="password"
           autoComplete="current-password"
           value={password}
@@ -67,7 +67,7 @@ export default function LoginForm() {
       </label>
 
       {error ? (
-        <p className="rounded-lg border border-red-400/20 bg-red-950/30 px-3 py-2 text-xs text-red-100/80">
+        <p className="rounded-lg border border-[rgba(251,113,133,0.3)] bg-[rgba(251,113,133,0.12)] px-3 py-2 text-xs text-[var(--red-negative)]">
           {error}
         </p>
       ) : null}
@@ -75,7 +75,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg border border-pink-300/40 bg-pink-500/15 px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-pink-50 transition hover:border-cyan-300/60 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-lg border border-[rgba(255,95,162,0.35)] bg-[linear-gradient(135deg,#ff5fa2,#ff8fbd)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-[#120712] shadow-[0_0_24px_rgba(255,95,162,0.28)] transition hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(255,95,162,0.42)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Checking" : "Enter Nexus"}
       </button>

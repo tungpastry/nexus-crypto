@@ -24,17 +24,17 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
 
   const trendRing =
     trend === "UPTREND"
-      ? "ring-2 ring-emerald-400/60 shadow-[0_0_24px_rgba(56,255,156,0.16)]"
+      ? "ring-2 ring-[rgba(94,234,212,0.6)] shadow-[0_0_24px_rgba(94,234,212,0.2)]"
       : trend === "DOWNTREND"
-        ? "ring-2 ring-red-400/60 shadow-[0_0_24px_rgba(255,79,109,0.16)]"
-        : "ring-1 ring-pink-500/20";
+        ? "ring-2 ring-[rgba(251,113,133,0.6)] shadow-[0_0_24px_rgba(251,113,133,0.2)]"
+        : "ring-1 ring-[rgba(255,255,255,0.16)]";
 
   return (
-    <main className="min-h-screen bg-[#050008] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--bg-main)] px-4 py-6 text-[var(--text-main)] sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <Link
           href="/"
-          className="inline-flex w-fit items-center gap-2 rounded-lg border border-pink-500/20 bg-black/45 px-3 py-2 text-sm font-semibold text-pink-100 transition hover:bg-pink-500/10"
+          className="inline-flex w-fit items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] transition hover:bg-[rgba(255,95,162,0.14)]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Top 10 Nexus Universe
@@ -56,7 +56,7 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
                   selectedTimeframe={selectedTimeframe}
                   onSelectTimeframe={setSelectedTimeframe}
                 />
-                <p className="text-xs leading-5 text-pink-100/55">
+                <p className="text-xs leading-5 text-[var(--text-muted)]">
                   Timeframe controls chart interval, Nexus MA context, and checklist confirmations.
                   Market data only; no trade execution or recommendations.
                 </p>
@@ -91,7 +91,7 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
           </div>
         </ClientErrorBoundary>
 
-        <p className="pb-4 text-center text-xs text-pink-100/40">
+        <p className="pb-4 text-center text-xs text-[var(--text-soft)]">
           Workspace data is informational only. Nexus does not execute trades or provide trading
           recommendations.
         </p>

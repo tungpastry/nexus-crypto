@@ -71,15 +71,14 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
 
   const ringColor =
     direction === "up"
-      ? "ring-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+      ? "ring-[rgba(94,234,212,0.55)] shadow-[0_0_12px_rgba(94,234,212,0.28)]"
       : direction === "down"
-      ? "ring-red-500/50 shadow-[0_0_12px_rgba(248,113,113,0.25)]"
-      : "ring-slate-700/40 shadow-[0_0_10px_rgba(100,116,139,0.15)]";
+      ? "ring-[rgba(251,113,133,0.55)] shadow-[0_0_12px_rgba(251,113,133,0.28)]"
+      : "ring-[rgba(255,255,255,0.16)] shadow-[0_0_10px_rgba(255,255,255,0.12)]";
 
   return (
     <motion.div
-      className={`relative bg-gradient-to-b from-gray-900 to-black text-white p-5 rounded-2xl border border-slate-800
-        ring-2 ${ringColor} transition-all duration-700 w-full max-w-md mx-auto flex items-center justify-between overflow-hidden`}
+      className={`relative mx-auto flex w-full max-w-md items-center justify-between overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-5 text-[var(--text-main)] ring-2 ${ringColor} transition-all duration-700`}
       animate={{
         scale: pulse ? 1.04 : 1,
         opacity: pulse ? 1 : 0.98,
@@ -99,9 +98,9 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         />
       )}
 
-      <div className="flex flex-col z-10">
+      <div className="z-10 flex flex-col">
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <h2 className="text-sm font-semibold text-pink-200 tracking-wide">
+          <h2 className="text-sm font-semibold tracking-wide text-[var(--text-muted)]">
             {asset.symbol} {asset.quote ? `/ ${asset.quote}` : ""}
           </h2>
           <DataFreshnessBadge updatedAt={updatedAt} />
@@ -116,16 +115,16 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
             transition={{ duration: 0.25 }}
             className={`text-4xl font-extrabold leading-snug ${
               direction === "up"
-                ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]"
+                ? "text-[var(--mint-positive)] drop-shadow-[0_0_6px_rgba(94,234,212,0.7)]"
                 : direction === "down"
-                ? "text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.7)]"
-                : "text-slate-200"
+                ? "text-[var(--red-negative)] drop-shadow-[0_0_6px_rgba(251,113,133,0.7)]"
+                : "text-[var(--text-main)]"
             }`}
           >
             {asset.binanceSymbol ? formatPrice(price) : "Market data only"}
           </motion.p>
         </AnimatePresence>
-        <p className="mt-1 text-xs text-pink-100/55">
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
           {error || `${asset.name} price via Nexus crypto-price`}
         </p>
       </div>
@@ -141,16 +140,16 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         {direction === "up" && (
           <TrendingUp
             size={38}
-            className="text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.7)]"
+            className="text-[var(--mint-positive)] drop-shadow-[0_0_8px_rgba(94,234,212,0.7)]"
           />
         )}
         {direction === "down" && (
           <TrendingDown
             size={38}
-            className="text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.7)]"
+            className="text-[var(--red-negative)] drop-shadow-[0_0_8px_rgba(251,113,133,0.7)]"
           />
         )}
-        {!direction && <Shield size={34} className="text-pink-300" />}
+        {!direction && <Shield size={34} className="text-[var(--pink-soft)]" />}
       </motion.div>
     </motion.div>
   );

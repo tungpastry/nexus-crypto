@@ -35,11 +35,11 @@ export default function VersionBadge() {
   if (!version) return null;
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-pink-500/15 bg-black/40 px-3 py-1 font-mono text-xs text-pink-100/45 shadow-[0_0_18px_rgba(236,72,153,0.08)]">
+    <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-1 font-mono text-xs text-[var(--text-muted)] shadow-[0_0_18px_rgba(255,95,162,0.1)]">
       <span>Nexus v{version.version || "0.1.0"}</span>
-      <span className="text-cyan-200/45">/</span>
+      <span className="text-[rgba(125,211,252,0.55)]">/</span>
       <span>{version.short_commit || "unknown"}</span>
-      <span className="text-cyan-200/45">/</span>
+      <span className="text-[rgba(125,211,252,0.55)]">/</span>
       <span>{version.env || "unknown"}</span>
     </div>
   );

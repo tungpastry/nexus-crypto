@@ -81,17 +81,17 @@ function isPlainUserChecks(value: unknown): value is UserChecks {
 function RuleIcon({ rule, checked }: { rule: NexusChecklistRule; checked?: boolean }) {
   if (rule.type !== "auto") {
     return checked ? (
-      <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+      <CheckCircle2 className="h-4 w-4 text-[var(--mint-positive)]" />
     ) : (
-      <Circle className="h-4 w-4 text-pink-100/35" />
+      <Circle className="h-4 w-4 text-[var(--text-soft)]" />
     );
   }
 
-  if (rule.status === "pass") return <CheckCircle2 className="h-4 w-4 text-emerald-300" />;
+  if (rule.status === "pass") return <CheckCircle2 className="h-4 w-4 text-[var(--mint-positive)]" />;
   if (rule.status === "warn" || rule.status === "neutral") {
-    return <AlertTriangle className="h-4 w-4 text-amber-300" />;
+    return <AlertTriangle className="h-4 w-4 text-[var(--amber-warning)]" />;
   }
-  return <XCircle className="h-4 w-4 text-red-300" />;
+  return <XCircle className="h-4 w-4 text-[var(--red-negative)]" />;
 }
 
 function RuleRow({
@@ -111,16 +111,16 @@ function RuleRow({
       disabled={!interactive}
       className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition ${
         checked
-          ? "border-emerald-400/30 bg-emerald-400/10"
-          : "border-pink-500/10 bg-black/35 hover:bg-pink-500/10"
+          ? "border-[rgba(94,234,212,0.35)] bg-[rgba(94,234,212,0.1)]"
+          : "border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] hover:bg-[rgba(255,95,162,0.08)]"
       } ${interactive ? "cursor-pointer" : "cursor-default"}`}
     >
-      <span className="flex items-center gap-2 text-sm text-pink-50/85">
+      <span className="flex items-center gap-2 text-sm text-[var(--text-main)]">
         <RuleIcon rule={rule} checked={checked} />
         {rule.label}
       </span>
       {rule.type === "auto" && (
-        <span className="font-mono text-xs text-pink-100/50">{rule.score}</span>
+        <span className="font-mono text-xs text-[var(--text-soft)]">{rule.score}</span>
       )}
     </button>
   );
@@ -206,7 +206,7 @@ export default function NexusAutoChecklist({
   if (!asset.enableChecklist || !asset.binanceSymbol) {
     return (
       <RetroPanel title="Nexus Auto Checklist" eyebrow={`${asset.symbol} market mode`}>
-        <div className="p-5 text-sm text-pink-100/70">
+        <div className="p-5 text-sm text-[var(--text-muted)]">
           Stablecoin assets use market data only. MA rules, Nexus Score, and checklist automation
           are disabled for {asset.symbol}.
         </div>
@@ -217,7 +217,7 @@ export default function NexusAutoChecklist({
   if (error || !signal) {
     return (
       <RetroPanel title="Nexus Auto Checklist" eyebrow={`${asset.symbol} ${timeframe.label}`}>
-        <div className="p-5 text-sm text-pink-100/70">
+        <div className="p-5 text-sm text-[var(--text-muted)]">
           {error ? `Checklist degraded: ${error}` : "Loading Nexus signal..."}
         </div>
       </RetroPanel>
@@ -227,16 +227,16 @@ export default function NexusAutoChecklist({
   return (
     <RetroPanel title="Nexus Auto Checklist" eyebrow={`${signal.symbol} ${timeframe.label}`}>
       <div className="grid gap-4 p-5 lg:grid-cols-[180px_1fr]">
-        <div className="rounded-2xl border border-pink-500/10 bg-[#110014]/70 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-pink-200/55">Nexus Score</p>
-          <p className="mt-2 font-mono text-5xl font-bold text-pink-100">{signal.score}</p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-pink-950">
+        <div className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-4">
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Nexus Score</p>
+          <p className="mt-2 font-mono text-5xl font-bold text-[var(--text-main)]">{signal.score}</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.16)]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-pink-500 to-cyan-300"
               style={{ width: `${signal.score}%` }}
             />
           </div>
-          <div className="mt-4 space-y-1 text-xs text-pink-100/65">
+          <div className="mt-4 space-y-1 text-xs text-[var(--text-muted)]">
             <p>Direction: {signal.direction.toUpperCase()}</p>
             <p>Trend: {signal.trend}</p>
             <p>Bias: {signal.bias}</p>
@@ -249,7 +249,7 @@ export default function NexusAutoChecklist({
         </div>
 
         <div className="space-y-4">
-          <div className="grid gap-2 font-mono text-xs text-pink-100/65 sm:grid-cols-4">
+          <div className="grid gap-2 font-mono text-xs text-[var(--text-muted)] sm:grid-cols-4">
             <span>Price {formatNumber(signal.price)}</span>
             <span>MA20 {formatNumber(signal.ma20)}</span>
             <span>MA50 {formatNumber(signal.ma50)}</span>
@@ -257,7 +257,7 @@ export default function NexusAutoChecklist({
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pink-100">Auto Rules</h3>
+            <h3 className="mb-2 text-sm font-semibold text-[var(--text-main)]">Auto Rules</h3>
             <div className="space-y-2">
               {autoRules.map((rule) => (
                 <RuleRow key={rule.id} rule={rule} />
@@ -266,7 +266,7 @@ export default function NexusAutoChecklist({
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pink-100">Hybrid Confirmation</h3>
+            <h3 className="mb-2 text-sm font-semibold text-[var(--text-main)]">Hybrid Confirmation</h3>
             <div className="space-y-2">
               {hybridRules.map((rule) => (
                 <RuleRow
@@ -284,7 +284,7 @@ export default function NexusAutoChecklist({
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pink-100">Manual Discipline</h3>
+            <h3 className="mb-2 text-sm font-semibold text-[var(--text-main)]">Manual Discipline</h3>
             <div className="space-y-2">
               {MANUAL_RULES.map((rule) => (
                 <RuleRow
@@ -295,7 +295,7 @@ export default function NexusAutoChecklist({
                 />
               ))}
             </div>
-            <p className="mt-3 text-xs text-pink-100/50">
+            <p className="mt-3 text-xs text-[var(--text-soft)]">
               User confirmations: {userConfirmed}/{userRuleCount}. This dashboard does not execute
               trades or make trading recommendations.
             </p>
