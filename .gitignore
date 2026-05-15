@@ -12,6 +12,7 @@ dist/
 
 # logs
 *.log
+.runtime/
 
 # OS junk
 .DS_Store

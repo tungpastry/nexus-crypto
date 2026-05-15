@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
+import { mkdir, readFile, stat, writeFile } from "fs/promises";
+import path from "path";
 import { NEXUS_ASSETS } from "../../config/assets";
+
+export const runtime = "nodejs";
 
 const COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3";
 const MARKET_SNAPSHOT_TTL_MS = 60_000;
+const MARKET_SNAPSHOT_CACHE_DIR = path.join(process.cwd(), ".runtime");
+const MARKET_SNAPSHOT_CACHE_FILE = path.join(
+  MARKET_SNAPSHOT_CACHE_DIR,
+  "market-snapshot-cache.json"
+);
 
 type MarketAsset = {
   id: string;
@@ -89,6 +98,57 @@ function buildFallbackSnapshot(message: string): MarketSnapshot {
   };
 }
 
+function isNumberOrNull(value: unknown): value is number | null {
+  return typeof value === "number" || value === null;
+}
+
+function isMarketSnapshot(value: unknown): value is MarketSnapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const snapshot = value as Record<string, unknown>;
+  const global = snapshot.global as Record<string, unknown> | undefined;
+  const assets = snapshot.assets;
+
+  return (
+    snapshot.provider === "coingecko" &&
+    typeof snapshot.updated_at === "string" &&
+    Boolean(global) &&
+    isNumberOrNull(global?.market_cap_usd) &&
+    isNumberOrNull(global?.volume_24h_usd) &&
+    isNumberOrNull(global?.btc_dominance) &&
+    isNumberOrNull(global?.eth_dominance) &&
+    Array.isArray(assets) &&
+    assets.length === NEXUS_ASSETS.length
+  );
+}
+
+async function writePersistentSnapshot(snapshot: MarketSnapshot) {
+  try {
+    await mkdir(MARKET_SNAPSHOT_CACHE_DIR, { recursive: true });
+    await writeFile(MARKET_SNAPSHOT_CACHE_FILE, JSON.stringify(snapshot, null, 2), "utf8");
+  } catch (error) {
+    console.warn("Failed to persist market snapshot cache:", error);
+  }
+}
+
+async function readPersistentSnapshot() {
+  try {
+    const [file, stats] = await Promise.all([
+      readFile(MARKET_SNAPSHOT_CACHE_FILE, "utf8"),
+      stat(MARKET_SNAPSHOT_CACHE_FILE),
+    ]);
+    const parsed: unknown = JSON.parse(file);
+
+    if (!isMarketSnapshot(parsed)) return null;
+
+    return {
+      snapshot: parsed,
+      age_ms: Math.max(0, Date.now() - stats.mtimeMs),
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchMarketSnapshot(): Promise<MarketSnapshot> {
   const ids = NEXUS_ASSETS.map((asset) => asset.coingeckoId).join(",");
 
@@ -141,9 +201,10 @@ async function fetchMarketSnapshot(): Promise<MarketSnapshot> {
 function refreshMarketSnapshot() {
   if (!inFlightPromise) {
     inFlightPromise = fetchMarketSnapshot()
-      .then((snapshot) => {
+      .then(async (snapshot) => {
         cachedSnapshot = snapshot;
         cachedAt = Date.now();
+        await writePersistentSnapshot(snapshot);
         return snapshot;
       })
       .finally(() => {
@@ -177,6 +238,23 @@ export async function GET() {
             error: { code: "MARKET_SNAPSHOT_STALE", message },
           },
           { status: "stale", age_ms: getCacheAge() }
+        )
+      );
+    }
+
+    const persisted = await readPersistentSnapshot();
+    if (persisted) {
+      cachedSnapshot = persisted.snapshot;
+      cachedAt = Date.now() - persisted.age_ms;
+
+      return NextResponse.json(
+        withCache(
+          {
+            ...persisted.snapshot,
+            status: "degraded",
+            error: { code: "MARKET_SNAPSHOT_STALE", message },
+          },
+          { status: "stale", age_ms: persisted.age_ms }
         )
       );
     }
