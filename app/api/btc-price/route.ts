@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import { getCryptoPrice } from "../../lib/binance";
 
 export async function GET() {
   try {
-    // Gọi API Binance lấy giá BTC/USDT
-    const res = await axios.get("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-    const updatedAt = new Date().toISOString();
-    return NextResponse.json({ price: res.data.price, updated_at: updatedAt });
-  } catch (error: any) {
-    console.error("Error fetching BTC price:", error.message);
+    const data = await getCryptoPrice("BTCUSDT");
+    return NextResponse.json({ price: data.price, updated_at: data.updated_at });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error fetching BTC price:", message);
     return NextResponse.json({ error: "Failed to fetch price" }, { status: 500 });
   }
 }

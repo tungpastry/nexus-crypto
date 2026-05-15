@@ -13,15 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "⚡ Nexus Crypto Dashboard",
+  metadataBase: new URL("http://localhost:3200"),
+  title: "Nexus Crypto SaaS 2026",
   description:
-    "Real-time BTC/USDT Dashboard built with Next.js 16, TradingView, and AutoChecklist AI.",
+    "Retro black-pink crypto SaaS dashboard for 10-asset market monitoring and Nexus checklist workflow.",
   openGraph: {
-    title: "⚡ Nexus Crypto Dashboard",
+    title: "Nexus Crypto SaaS 2026",
     description:
-      "Real-time BTC/USDT Dashboard built with Next.js 16, TradingView, and AutoChecklist AI.",
+      "Retro black-pink crypto SaaS dashboard for 10-asset market monitoring and Nexus checklist workflow.",
     url: "https://nexus-crypto.vercel.app",
-    siteName: "Nexus Crypto Dashboard",
+    siteName: "Nexus Crypto SaaS 2026",
     images: [
       {
         url: "/og-image.png",

@@ -1,27 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { NexusAsset } from "../config/assets";
+import DataFreshnessBadge from "./market/DataFreshnessBadge";
 
-export default function PriceWidget() {
+type PriceWidgetProps = {
+  asset: NexusAsset;
+};
+
+export default function PriceWidget({ asset }: PriceWidgetProps) {
   const [price, setPrice] = useState<number | null>(null);
-  const [prevPrice, setPrevPrice] = useState<number | null>(null);
   const [direction, setDirection] = useState<"up" | "down" | null>(null);
   const [pulse, setPulse] = useState(false);
   const [trail, setTrail] = useState<{ value: number; color: string } | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // ✅ Lấy giá BTC từ API nội bộ
-  const fetchPrice = async () => {
+  const fetchPrice = useCallback(async () => {
+    if (!asset.binanceSymbol) {
+      setPrice(null);
+      setDirection(null);
+      setUpdatedAt(null);
+      setError("Market snapshot only");
+      return;
+    }
+
     try {
-      const res = await axios.get("/api/btc-price");
+      const res = await axios.get("/api/crypto-price", {
+        params: { symbol: asset.binanceSymbol },
+      });
       const newPrice = parseFloat(res.data.price);
 
       if (price !== null && newPrice !== price) {
         const newDirection = newPrice > price ? "up" : "down";
         setDirection(newDirection);
-        setPrevPrice(price);
         setPulse(true);
 
         // Tạo hiệu ứng đuôi mờ theo hướng giá
@@ -37,21 +52,23 @@ export default function PriceWidget() {
       }
 
       setPrice(newPrice);
+      setUpdatedAt(res.data.updated_at);
+      setError(null);
     } catch (err) {
-      console.error("Error fetching BTC price:", err);
+      console.error(`Error fetching ${asset.symbol} price:`, err);
+      setError("Price feed unavailable");
     }
-  };
+  }, [asset.binanceSymbol, asset.symbol, price]);
 
   useEffect(() => {
     fetchPrice();
     const interval = setInterval(fetchPrice, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchPrice]);
 
   const formatPrice = (p: number | null) =>
     p ? `$${p.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "Loading...";
 
-  // 🎨 Viền glow động theo xu hướng
   const ringColor =
     direction === "up"
       ? "ring-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
@@ -69,7 +86,6 @@ export default function PriceWidget() {
       }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
     >
-      {/* Hiệu ứng fade trail */}
       {trail && (
         <motion.div
           key={trail.value}
@@ -83,9 +99,13 @@ export default function PriceWidget() {
         />
       )}
 
-      {/* Giá BTC */}
       <div className="flex flex-col z-10">
-        <h2 className="text-sm font-semibold text-slate-400 tracking-wide">BTC / USDT</h2>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold text-pink-200 tracking-wide">
+            {asset.symbol} {asset.quote ? `/ ${asset.quote}` : ""}
+          </h2>
+          <DataFreshnessBadge updatedAt={updatedAt} />
+        </div>
 
         <AnimatePresence mode="wait">
           <motion.p
@@ -102,12 +122,14 @@ export default function PriceWidget() {
                 : "text-slate-200"
             }`}
           >
-            {formatPrice(price)}
+            {asset.binanceSymbol ? formatPrice(price) : "Market data only"}
           </motion.p>
         </AnimatePresence>
+        <p className="mt-1 text-xs text-pink-100/55">
+          {error || `${asset.name} price via Nexus crypto-price`}
+        </p>
       </div>
 
-      {/* Icon hướng giá + glow */}
       <motion.div
         animate={{
           scale: pulse ? 1.2 : 1,
@@ -128,6 +150,7 @@ export default function PriceWidget() {
             className="text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.7)]"
           />
         )}
+        {!direction && <Shield size={34} className="text-pink-300" />}
       </motion.div>
     </motion.div>
   );

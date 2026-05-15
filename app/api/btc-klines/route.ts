@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { getCryptoKlines } from "../../lib/binance";
+import { validateBinanceTimeframe } from "../../lib/validators";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const tf = searchParams.get("tf") || "1h"; // mặc định 1h
-  const limit = tf === "1M" ? 500 : 400;
+  const tfValidation = validateBinanceTimeframe(searchParams.get("tf"));
+
+  if (!tfValidation.ok) {
+    return NextResponse.json(tfValidation.response, { status: 400 });
+  }
 
   try {
-    const url = `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${tf}&limit=${limit}`;
-    const res = await axios.get(url);
-    const candles = res.data.map((c: any) => ({
-      time: c[0],
-      open: parseFloat(c[1]),
-      high: parseFloat(c[2]),
-      low: parseFloat(c[3]),
-      close: parseFloat(c[4]),
+    const data = await getCryptoKlines("BTCUSDT", tfValidation.tf);
+    const candles = data.candles.map(({ time, open, high, low, close }) => ({
+      time,
+      open,
+      high,
+      low,
+      close,
     }));
     return NextResponse.json(candles);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch klines";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

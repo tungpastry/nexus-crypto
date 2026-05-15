@@ -1,208 +1,192 @@
-# ⚡ Nexus Crypto Dashboard
+# Nexus Crypto SaaS 2026
 
-> Real-time crypto dashboard built with **Next.js 16 + React 19 + TradingView Widget + Binance API**.
+> Retro black-pink crypto dashboard built with Next.js 16, React 19, TradingView Widget, Binance API, and CoinGecko-style market data.
 
-![Banner](https://raw.githubusercontent.com/tungpastry/nexus-crypto/main/public/banner_nexus_crypto.png)
+Nexus Crypto is a decision-support dashboard for watching the top 10 Nexus assets, syncing price/chart/timeframe context, and running a structured Nexus checklist. It does not execute trades and does not make trading recommendations.
 
-> *Visualize the market. Stay in sync. Trade with confidence.*
+## SaaS 2026 Blueprint
 
----
-
-## 📊 Overview
-
-**Nexus Crypto** is a lightweight crypto market dashboard focused on **BTC/USDT** runtime data and TradingView-based visual monitoring.
-
-The current app combines:
-
-- **TradingView Advanced Chart Widget** for visual charting.
-- **BTC price widget** powered by the internal `/api/btc-price` route.
-- **Auto Checklist** for MA20 / MA50 / MA200 trend analysis.
-- **Manual Checklist** stored in browser `localStorage`.
-- **Zenora provider-health compatibility** through a durable `updated_at` timestamp in the BTC price payload.
-
----
-
-## ✅ Current Runtime Scope
-
-| Area | Current behavior |
+| Area | Runtime behavior |
 |---|---|
-| Main dashboard | Next.js App Router page at `/` |
-| Chart | TradingView widget loaded from `https://s3.tradingview.com/tv.js` |
-| Chart symbols | UI selector supports `BINANCE:BTCUSDT`, `BINANCE:ETHUSDT`, `BINANCE:SOLUSDT` |
-| Price widget | BTC/USDT only via `/api/btc-price` |
-| Auto Checklist | BTC/USDT only, fetches Binance klines directly from the client |
-| Manual Checklist | Stored locally in browser `localStorage` under `manualChecklist` |
-| BTC price refresh | Every 5 seconds in `PriceWidget` |
-| Auto Checklist refresh | Every 60 seconds and whenever timeframe changes |
-| Zenora contract | `/api/btc-price` returns `price` + `updated_at` |
+| Asset universe | BTC, ETH, USDT, BNB, XRP, USDC, SOL, TRX, SHIB, DOGE |
+| Market table | CoinGecko-style price, 24h/7d change, volume, and market data |
+| Selected workspace | PriceWidget, timeframe picker, selected asset note |
+| Chart | TradingView widget with unique container id per asset/timeframe |
+| Nexus checklist | MA20/MA50/MA200 auto rules, hybrid confirmations, manual discipline |
+| Stablecoins | USDT and USDC show market data only; MA/checklist/chart are disabled |
+| Freshness | UI badges classify data as fresh, ok, stale, or offline |
+| Provider health | `/api/provider-health` returns Zenora/Nexus-compatible provider checks |
+| Legacy BTC contract | `/api/btc-price` still returns `price` + `updated_at` |
 
-> Important: the chart symbol selector can display ETH/SOL in TradingView, but the current API routes, PriceWidget, and AutoChecklist are still BTC/USDT-focused.
+## Asset And Timeframe Config
 
----
+Canonical asset metadata lives in:
 
-## 🚀 Features
+```text
+app/config/assets.ts
+```
 
-| Module | Description |
-|---|---|
-| 📈 TradingView Chart | Client-side TradingView widget with symbol and timeframe switching |
-| 💵 PriceWidget | Realtime BTC/USDT price with animated up/down movement |
-| 🤖 AutoChecklist | MA20 / MA50 / MA200 trend analyzer for BTC/USDT |
-| 🧠 ManualChecklist | Manual trade checklist with progress bar and reset button |
-| 🧩 Dynamic TF Sync | Chart, AutoChecklist, and ManualChecklist receive the same selected timeframe |
-| 🔄 Auto Refresh | BTC price refreshes every 5s; AutoChecklist refreshes every 60s |
-| 💡 Visual FX | Trend-based glow / ring effects for dashboard cards |
+Canonical timeframe mapping lives in:
 
----
+```text
+app/config/timeframes.ts
+```
 
-## 🛠️ Tech Stack
+Supported Binance symbols:
 
-Runtime stack from `package.json`:
+```text
+BTCUSDT ETHUSDT BNBUSDT XRPUSDT SOLUSDT TRXUSDT SHIBUSDT DOGEUSDT
+```
 
-- **Next.js 16.0.0**
-- **React 19.2.0**
-- **TypeScript 5**
-- **Tailwind CSS 4** via `@import "tailwindcss"`
-- **Axios** for HTTP requests
-- **TradingView Widget** via external `tv.js` script
-- **Binance API** for BTC price and kline data
-- **Framer Motion** for animation
-- **Lucide React** for icons
+Supported timeframes:
 
-Notes:
+```text
+15m 30m 1h 4h 1d 1w
+```
 
-- `chart.js`, `react-chartjs-2`, `chartjs-chart-financial`, `chartjs-plugin-zoom`, and `chartjs-plugin-crosshair` are still listed as dependencies, but the current dashboard page uses the TradingView widget instead of rendering Chart.js directly.
-- The repo uses `next.config.ts`, not `next.config.mjs`.
+TradingView mappings:
 
----
+```text
+15m -> 15
+30m -> 30
+1h  -> 60
+4h  -> 240
+1D  -> D
+1W  -> W
+```
 
-## 🧰 Project Structure
+## API Contracts
+
+### `GET /api/crypto-price?symbol=BTCUSDT`
+
+Returns a validated Binance price payload.
+
+```json
+{
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "price": "80457.17000000",
+  "updated_at": "2026-05-15T00:00:00.000Z"
+}
+```
+
+Unsupported symbols return:
+
+```json
+{
+  "error": {
+    "code": "UNSUPPORTED_SYMBOL",
+    "message": "Symbol is not allowed",
+    "allowed": ["BTCUSDT", "ETHUSDT"]
+  }
+}
+```
+
+### `GET /api/crypto-klines?symbol=BTCUSDT&tf=4h`
+
+Returns validated Binance OHLCV candles.
+
+```json
+{
+  "provider": "binance",
+  "symbol": "BTCUSDT",
+  "tf": "4h",
+  "updated_at": "2026-05-15T00:00:00.000Z",
+  "candles": [
+    {
+      "time": 1710000000000,
+      "open": 68000,
+      "high": 69000,
+      "low": 67500,
+      "close": 68500,
+      "volume": 1234.56
+    }
+  ]
+}
+```
+
+### `GET /api/market-snapshot`
+
+Returns CoinGecko-style global market data and the 10 Nexus assets.
+
+### `GET /api/provider-health`
+
+Returns Zenora/Nexus provider health:
+
+```json
+{
+  "provider": "nexus_crypto",
+  "status": "ok",
+  "updated_at": "2026-05-15T00:00:00.000Z",
+  "checks": {
+    "binance_price": { "status": "ok", "latency_ms": 120 },
+    "binance_klines": { "status": "ok", "latency_ms": 180 },
+    "market_snapshot": { "status": "ok", "latency_ms": 240 }
+  }
+}
+```
+
+### Legacy BTC Routes
+
+`/api/btc-price` is preserved for Zenora compatibility and still returns:
+
+```json
+{
+  "price": "80169.73000000",
+  "updated_at": "2026-05-15T00:00:00.000Z"
+}
+```
+
+`/api/btc-klines?tf=4h` is preserved and still returns the legacy candle array.
+
+## Project Structure
 
 ```text
 nexus-crypto/
 ├── app/
 │   ├── api/
-│   │   ├── btc-klines/route.ts      # Binance OHLC candles for BTCUSDT
-│   │   └── btc-price/route.ts       # BTCUSDT realtime price + updated_at
+│   │   ├── btc-klines/route.ts
+│   │   ├── btc-price/route.ts
+│   │   ├── crypto-klines/route.ts
+│   │   ├── crypto-price/route.ts
+│   │   ├── market-snapshot/route.ts
+│   │   └── provider-health/route.ts
 │   ├── components/
-│   │   ├── AutoChecklist.tsx        # MA20/MA50/MA200 trend analyzer
-│   │   ├── ManualChecklist.tsx      # localStorage manual checklist
-│   │   ├── PriceWidget.tsx          # realtime BTC price widget
-│   │   ├── TradingViewChart.tsx     # TradingView widget wrapper
-│   │   └── utils/
-│   │       └── indicators.ts        # SMA helper
-│   ├── globals.css                  # Tailwind CSS 4 import + root theme tokens
-│   ├── layout.tsx                   # metadata, fonts, global layout
-│   └── page.tsx                     # dashboard page
-├── public/
-│   └── banner_nexus_crypto.png
+│   │   ├── checklist/NexusAutoChecklist.tsx
+│   │   ├── layout/RetroPanel.tsx
+│   │   ├── market/AssetWatchlist.tsx
+│   │   ├── market/DataFreshnessBadge.tsx
+│   │   ├── market/MarketSnapshot.tsx
+│   │   ├── ManualChecklist.tsx
+│   │   ├── PriceWidget.tsx
+│   │   └── TradingViewChart.tsx
+│   ├── config/
+│   │   ├── assets.ts
+│   │   ├── theme.ts
+│   │   └── timeframes.ts
+│   ├── lib/
+│   │   ├── binance.ts
+│   │   ├── nexusAlgorithm.ts
+│   │   └── validators.ts
+│   └── page.tsx
 ├── scripts/
-│   └── smoke_btc_price_contract.sh  # BTC price/klines contract smoke check
-├── next.config.ts
-├── package.json
-└── tsconfig.json
+│   ├── smoke_btc_price_contract.sh
+│   └── smoke_crypto_assets_contract.sh
+└── package.json
 ```
 
----
+## Local Development
 
-## 🔌 API Contracts
-
-### `GET /api/btc-price`
-
-Fetches BTC/USDT ticker price from Binance and returns a Zenora-compatible timestamp.
-
-Response:
-
-```json
-{
-  "price": "80169.73000000",
-  "updated_at": "2026-05-13T13:55:00.000Z"
-}
-```
-
-Field contract:
-
-| Field | Type | Description |
-|---|---|---|
-| `price` | string | BTC/USDT price from Binance ticker API |
-| `updated_at` | string | UTC ISO-8601 timestamp captured when the Nexus-Crypto server receives the Binance ticker response |
-
-This keeps `price` backward-compatible while satisfying the Zenora provider-health timestamp contract for `nexus_crypto`.
-
-Failure response:
-
-```json
-{
-  "error": "Failed to fetch price"
-}
-```
-
----
-
-### `GET /api/btc-klines?tf=<interval>`
-
-Fetches BTC/USDT OHLC candles from Binance.
-
-Default:
-
-```text
-/api/btc-klines?tf=1h
-```
-
-Example:
-
-```text
-/api/btc-klines?tf=4h
-```
-
-Response shape:
-
-```json
-[
-  {
-    "time": 1710000000000,
-    "open": 68000.0,
-    "high": 69000.0,
-    "low": 67500.0,
-    "close": 68500.0
-  }
-]
-```
-
-Notes:
-
-- `tf` is passed to Binance as the `interval` parameter.
-- Current route is BTCUSDT-only.
-- Current route uses `limit=400`, except `tf=1M` uses `limit=500`.
-
----
-
-## ⚙️ Local Development
-
-### 1. Clone repo
-
-```bash
-git clone https://github.com/tungpastry/nexus-crypto.git
-cd nexus-crypto
-```
-
-### 2. Install dependencies
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### 3. Run dev server
+Run dev server on port 3200:
 
 ```bash
 npm run dev
-```
-
-The `dev` script already binds to port `3200`:
-
-```json
-{
-  "dev": "next dev -p 3200"
-}
 ```
 
 Open:
@@ -211,53 +195,55 @@ Open:
 http://localhost:3200
 ```
 
-For LAN access, `next.config.ts` currently allows:
+For LAN usage in this deployment:
 
-```ts
-allowedDevOrigins: ["192.168.1.30"]
+```text
+Mac Mini: 192.168.1.7
+Ubuntu Server: 192.168.1.30
+Ubuntu path: /home/nexus/projects/nexus-crypto
 ```
 
----
+## Validation
 
-## 🧪 Smoke Checks
+Run lint and build:
 
-Run the BTC price and kline contract smoke test:
+```bash
+npm run lint
+npm run build
+```
+
+Run the app:
+
+```bash
+npm run dev
+```
+
+Run smoke checks against the dev server:
 
 ```bash
 ./scripts/smoke_btc_price_contract.sh
+./scripts/smoke_crypto_assets_contract.sh
 ```
 
-Default base URL:
-
-```text
-http://127.0.0.1:3200
-```
-
-Override base URL:
+Override the base URL:
 
 ```bash
-NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" ./scripts/smoke_btc_price_contract.sh
+NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" ./scripts/smoke_crypto_assets_contract.sh
 ```
 
-Expected output:
+Expected multi-asset output includes:
 
 ```text
-BTC_PRICE_CONTRACT=PASS
-BTC_KLINES_CONTRACT=PASS
+CRYPTO_PRICE_BTCUSDT=PASS
+CRYPTO_KLINES_BTCUSDT=PASS
+CRYPTO_PRICE_ETHUSDT=PASS
+CRYPTO_KLINES_ETHUSDT=PASS
+PROVIDER_HEALTH=PASS
 ```
 
-Manual curl checks:
+## Production Deployment On Ubuntu
 
-```bash
-curl -sS http://127.0.0.1:3200/api/btc-price | python3 -m json.tool
-curl -sS 'http://127.0.0.1:3200/api/btc-klines?tf=4h' | python3 -m json.tool | head -80
-```
-
----
-
-## ☁️ Production Deployment on Ubuntu Server
-
-### 1. Build
+Build:
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
@@ -265,21 +251,13 @@ npm install
 npm run build
 ```
 
-### 2. Start manually on port 3200
+Start manually on port 3200:
 
 ```bash
 npm start -- -p 3200
 ```
 
-### 3. systemd service
-
-Create or edit:
-
-```bash
-sudo nano /etc/systemd/system/nexus-crypto.service
-```
-
-Example unit:
+Example systemd unit:
 
 ```ini
 [Unit]
@@ -309,70 +287,10 @@ sudo systemctl enable --now nexus-crypto.service
 sudo systemctl status nexus-crypto.service --no-pager
 ```
 
-Restart after deploy:
+## Zenora Integration Notes
 
-```bash
-sudo systemctl restart nexus-crypto.service
-journalctl -u nexus-crypto.service -n 80 --no-pager
-```
+Zenora reads Nexus Crypto as provider `nexus_crypto`. Keep `/api/btc-price` backward compatible with `price` and timezone-aware `updated_at`, and use `/api/provider-health` for the fuller SaaS 2026 health surface.
 
----
-
-## 🧭 Dashboard Usage
-
-| Action | How |
-|---|---|
-| Change chart symbol | Use BTCUSDT / ETHUSDT / SOLUSDT buttons |
-| Change timeframe | Use `15`, `30`, `60`, `240`, `D`, `W` selector |
-| Reset manual checklist | Click `Reset` in ManualChecklist |
-| Inspect BTC price API | Open `/api/btc-price` |
-| Inspect BTC klines API | Open `/api/btc-klines?tf=4h` |
-
-TradingView widget interactions depend on the embedded TradingView UI and browser behavior.
-
----
-
-## 🧠 Developer Notes
-
-- AutoChecklist currently fetches Binance klines directly from the client instead of using `/api/btc-klines`.
-- PriceWidget fetches `/api/btc-price` every 5 seconds.
-- ManualChecklist persists all checklist items in one localStorage key; it is not currently namespaced by timeframe or symbol.
-- To extend APIs beyond BTCUSDT, add a validated `symbol` query parameter to `/api/btc-price` and `/api/btc-klines`, then update `PriceWidget` and `AutoChecklist` to pass the selected symbol.
-- For Zenora provider health, keep `updated_at` timezone-aware and ISO-8601 compatible.
-
----
-
-## 🔗 Zenora Integration Notes
-
-Zenora-AI reads Nexus-Crypto as provider `nexus_crypto`.
-
-The key health contract is:
-
-```text
-GET /api/btc-price
-```
-
-The response must include a durable timestamp field recognized by Zenora provider health. Current implementation uses:
-
-```json
-{
-  "price": "...",
-  "updated_at": "..."
-}
-```
-
-After deploy, verify from Zenora-AI:
-
-```bash
-cd /home/nexus/projects/Zenora-AI
-./scripts/run_terminal.sh providers detail nexus_crypto --json
-./scripts/run_terminal.sh providers health
-```
-
----
-
-## 🧾 License
+## License
 
 MIT License © 2025 tungpastry
-
-💬 Made with ⚡ passion by Mike Nguyen

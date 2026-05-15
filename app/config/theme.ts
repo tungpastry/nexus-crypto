@@ -1,0 +1,15 @@
+export const NEXUS_THEME = {
+  background: "#050008",
+  surface: "#110014",
+  surfaceSoft: "#1a071f",
+  border: "#3a173f",
+  pink: "#ff4fd8",
+  hotPink: "#ff2ea6",
+  violet: "#9b5cff",
+  cyan: "#38f8ff",
+  green: "#38ff9c",
+  red: "#ff4f6d",
+  amber: "#ffcc66",
+  text: "#fff4fb",
+  muted: "#b98ab7",
+};

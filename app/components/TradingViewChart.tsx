@@ -1,74 +1,86 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { NexusAsset } from "../config/assets";
+import type { NexusTimeframe } from "../config/timeframes";
 
 interface TradingViewChartProps {
-  symbol?: string; // ví dụ: "BINANCE:BTCUSDT"
-  interval?: string; // ví dụ: "60", "240", "D", "W"
+  asset: NexusAsset;
+  timeframe: NexusTimeframe;
   theme?: "dark" | "light";
   height?: number;
 }
 
-/**
- * TradingViewChart.tsx v1.0
- * Triển khai TradingView Advanced Chart widget (tv.js)
- * - Tự resize theo container
- * - Đồng bộ theme, interval, symbol
- * - Dùng trong Next.js 16 (client component)
- */
+declare global {
+  interface Window {
+    TradingView?: {
+      widget: new (options: Record<string, unknown>) => unknown;
+    };
+  }
+}
+
 export default function TradingViewChart({
-  symbol = "BINANCE:BTCUSDT",
-  interval = "60",
+  asset,
+  timeframe,
   theme = "dark",
   height = 600,
 }: TradingViewChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const containerId = `tradingview_${asset.symbol}_${timeframe.label}`.replace(/\W/g, "_");
+  const symbol = asset.tradingViewSymbol || "BINANCE:BTCUSDT";
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    // 🧹 Clear nội dung cũ nếu re-render
-    containerRef.current.innerHTML = "";
+    container.innerHTML = "";
 
-    // ✅ Inject script TradingView
+    if (!asset.enableChart || !asset.tradingViewSymbol) return;
+
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/tv.js";
     script.async = true;
     script.onload = () => {
-      // @ts-ignore
-      if (typeof TradingView === "undefined") return;
-      // @ts-ignore
-      new TradingView.widget({
+      if (!window.TradingView) return;
+      new window.TradingView.widget({
         autosize: true,
         symbol,
-        interval,
+        interval: timeframe.tradingView,
         timezone: "Etc/UTC",
         theme,
         style: "1",
         locale: "en",
-        toolbar_bg: theme === "dark" ? "#0f172a" : "#f8fafc",
+        toolbar_bg: theme === "dark" ? "#050008" : "#f8fafc",
         enable_publishing: false,
         hide_legend: false,
         hide_top_toolbar: false,
         hide_side_toolbar: false,
-        allow_symbol_change: true,
-        container_id: "tradingview_chart",
+        allow_symbol_change: false,
+        studies: ["MASimple@tv-basicstudies"],
+        container_id: containerId,
       });
     };
 
-    containerRef.current.appendChild(script);
+    container.appendChild(script);
 
     return () => {
-      // Cleanup script & chart nếu component bị hủy
-      containerRef.current!.innerHTML = "";
+      container.innerHTML = "";
     };
-  }, [symbol, interval, theme]);
+  }, [asset.enableChart, asset.tradingViewSymbol, containerId, symbol, theme, timeframe.tradingView]);
+
+  if (!asset.enableChart) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-pink-500/20 bg-black/70 p-6 text-center text-pink-100/70">
+        {asset.symbol} is configured as market data only, so TradingView charting is disabled.
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
-      id="tradingview_chart"
-      className="rounded-xl border border-gray-700 overflow-hidden shadow-lg"
+      id={containerId}
+      className="overflow-hidden rounded-2xl border border-pink-500/20 shadow-[0_0_30px_rgba(255,47,166,0.12)]"
       style={{ width: "100%", height }}
     />
   );

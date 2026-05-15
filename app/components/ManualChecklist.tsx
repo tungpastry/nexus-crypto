@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, RotateCcw, XCircle } from "lucide-react";
+import type { NexusAsset } from "../config/assets";
+import type { NexusTimeframe } from "../config/timeframes";
+import RetroPanel from "./layout/RetroPanel";
 
 interface ChecklistItem {
   id: string;
@@ -11,34 +14,34 @@ interface ChecklistItem {
 }
 
 interface ManualChecklistProps {
-  tf: string;
+  asset: NexusAsset;
+  timeframe: NexusTimeframe;
 }
 
 const initialChecklist: ChecklistItem[] = [
-  { id: "trend", label: "H4 xu hướng giảm", checked: false, group: "Trend & Setup" },
-  { id: "ma20", label: "Giá dưới MA20 (M30 + H1)", checked: false, group: "Position" },
-  { id: "pullback", label: "Giá test vùng cản + MA20", checked: false, group: "Pullback" },
-  { id: "signal", label: "Có Long Wick / Engulfing xác nhận", checked: false, group: "Signal Candle" },
-  { id: "rr", label: "RR tối thiểu 1:1", checked: false, group: "Risk/Reward" },
-  { id: "psych", label: "Tâm lý bình tĩnh, không FOMO", checked: false, group: "Psychology" },
+  { id: "context", label: "Higher-timeframe context reviewed", checked: false, group: "Context" },
+  { id: "pullback", label: "Pullback or retest area marked", checked: false, group: "Setup" },
+  { id: "signal", label: "Confirmation candle reviewed", checked: false, group: "Setup" },
+  { id: "risk", label: "Risk and invalidation are written down", checked: false, group: "Risk" },
+  { id: "news", label: "Major news and event risk checked", checked: false, group: "Risk" },
+  { id: "psych", label: "Calm mindset; no FOMO or overtrade impulse", checked: false, group: "Discipline" },
 ];
 
-export default function ManualChecklist({ tf }: ManualChecklistProps) {
+export default function ManualChecklist({ asset, timeframe }: ManualChecklistProps) {
   const [items, setItems] = useState<ChecklistItem[]>(initialChecklist);
   const [progress, setProgress] = useState(0);
+  const storageKey = `manualChecklist:${asset.symbol}:${timeframe.binance}`;
 
-  // ✅ Load trạng thái từ localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("manualChecklist");
-    if (saved) setItems(JSON.parse(saved));
-  }, []);
+    const saved = localStorage.getItem(storageKey);
+    setItems(saved ? JSON.parse(saved) : initialChecklist);
+  }, [storageKey]);
 
-  // ✅ Lưu lại khi thay đổi
   useEffect(() => {
-    localStorage.setItem("manualChecklist", JSON.stringify(items));
+    localStorage.setItem(storageKey, JSON.stringify(items));
     const done = items.filter((i) => i.checked).length;
     setProgress(Math.round((done / items.length) * 100));
-  }, [items]);
+  }, [items, storageKey]);
 
   const toggleItem = (id: string) => {
     setItems((prev) =>
@@ -52,7 +55,6 @@ export default function ManualChecklist({ tf }: ManualChecklistProps) {
     setItems(initialChecklist);
   };
 
-  // ✅ Group các item theo category
   const grouped = items.reduce((acc: Record<string, ChecklistItem[]>, item) => {
     if (!acc[item.group]) acc[item.group] = [];
     acc[item.group].push(item);
@@ -60,62 +62,66 @@ export default function ManualChecklist({ tf }: ManualChecklistProps) {
   }, {});
 
   return (
-    <div className="bg-gray-900 text-white p-5 rounded-2xl mt-6 max-w-3xl mx-auto shadow-lg border border-gray-700">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-slate-200">
-          📝 Manual Checklist <span className="text-sm text-gray-400">({tf.toUpperCase()})</span>
-        </h3>
+    <RetroPanel
+      title="Manual Discipline Checklist"
+      eyebrow={`${asset.symbol} ${timeframe.label} namespace`}
+      className="mt-6"
+    >
+      <div className="flex items-center justify-between gap-3 px-5 py-4">
+        <p className="text-sm text-pink-100/65">
+          Stored under <span className="font-mono text-pink-200">{storageKey}</span>
+        </p>
         <button
           onClick={resetChecklist}
-          className="text-xs bg-gray-700 px-2 py-1 rounded hover:bg-gray-600 transition"
+          className="inline-flex items-center gap-2 rounded-lg border border-pink-500/20 bg-black/40 px-3 py-2 text-xs text-pink-100 transition hover:bg-pink-500/10"
         >
+          <RotateCcw className="h-3.5 w-3.5" />
           Reset
         </button>
       </div>
 
-      {/* Thanh tiến trình */}
-      <div className="h-2 bg-gray-700 rounded-full overflow-hidden mb-4">
-        <div
-          className={`h-full transition-all duration-700 ${
-            progress === 100 ? "bg-emerald-400" : "bg-amber-400"
-          }`}
-          style={{ width: `${progress}%` }}
-        />
+      <div className="px-5">
+        <div className="h-2 overflow-hidden rounded-full bg-pink-950">
+          <div
+            className={`h-full transition-all duration-700 ${
+              progress === 100 ? "bg-emerald-400" : "bg-pink-400"
+            }`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-pink-100/50">Progress: {progress}%</p>
       </div>
-      <p className="text-xs text-gray-400 mb-3">Progress: {progress}%</p>
 
-      {/* ✅ Hiển thị theo nhóm */}
-      {Object.entries(grouped).map(([group, items]) => (
-        <div key={group} className="mb-3">
-          <h4 className="text-sm font-semibold text-gray-300 mb-1">{group}</h4>
-          <div className="space-y-1">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => toggleItem(item.id)}
-                className={`flex items-center justify-between cursor-pointer px-3 py-2 rounded-lg border transition ${
-                  item.checked
-                    ? "bg-emerald-900/40 border-emerald-500"
-                    : "bg-gray-800 border-gray-700 hover:bg-gray-700/50"
-                }`}
-              >
-                <span
-                  className={`text-sm ${
-                    item.checked ? "text-emerald-300" : "text-gray-300"
+      <div className="grid gap-4 p-5 md:grid-cols-2">
+        {Object.entries(grouped).map(([group, groupItems]) => (
+          <div key={group}>
+            <h4 className="mb-2 text-sm font-semibold text-pink-100">{group}</h4>
+            <div className="space-y-2">
+              {groupItems.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  onClick={() => toggleItem(item.id)}
+                  className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition ${
+                    item.checked
+                      ? "border-emerald-400/40 bg-emerald-400/10"
+                      : "border-pink-500/10 bg-black/35 hover:bg-pink-500/10"
                   }`}
                 >
-                  {item.label}
-                </span>
-                {item.checked ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-gray-500" />
-                )}
-              </div>
-            ))}
+                  <span className={item.checked ? "text-sm text-emerald-200" : "text-sm text-pink-50/75"}>
+                    {item.label}
+                  </span>
+                  {item.checked ? (
+                    <CheckCircle className="h-4 w-4 shrink-0 text-emerald-300" />
+                  ) : (
+                    <XCircle className="h-4 w-4 shrink-0 text-pink-100/30" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </RetroPanel>
   );
 }
