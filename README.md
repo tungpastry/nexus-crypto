@@ -1,5 +1,9 @@
 # Nexus Crypto SaaS 2026
 
+<p align="center">
+  <img src="public/logo.png" alt="Nexus Crypto Logo" width="320" />
+</p>
+
 > Retro black-pink crypto dashboard built with Next.js 16, React 19, TradingView Widget, Binance API, and CoinGecko-style market data.
 
 Nexus Crypto is a decision-support dashboard for watching the top 10 Nexus assets, syncing price/chart/timeframe context, and running a structured Nexus checklist. It does not execute trades and does not make trading recommendations.
