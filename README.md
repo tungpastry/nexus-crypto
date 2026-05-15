@@ -11,9 +11,9 @@ Nexus Crypto is a decision-support dashboard for watching the top 10 Nexus asset
 | Asset universe | BTC, ETH, USDT, BNB, XRP, USDC, SOL, TRX, SHIB, DOGE |
 | Market table | CoinGecko-style price, 24h/7d change, volume, and market data |
 | Home overview | `/` shows the Top 10 Nexus Universe market overview |
-| Asset workspace | `/asset/[id]` contains PriceWidget, timeframe picker, chart, and checklists |
+| Asset workspace | `/asset/[id]` contains PriceWidget, timeframe picker, chart, and the Nexus checklist |
 | Chart | TradingView widget with unique container id per asset/timeframe |
-| Nexus checklist | MA20/MA50/MA200 auto rules, hybrid confirmations, manual discipline |
+| Nexus checklist | Direction-aware MA20/MA50/MA200 auto rules, hybrid confirmations, manual discipline |
 | Stablecoins | USDT and USDC show market data only; MA/checklist/chart are disabled |
 | Freshness | UI badges classify data as fresh, ok, stale, or offline |
 | Provider health | `/api/provider-health` returns Zenora/Nexus-compatible provider checks |
@@ -23,7 +23,7 @@ Nexus Crypto is a decision-support dashboard for watching the top 10 Nexus asset
 
 `/` is the Top 10 Nexus Universe page. It stays focused on market overview: header, market snapshot, asset watchlist, provider health, and footer.
 
-`/asset/[id]` is the Asset Workspace page. It contains the heavier workflow: TradingView Chart, Nexus Auto Checklist, and Manual Discipline Checklist.
+`/asset/[id]` is the Asset Workspace page. It contains the heavier workflow: TradingView Chart and one Nexus Auto Checklist panel. That checklist combines Auto Rules, Hybrid Confirmation, and Manual Discipline so users do not have to tick duplicate manual panels.
 
 Stablecoins such as USDT and USDC use Market Mode. They can still open a workspace for market context, but TradingView charting and Nexus MA automation remain disabled. Nexus does not execute trades and does not provide trading recommendations.
 

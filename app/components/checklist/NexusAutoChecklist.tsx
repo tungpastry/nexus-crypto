@@ -237,6 +237,7 @@ export default function NexusAutoChecklist({
             />
           </div>
           <div className="mt-4 space-y-1 text-xs text-pink-100/65">
+            <p>Direction: {signal.direction.toUpperCase()}</p>
             <p>Trend: {signal.trend}</p>
             <p>Bias: {signal.bias}</p>
             <p>Setup: {signal.setup}</p>

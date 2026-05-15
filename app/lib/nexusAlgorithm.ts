@@ -21,6 +21,7 @@ export type NexusSignal = {
   ma20: number;
   ma50: number;
   ma200: number;
+  direction: "bull" | "bear" | "neutral";
   trend: "UPTREND" | "DOWNTREND" | "SIDEWAY";
   bias: "Bull Bias" | "Bear Bias" | "Neutral" | "High Risk Chop";
   setup: "Continuation" | "Pullback Continuation" | "Breakout" | "Compression" | "No Setup";
@@ -65,46 +66,48 @@ export function buildNexusSignal(
   const candleRange = latest ? Math.max(latest.high - latest.low, 0) : 0;
   const candleBody = latest ? Math.abs(latest.close - latest.open) : 0;
   const bodyRatio = candleRange ? candleBody / candleRange : 0;
+  const hasMovingAverages = ma20 > 0 && ma50 > 0 && ma200 > 0;
+  const isBullAligned = hasMovingAverages && price > ma20 && ma20 > ma50 && ma50 > ma200;
+  const isBearAligned = hasMovingAverages && price < ma20 && ma20 < ma50 && ma50 < ma200;
+  const direction: NexusSignal["direction"] = isBullAligned
+    ? "bull"
+    : isBearAligned
+      ? "bear"
+      : "neutral";
+  const momentumAligned =
+    (direction === "bull" && candleMomentum > 0) ||
+    (direction === "bear" && candleMomentum < 0);
 
   let trend: NexusSignal["trend"] = "SIDEWAY";
-  if (price > ma20 && ma20 > ma50 && ma50 > ma200) trend = "UPTREND";
-  if (price < ma20 && ma20 < ma50 && ma50 < ma200) trend = "DOWNTREND";
+  if (direction === "bull") trend = "UPTREND";
+  if (direction === "bear") trend = "DOWNTREND";
 
   const isExtended = Math.abs(ma20Distance) > 7;
   const bias: NexusSignal["bias"] =
-    trend === "UPTREND"
-      ? isExtended
-        ? "High Risk Chop"
-        : "Bull Bias"
-      : trend === "DOWNTREND"
-        ? isExtended
-          ? "High Risk Chop"
-          : "Bear Bias"
-        : "Neutral";
+    isExtended
+      ? "High Risk Chop"
+      : direction === "bull"
+        ? "Bull Bias"
+        : direction === "bear"
+          ? "Bear Bias"
+          : "Neutral";
 
   const setup: NexusSignal["setup"] =
-    trend === "SIDEWAY"
+    direction === "neutral"
       ? bodyRatio < 0.35
         ? "Compression"
         : "No Setup"
       : Math.abs(ma20Distance) < 2.5
         ? "Pullback Continuation"
-        : candleMomentum > 0 && trend === "UPTREND"
+        : momentumAligned
           ? "Continuation"
-          : candleMomentum < 0 && trend === "DOWNTREND"
-            ? "Continuation"
-            : "No Setup";
+          : "No Setup";
 
   const trendStatus: NexusRuleStatus =
-    trend === "UPTREND" || trend === "DOWNTREND" ? "pass" : "neutral";
-  const positionStatus: NexusRuleStatus =
-    price > ma20 && ma20 > ma50 ? "pass" : price < ma20 && ma20 < ma50 ? "fail" : "neutral";
+    direction === "bull" || direction === "bear" ? "pass" : "neutral";
+  const positionStatus: NexusRuleStatus = direction === "neutral" ? "neutral" : "pass";
   const momentumStatus: NexusRuleStatus =
-    candleMomentum > 0 && trend === "UPTREND"
-      ? "pass"
-      : candleMomentum < 0 && trend === "DOWNTREND"
-        ? "pass"
-        : "neutral";
+    direction === "neutral" ? "neutral" : momentumAligned ? "pass" : "neutral";
   const candleStatus: NexusRuleStatus = bodyRatio >= 0.45 ? "pass" : "warn";
   const riskStatus: NexusRuleStatus = isExtended ? "warn" : "pass";
   const freshnessStatus: NexusRuleStatus =
@@ -120,7 +123,7 @@ export function buildNexusSignal(
     },
     {
       id: "ma_position",
-      label: "Price position relative to MA20 and MA50",
+      label: "Directional MA position supports bull/bear context",
       status: positionStatus,
       score: statusScore(positionStatus, 20),
       type: "auto",
@@ -165,11 +168,12 @@ export function buildNexusSignal(
     ma20,
     ma50,
     ma200,
+    direction,
     trend,
     bias,
     setup,
     score,
-    risk: isExtended ? "High" : trend === "SIDEWAY" ? "Medium" : "Low",
+    risk: isExtended ? "High" : direction === "neutral" ? "Medium" : "Low",
     updated_at: updatedAt,
     rules,
   };

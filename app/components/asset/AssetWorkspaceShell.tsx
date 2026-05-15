@@ -9,7 +9,6 @@ import type { NexusSignal } from "../../lib/nexusAlgorithm";
 import PriceWidget from "../PriceWidget";
 import TradingViewChart from "../TradingViewChart";
 import NexusAutoChecklist from "../checklist/NexusAutoChecklist";
-import ManualDisciplineChecklist from "../checklist/ManualDisciplineChecklist";
 import ClientErrorBoundary from "../layout/ClientErrorBoundary";
 import RetroPanel from "../layout/RetroPanel";
 import AssetWorkspaceHeader from "./AssetWorkspaceHeader";
@@ -58,8 +57,8 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
                   onSelectTimeframe={setSelectedTimeframe}
                 />
                 <p className="text-xs leading-5 text-pink-100/55">
-                  Timeframe controls chart interval, Nexus MA context, and manual discipline
-                  storage namespace. Market data only; no trade execution or recommendations.
+                  Timeframe controls chart interval, Nexus MA context, and checklist confirmations.
+                  Market data only; no trade execution or recommendations.
                 </p>
               </div>
             </RetroPanel>
@@ -82,21 +81,15 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
           </RetroPanel>
         </ClientErrorBoundary>
 
-        <div className="grid gap-6 xl:grid-cols-2">
-          <ClientErrorBoundary>
-            <div className={`rounded-2xl transition-all duration-700 ${trendRing}`}>
-              <NexusAutoChecklist
-                asset={asset}
-                timeframe={selectedTimeframe}
-                onTrendChange={setTrend}
-              />
-            </div>
-          </ClientErrorBoundary>
-
-          <ClientErrorBoundary>
-            <ManualDisciplineChecklist asset={asset} timeframe={selectedTimeframe} />
-          </ClientErrorBoundary>
-        </div>
+        <ClientErrorBoundary>
+          <div className={`rounded-2xl transition-all duration-700 ${trendRing}`}>
+            <NexusAutoChecklist
+              asset={asset}
+              timeframe={selectedTimeframe}
+              onTrendChange={setTrend}
+            />
+          </div>
+        </ClientErrorBoundary>
 
         <p className="pb-4 text-center text-xs text-pink-100/40">
           Workspace data is informational only. Nexus does not execute trades or provide trading
