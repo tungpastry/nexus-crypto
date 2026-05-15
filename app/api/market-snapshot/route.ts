@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import path from "path";
 import { NEXUS_ASSETS } from "../../config/assets";
+import { requireApiAuth } from "../../lib/auth/api";
 
 export const runtime = "nodejs";
 
@@ -215,7 +216,10 @@ function refreshMarketSnapshot() {
   return inFlightPromise;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (!auth.ok) return auth.response;
+
   const now = Date.now();
   const ageMs = getCacheAge(now);
 

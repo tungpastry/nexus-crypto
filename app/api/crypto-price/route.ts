@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "../../lib/auth/api";
 import { getCryptoPrice } from "../../lib/binance";
 import { getCachedOrFetch } from "../../lib/serverCache";
 import { validateBinanceSymbol } from "../../lib/validators";
@@ -6,6 +7,9 @@ import { validateBinanceSymbol } from "../../lib/validators";
 const PRICE_CACHE_TTL_MS = 5_000;
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (!auth.ok) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const validation = validateBinanceSymbol(searchParams.get("symbol"));
 

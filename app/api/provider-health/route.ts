@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { getAuthConfig } from "../../lib/auth/config";
 import { getCryptoKlines, getCryptoPrice } from "../../lib/binance";
 
 type CheckStatus = "ok" | "warn" | "error";
@@ -70,10 +71,16 @@ function buildAgeCheck(value: number | null) {
 
 async function measureMarketSnapshot(origin: string) {
   const started = Date.now();
+  const authConfig = getAuthConfig();
+  const headers =
+    authConfig.enabled && authConfig.smokeAuthToken
+      ? { Authorization: `Bearer ${authConfig.smokeAuthToken}` }
+      : undefined;
 
   try {
     const res = await axios.get(`${origin}/api/market-snapshot`, {
       timeout: 10_000,
+      headers,
     });
     const latencyMs = Date.now() - started;
     const cacheStatus = getSnapshotCacheStatus(res.data);

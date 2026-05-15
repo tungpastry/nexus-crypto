@@ -320,9 +320,18 @@ NEXUS_AUTH_ENABLED=1
 NEXUS_AUTH_USERNAME=admin
 NEXUS_AUTH_PASSWORD_HASH=scrypt:...
 NEXUS_AUTH_SECRET=...
+NEXUS_SMOKE_AUTH_TOKEN=...
 ```
 
-See [docs/auth-lan-local.md](docs/auth-lan-local.md) for the full setup. Auth v1 keeps API routes public so health checks, version checks, and smoke tests continue to work.
+See [docs/auth-lan-local.md](docs/auth-lan-local.md) for the full setup. When auth is enabled, selected market-data APIs require a browser session or `Authorization: Bearer $NEXUS_SMOKE_AUTH_TOKEN`; `/api/version`, `/api/provider-health`, and auth routes remain public.
+
+Smoke with auth enabled:
+
+```bash
+NEXUS_SMOKE_AUTH_TOKEN="..." \
+NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
+./scripts/smoke_crypto_assets_contract.sh
+```
 
 ## Production Deployment On Ubuntu
 

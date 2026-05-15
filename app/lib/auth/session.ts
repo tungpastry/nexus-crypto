@@ -122,6 +122,15 @@ export function getSessionTtlSeconds() {
   return getAuthConfig().ttlSeconds;
 }
 
+export function shouldRotateSession(
+  exp: number,
+  ttlSeconds: number,
+  nowSeconds = Math.floor(Date.now() / 1_000)
+) {
+  const remainingSeconds = exp - nowSeconds;
+  return remainingSeconds > 0 && remainingSeconds < ttlSeconds / 2;
+}
+
 export function buildSessionCookieOptions(maxAge = getSessionTtlSeconds()) {
   const config = getAuthConfig();
   return {

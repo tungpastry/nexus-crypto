@@ -5,6 +5,14 @@ BASE_URL="${NEXUS_CRYPTO_BASE_URL:-http://127.0.0.1:3200}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
+curl_with_auth() {
+  if [[ -n "${NEXUS_SMOKE_AUTH_TOKEN:-}" ]]; then
+    curl -sS -H "Authorization: Bearer ${NEXUS_SMOKE_AUTH_TOKEN}" "$@"
+  else
+    curl -sS "$@"
+  fi
+}
+
 SYMBOLS=(
   BTCUSDT
   ETHUSDT
@@ -18,7 +26,7 @@ SYMBOLS=(
 
 for symbol in "${SYMBOLS[@]}"; do
   price_file="$TMP_DIR/crypto-price-${symbol}.json"
-  curl -sS "${BASE_URL}/api/crypto-price?symbol=${symbol}" -o "$price_file"
+  curl_with_auth "${BASE_URL}/api/crypto-price?symbol=${symbol}" -o "$price_file"
   python3 - "$price_file" "$symbol" <<'PY'
 import json
 import sys
@@ -37,7 +45,7 @@ print(f"CRYPTO_PRICE_{symbol}=PASS")
 PY
 
   klines_file="$TMP_DIR/crypto-klines-${symbol}.json"
-  curl -sS "${BASE_URL}/api/crypto-klines?symbol=${symbol}&tf=4h" -o "$klines_file"
+  curl_with_auth "${BASE_URL}/api/crypto-klines?symbol=${symbol}&tf=4h" -o "$klines_file"
   python3 - "$klines_file" "$symbol" <<'PY'
 import json
 import sys
@@ -60,7 +68,7 @@ done
 
 negative_symbol_file="$TMP_DIR/negative-unsupported-symbol.json"
 negative_symbol_code="$(
-  curl -sS \
+  curl_with_auth \
     -o "$negative_symbol_file" \
     -w "%{http_code}" \
     "${BASE_URL}/api/crypto-price?symbol=INVALID"
@@ -78,7 +86,7 @@ PY
 
 negative_timeframe_file="$TMP_DIR/negative-unsupported-timeframe.json"
 negative_timeframe_code="$(
-  curl -sS \
+  curl_with_auth \
     -o "$negative_timeframe_file" \
     -w "%{http_code}" \
     "${BASE_URL}/api/crypto-klines?symbol=BTCUSDT&tf=2h"

@@ -34,6 +34,13 @@
 - [ ] Confirm `/api/version` remains public.
 - [ ] Confirm `/api/provider-health` remains public.
 - [ ] Confirm smoke still passes.
+- [ ] Confirm auth-enabled selected API without auth returns `401`.
+- [ ] Confirm auth-enabled selected API works with bearer token.
+- [ ] Confirm auth-enabled selected API works with session cookie.
+- [ ] Confirm smoke passes with `NEXUS_SMOKE_AUTH_TOKEN`.
+- [ ] Confirm wrong login attempts trigger `429` after configured threshold.
+- [ ] Confirm correct login clears the rate-limit key.
+- [ ] Confirm `/api/auth/me` can refresh/rotate a near-expiry session cookie.
 - [ ] Confirm `VersionBadge` shows expected short commit.
 - [ ] Confirm git status is clean.
 - [ ] Record release in `CHANGELOG.md`.

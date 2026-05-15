@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthConfig } from "../../../lib/auth/config";
-import { verifySessionToken } from "../../../lib/auth/session";
+import {
+  buildSessionCookieOptions,
+  createSessionToken,
+  shouldRotateSession,
+  verifySessionToken,
+} from "../../../lib/auth/session";
 
 export async function GET(req: NextRequest) {
   const config = getAuthConfig();
@@ -31,9 +36,27 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     authenticated: true,
     auth_enabled: true,
     user: { name: session.username },
   });
+
+  if (
+    config.sessionRotationEnabled &&
+    shouldRotateSession(session.exp, config.ttlSeconds)
+  ) {
+    const nextToken = await createSessionToken(
+      session.username,
+      config.secret,
+      config.ttlSeconds
+    );
+    res.cookies.set(
+      config.cookieName,
+      nextToken,
+      buildSessionCookieOptions(config.ttlSeconds)
+    );
+  }
+
+  return res;
 }

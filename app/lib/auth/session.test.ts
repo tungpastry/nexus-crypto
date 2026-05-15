@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createSessionToken, verifySessionToken } from "./session";
+import { createSessionToken, shouldRotateSession, verifySessionToken } from "./session";
 
 describe("signed session tokens", () => {
   afterEach(() => {
@@ -48,5 +48,13 @@ describe("signed session tokens", () => {
     const result = await verifySessionToken("malformed", "secret-a");
 
     expect(result.ok).toBe(false);
+  });
+
+  it("does not rotate when enough session lifetime remains", () => {
+    expect(shouldRotateSession(1_000, 600, 500)).toBe(false);
+  });
+
+  it("rotates when less than half of session lifetime remains", () => {
+    expect(shouldRotateSession(1_000, 600, 760)).toBe(true);
   });
 });

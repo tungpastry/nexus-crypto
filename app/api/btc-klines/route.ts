@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "../../lib/auth/api";
 import { getCryptoKlines } from "../../lib/binance";
 import { validateBinanceTimeframe } from "../../lib/validators";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (!auth.ok) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const tfValidation = validateBinanceTimeframe(searchParams.get("tf"));
 

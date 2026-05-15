@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiAuth } from "../../lib/auth/api";
 import { getCryptoKlines } from "../../lib/binance";
 import { getCachedOrFetch } from "../../lib/serverCache";
 import { validateBinanceSymbol, validateBinanceTimeframe } from "../../lib/validators";
@@ -6,6 +7,9 @@ import { validateBinanceSymbol, validateBinanceTimeframe } from "../../lib/valid
 const KLINES_CACHE_TTL_MS = 60_000;
 
 export async function GET(req: NextRequest) {
+  const auth = await requireApiAuth(req);
+  if (!auth.ok) return auth.response;
+
   const { searchParams } = new URL(req.url);
   const symbolValidation = validateBinanceSymbol(searchParams.get("symbol"));
   const tfValidation = validateBinanceTimeframe(searchParams.get("tf"));

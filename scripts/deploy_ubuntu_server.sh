@@ -30,6 +30,22 @@ show_runtime_diagnostics() {
   npm ls next react react-dom eslint-config-next baseline-browser-mapping postcss || true
 }
 
+load_local_env() {
+  local env_file="$1"
+  [[ -f "$env_file" ]] || return 0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    [[ "$line" == *=* ]] || continue
+
+    local key="${line%%=*}"
+    local value="${line#*=}"
+    if [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+      export "$key=$value"
+    fi
+  done < "$env_file"
+}
+
 section "DEPLOY CONFIG"
 echo "REPO_DIR=$REPO_DIR"
 echo "BASE_URL=$BASE_URL"
@@ -81,6 +97,7 @@ NEXT_PUBLIC_BUILD_TIME=$BUILD_TIME
 EOF
 mv "$env_tmp" "$ENV_FILE"
 chmod 600 "$ENV_FILE"
+load_local_env "$ENV_FILE"
 
 section "INSTALL"
 npm install
@@ -143,6 +160,18 @@ assert str(payload.get("node", "")).startswith("v"), "missing node version"
 print("VERSION_METADATA=PASS")
 PY
 rm -f "$version_file"
+
+section "SMOKE AUTH"
+if [[ "${NEXUS_AUTH_ENABLED:-0}" == "1" ]]; then
+  if [[ -z "${NEXUS_SMOKE_AUTH_TOKEN:-}" ]]; then
+    echo "NEXUS_SMOKE_AUTH_TOKEN is required for smoke when NEXUS_AUTH_ENABLED=1"
+    exit 1
+  fi
+  export NEXUS_SMOKE_AUTH_TOKEN
+  echo "SMOKE_AUTH_TOKEN=CONFIGURED"
+else
+  echo "SMOKE_AUTH_TOKEN=NOT_REQUIRED"
+fi
 
 section "SMOKE"
 NEXUS_CRYPTO_BASE_URL="$BASE_URL" ./scripts/smoke_crypto_assets_contract.sh

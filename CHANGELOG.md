@@ -9,6 +9,10 @@
 - P11: Login, logout, and auth status routes.
 - P11: Middleware UI page protection for `/` and `/asset/*`.
 - P11: Password hash generator for local auth setup.
+- P12: Protected selected market-data API routes when LAN auth is enabled.
+- P12: Smoke/deploy bearer token support for protected API checks.
+- P12: Login attempt rate limiting.
+- P12: Session rotation through the auth status route.
 
 ## 2026-05-15 - Nexus Crypto Hardening Batch
 
