@@ -4,6 +4,7 @@ import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import ProviderHealthPanel from "./components/insights/ProviderHealthPanel";
 import VersionBadge from "./components/insights/VersionBadge";
+import LogoutButton from "./components/auth/LogoutButton";
 
 export default function Home() {
   return (
@@ -49,9 +50,14 @@ export default function Home() {
         </ClientErrorBoundary>
 
         <footer className="flex flex-col items-center gap-3 pb-4">
-          <ClientErrorBoundary>
-            <VersionBadge />
-          </ClientErrorBoundary>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <ClientErrorBoundary>
+              <VersionBadge />
+            </ClientErrorBoundary>
+            <ClientErrorBoundary>
+              <LogoutButton />
+            </ClientErrorBoundary>
+          </div>
           <p className="text-center text-xs text-pink-100/40">
             Market data only. Nexus does not execute trades or provide trading recommendations.
           </p>

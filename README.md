@@ -192,6 +192,8 @@ nexus-crypto/
 │   │   ├── asset/AssetWorkspaceHeader.tsx
 │   │   ├── asset/AssetWorkspaceShell.tsx
 │   │   ├── asset/TimeframeSelector.tsx
+│   │   ├── auth/LoginForm.tsx
+│   │   ├── auth/LogoutButton.tsx
 │   │   ├── checklist/ManualDisciplineChecklist.tsx
 │   │   ├── checklist/NexusAutoChecklist.tsx
 │   │   ├── insights/ProviderHealthPanel.tsx
@@ -218,6 +220,7 @@ nexus-crypto/
 │   ├── smoke_btc_price_contract.sh
 │   └── smoke_crypto_assets_contract.sh
 ├── docs/
+│   ├── auth-lan-local.md
 │   └── release-checklist.md
 ├── CHANGELOG.md
 └── package.json
@@ -301,6 +304,26 @@ curl -sS "http://127.0.0.1:3200/api/version" | python3 -m json.tool
 
 `npm audit` may still report moderate advisories from bundled Next/PostCSS metadata. Do not use `npm audit fix --force`; review framework upgrades explicitly.
 
+## LAN Local Authentication
+
+Auth is disabled by default. To enable a LAN-local login gate for `/` and `/asset/*`, configure local environment variables in `.env.production.local`:
+
+```bash
+node scripts/generate_auth_password_hash.mjs "your-password"
+openssl rand -hex 32
+```
+
+Required env when enabled:
+
+```text
+NEXUS_AUTH_ENABLED=1
+NEXUS_AUTH_USERNAME=admin
+NEXUS_AUTH_PASSWORD_HASH=scrypt:...
+NEXUS_AUTH_SECRET=...
+```
+
+See [docs/auth-lan-local.md](docs/auth-lan-local.md) for the full setup. Auth v1 keeps API routes public so health checks, version checks, and smoke tests continue to work.
+
 ## Production Deployment On Ubuntu
 
 Preferred deploy flow:
@@ -324,6 +347,7 @@ Release hygiene docs:
 
 ```text
 CHANGELOG.md
+docs/auth-lan-local.md
 docs/release-checklist.md
 ```
 

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- P11: LAN local credential authentication.
+- P11: HTTP-only signed session cookie.
+- P11: Login, logout, and auth status routes.
+- P11: Middleware UI page protection for `/` and `/asset/*`.
+- P11: Password hash generator for local auth setup.
+
 ## 2026-05-15 - Nexus Crypto Hardening Batch
 
 ### Added

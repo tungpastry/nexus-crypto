@@ -62,14 +62,25 @@ BUILD_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 section "RELEASE METADATA"
 echo "RELEASE_COMMIT=$GIT_SHORT_SHA"
 echo "RELEASE_BUILD_TIME=$BUILD_TIME"
-(umask 077 && cat > .env.production.local <<EOF
+ENV_FILE=".env.production.local"
+touch "$ENV_FILE"
+chmod 600 "$ENV_FILE"
+env_tmp="$(mktemp)"
+awk '
+  /^# BEGIN NEXUS RELEASE METADATA$/ { skip=1; next }
+  /^# END NEXUS RELEASE METADATA$/ { skip=0; next }
+  !skip { print }
+' "$ENV_FILE" > "$env_tmp"
+cat >> "$env_tmp" <<EOF
+# BEGIN NEXUS RELEASE METADATA
 GIT_COMMIT_SHA=$GIT_COMMIT_SHA
 NEXT_PUBLIC_GIT_COMMIT_SHA=$GIT_COMMIT_SHA
 BUILD_TIME=$BUILD_TIME
 NEXT_PUBLIC_BUILD_TIME=$BUILD_TIME
+# END NEXUS RELEASE METADATA
 EOF
-)
-chmod 600 .env.production.local
+mv "$env_tmp" "$ENV_FILE"
+chmod 600 "$ENV_FILE"
 
 section "INSTALL"
 npm install

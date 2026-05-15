@@ -18,6 +18,7 @@
 - [ ] Confirm `/api/provider-health` is `ok` or acceptably `degraded`.
 - [ ] Confirm `/api/version` commit matches `git rev-parse HEAD`.
 - [ ] Confirm `smoke_crypto_assets_contract.sh` passes.
+- [ ] Confirm `.env.production.local` has `NEXUS_AUTH_ENABLED=1` if auth is desired.
 
 ## Post-deploy
 
@@ -25,6 +26,14 @@
 - [ ] Confirm port `3200` is listening.
 - [ ] Confirm homepage loads.
 - [ ] Confirm asset workspace loads.
+- [ ] Confirm `/login` loads.
+- [ ] Confirm invalid login fails when auth is enabled.
+- [ ] Confirm valid login redirects to dashboard when auth is enabled.
+- [ ] Confirm unauthenticated `/` redirects to `/login` when auth is enabled.
+- [ ] Confirm logout clears session.
+- [ ] Confirm `/api/version` remains public.
+- [ ] Confirm `/api/provider-health` remains public.
+- [ ] Confirm smoke still passes.
 - [ ] Confirm `VersionBadge` shows expected short commit.
 - [ ] Confirm git status is clean.
 - [ ] Record release in `CHANGELOG.md`.
