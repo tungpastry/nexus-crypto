@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { TifaPageContext } from "../../lib/tifa-core/types";
 import TifaBudgetBadge from "./TifaBudgetBadge";
 import TifaMessageBubble from "./TifaMessageBubble";
+import TifaAvatar from "./TifaAvatar";
 import TifaProviderBadge from "./TifaProviderBadge";
 import TifaQuickActions from "./TifaQuickActions";
 
@@ -252,11 +253,14 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
   return (
     <div className="flex h-full flex-col rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04))] shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.12)] backdrop-blur-xl">
       <div className="flex items-center justify-between border-b border-[var(--border-soft)] px-4 py-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-soft)]">
-            TifaWidget Assistant
-          </p>
-          <p className="text-sm font-semibold text-[var(--text-main)]">Nexus Crypto Chat</p>
+        <div className="flex items-center gap-3">
+          <TifaAvatar size="sm" />
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text-soft)]">
+              TifaWidget Assistant
+            </p>
+            <p className="text-sm font-semibold text-[var(--text-main)]">Nexus Crypto Chat</p>
+          </div>
         </div>
         <button
           type="button"

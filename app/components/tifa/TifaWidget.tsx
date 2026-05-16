@@ -1,9 +1,9 @@
 "use client";
 
-import { MessageCircle, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import type { TifaPageContext } from "../../lib/tifa-core/types";
+import TifaAvatar from "./TifaAvatar";
 import TifaChatPanel from "./TifaChatPanel";
 
 type TifaWidgetProps = {
@@ -39,7 +39,7 @@ export default function TifaWidget({ page, context }: TifaWidgetProps) {
         className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-pink)] bg-[linear-gradient(135deg,rgba(255,95,162,0.95),rgba(244,114,182,0.8))] text-[var(--text-main)] shadow-[0_16px_34px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.34)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
         aria-label={open ? "Close Tifa assistant" : "Open Tifa assistant"}
       >
-        {open ? <Sparkles className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        <TifaAvatar size="md" />
       </button>
     </div>
   );
