@@ -10,6 +10,7 @@ export type NexusAsset = {
   rank: number;
   name: string;
   symbol: string;
+  iconUrl: string;
   category: NexusAssetCategory;
   coingeckoId: string;
   binanceSymbol?: string;
@@ -28,6 +29,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 1,
     name: "Bitcoin",
     symbol: "BTC",
+    iconUrl: "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
     category: "major",
     coingeckoId: "bitcoin",
     binanceSymbol: "BTCUSDT",
@@ -43,6 +45,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 2,
     name: "Ethereum",
     symbol: "ETH",
+    iconUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
     category: "major",
     coingeckoId: "ethereum",
     binanceSymbol: "ETHUSDT",
@@ -58,6 +61,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 3,
     name: "Tether",
     symbol: "USDT",
+    iconUrl: "https://assets.coingecko.com/coins/images/325/small/Tether.png",
     category: "stablecoin",
     coingeckoId: "tether",
     enablePrice: true,
@@ -71,6 +75,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 4,
     name: "BNB",
     symbol: "BNB",
+    iconUrl: "https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png",
     category: "exchange",
     coingeckoId: "binancecoin",
     binanceSymbol: "BNBUSDT",
@@ -86,6 +91,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 5,
     name: "XRP",
     symbol: "XRP",
+    iconUrl: "https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png",
     category: "altcoin",
     coingeckoId: "ripple",
     binanceSymbol: "XRPUSDT",
@@ -101,6 +107,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 6,
     name: "USDC",
     symbol: "USDC",
+    iconUrl: "https://assets.coingecko.com/coins/images/6319/small/usdc.png",
     category: "stablecoin",
     coingeckoId: "usd-coin",
     enablePrice: true,
@@ -114,6 +121,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 7,
     name: "Solana",
     symbol: "SOL",
+    iconUrl: "https://assets.coingecko.com/coins/images/4128/small/solana.png",
     category: "altcoin",
     coingeckoId: "solana",
     binanceSymbol: "SOLUSDT",
@@ -129,6 +137,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 8,
     name: "TRON",
     symbol: "TRX",
+    iconUrl: "https://assets.coingecko.com/coins/images/1094/small/tron-logo.png",
     category: "altcoin",
     coingeckoId: "tron",
     binanceSymbol: "TRXUSDT",
@@ -144,6 +153,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 9,
     name: "Shiba Inu",
     symbol: "SHIB",
+    iconUrl: "https://assets.coingecko.com/coins/images/11939/small/shiba.png",
     category: "meme",
     coingeckoId: "shiba-inu",
     binanceSymbol: "SHIBUSDT",
@@ -160,6 +170,7 @@ export const NEXUS_ASSETS: NexusAsset[] = [
     rank: 10,
     name: "Dogecoin",
     symbol: "DOGE",
+    iconUrl: "https://assets.coingecko.com/coins/images/5/small/dogecoin.png",
     category: "meme",
     coingeckoId: "dogecoin",
     binanceSymbol: "DOGEUSDT",

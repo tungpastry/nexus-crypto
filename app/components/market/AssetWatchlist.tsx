@@ -7,6 +7,7 @@ import { ArrowRight, LineChart, Shield } from "lucide-react";
 import { NEXUS_ASSETS } from "../../config/assets";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "./DataFreshnessBadge";
+import CoinIcon from "./CoinIcon";
 
 type SnapshotAsset = {
   id: string;
@@ -112,7 +113,7 @@ export default function AssetWatchlist() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs text-[var(--text-soft)]">#{asset.rank}</span>
+                      <CoinIcon src={asset.iconUrl} symbol={asset.symbol} name={asset.name} />
                       <div>
                         <p className="font-semibold text-[var(--text-main)]">{asset.symbol}</p>
                         <p className="text-xs text-[var(--text-soft)]">{asset.name}</p>
