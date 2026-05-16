@@ -1,6 +1,7 @@
 import { LineChart, Shield } from "lucide-react";
 import type { NexusAsset } from "../../config/assets";
 import RetroPanel from "../layout/RetroPanel";
+import CoinIcon from "../market/CoinIcon";
 
 type AssetWorkspaceHeaderProps = {
   asset: NexusAsset;
@@ -22,11 +23,21 @@ export default function AssetWorkspaceHeader({ asset }: AssetWorkspaceHeaderProp
     <RetroPanel title={`${asset.symbol} Workspace`} eyebrow={asset.name}>
       <div className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-start">
         <div>
-          <div className="flex flex-wrap items-end gap-3">
-            <h1 className="bg-[linear-gradient(90deg,#ffffff,#ff8fbd,#7dd3fc)] bg-clip-text text-4xl font-black tracking-normal text-transparent sm:text-5xl">
-              {asset.symbol}
-            </h1>
-            <p className="pb-1 text-lg font-semibold text-[var(--text-muted)]">{asset.name}</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="rounded-full shadow-[0_0_28px_rgba(255,95,162,0.18)]">
+              <CoinIcon
+                src={asset.iconUrl}
+                symbol={asset.symbol}
+                name={asset.name}
+                size="lg"
+              />
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <h1 className="bg-[linear-gradient(90deg,#ffffff,#ff8fbd,#7dd3fc)] bg-clip-text text-4xl font-black tracking-normal text-transparent sm:text-5xl">
+                {asset.symbol}
+              </h1>
+              <p className="pb-1 text-lg font-semibold text-[var(--text-muted)]">{asset.name}</p>
+            </div>
           </div>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-muted)]">
             {asset.note ||
