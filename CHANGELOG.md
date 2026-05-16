@@ -22,6 +22,7 @@
 - P12: Smoke/deploy bearer token support for protected API checks.
 - P12: Login attempt rate limiting.
 - P12: Session rotation through the auth status route.
+- Provider health deep endpoint for multi-asset Binance diagnostics.
 
 ### Changed
 

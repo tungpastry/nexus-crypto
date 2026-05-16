@@ -6,7 +6,7 @@
   - Protected market-data routes require either:
     - valid session cookie, or
     - `Authorization: Bearer <NEXUS_SMOKE_AUTH_TOKEN>` (when configured).
-  - Public operational routes remain public: `/api/version`, `/api/provider-health`, and auth routes.
+  - Public operational routes remain public: `/api/version`, `/api/provider-health`, `/api/provider-health/deep`, and auth routes.
 
 Unauthorized protected calls return:
 
@@ -135,6 +135,48 @@ Example response:
 Notes:
 - Route status can be `ok` or `degraded`.
 - When auth is enabled and smoke token exists, provider-health includes bearer auth for internal market-snapshot checks.
+- This is the lightweight readiness check and should be preferred for frequent probes.
+
+---
+
+## GET /api/provider-health/deep
+Purpose: Deep multi-asset provider check across all Binance-enabled Nexus symbols.
+
+Auth:
+- Public.
+
+Coverage:
+- `BTCUSDT`, `ETHUSDT`, `BNBUSDT`, `XRPUSDT`, `SOLUSDT`, `TRXUSDT`, `SHIBUSDT`, `DOGEUSDT`
+- For each symbol, checks both price and `1h` klines (`limit=5`).
+
+Example response:
+
+```json
+{
+  "provider": "nexus_crypto",
+  "mode": "deep",
+  "status": "ok",
+  "updated_at": "2026-05-16T00:00:00.000Z",
+  "summary": {
+    "symbols_total": 8,
+    "symbols_ok": 8,
+    "symbols_warn": 0,
+    "symbols_error": 0,
+    "latency_ms": 956
+  },
+  "checks": {
+    "BTCUSDT": {
+      "status": "ok",
+      "price": { "status": "ok", "latency_ms": 80 },
+      "klines": { "status": "ok", "latency_ms": 101, "candles": 5 }
+    }
+  }
+}
+```
+
+Notes:
+- Use this endpoint for manual diagnostics/monitoring depth.
+- Avoid high-frequency polling; it performs a wider provider fanout than `/api/provider-health`.
 
 ---
 

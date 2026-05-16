@@ -60,9 +60,12 @@ Public deploy/readiness routes remain available:
 ```bash
 sudo systemctl status nexus-crypto.service --no-pager
 curl -sS http://127.0.0.1:3200/api/provider-health | python3 -m json.tool
+curl -sS http://127.0.0.1:3200/api/provider-health/deep | python3 -m json.tool
 curl -sS http://127.0.0.1:3200/api/version | python3 -m json.tool
 NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" ./scripts/smoke_crypto_assets_contract.sh
 ```
+
+Use `/api/provider-health` for frequent readiness checks. Use `/api/provider-health/deep` for manual multi-asset diagnostics.
 
 ## Rollback Notes
 

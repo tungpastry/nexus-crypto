@@ -33,4 +33,5 @@ Nexus Crypto is a Next.js App Router dashboard focused on market-data observatio
 
 ## Current Limitations
 - No trade execution and no custody/account integration.
-- Provider health probes representative Binance pairs (`BTCUSDT`) and market snapshot route status; it is not yet a full per-asset deep diagnostic grid.
+- Default `/api/provider-health` remains lightweight (BTC representative checks + market snapshot).
+- Deep diagnostics are exposed separately at `/api/provider-health/deep` across all Binance-enabled symbols to avoid heavy default readiness probes.
