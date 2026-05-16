@@ -1,0 +1,89 @@
+import fs from "fs";
+import path from "path";
+
+export type TifaRuntimeConfig = {
+  enabled: boolean;
+  timezone: string;
+  runtimeDir: string;
+  promptPath: string;
+  llmProvider: "gemini";
+  routingPolicy: string;
+  fallbackOrder: string[];
+  gemini: {
+    apiKey?: string;
+    model: string;
+    apiUrl: string;
+    timeoutMs: number;
+    maxOutputTokens: number;
+    temperature: number;
+  };
+};
+
+function parsePositiveInt(value: string | undefined, fallback: number) {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseNumber(value: string | undefined, fallback: number) {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export function getTifaRuntimeConfig(): TifaRuntimeConfig {
+  const runtimeDir = process.env.TIFA_RUNTIME_DIR || "runtime";
+  const promptPath =
+    process.env.TIFA_PROMPT_PATH || "prompts/TIFA_NEXUS_CRYPTO_RUNTIME.md";
+
+  return {
+    enabled: process.env.TIFA_ASSISTANT_ENABLED !== "0",
+    timezone: process.env.TIFA_TIMEZONE || "Asia/Ho_Chi_Minh",
+    runtimeDir,
+    promptPath,
+    llmProvider: "gemini",
+    routingPolicy: process.env.TIFA_LLM_ROUTING_POLICY || "cost-aware",
+    fallbackOrder: (process.env.TIFA_LLM_FALLBACK_ORDER || "gemini")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+    gemini: {
+      apiKey: process.env.GEMINI_API_KEY,
+      model: process.env.GEMINI_MODEL || "gemini-3-flash-preview",
+      apiUrl:
+        process.env.GEMINI_API_URL ||
+        "https://generativelanguage.googleapis.com/v1beta",
+      timeoutMs: parsePositiveInt(process.env.GEMINI_TIMEOUT_MS, 20_000),
+      maxOutputTokens: parsePositiveInt(process.env.GEMINI_MAX_OUTPUT_TOKENS, 900),
+      temperature: parseNumber(process.env.GEMINI_TEMPERATURE, 0.3),
+    },
+  };
+}
+
+export function assertTifaRuntimeSafe(config = getTifaRuntimeConfig()) {
+  if (!config.runtimeDir) {
+    throw new Error("TIFA_RUNTIME_DIR is empty");
+  }
+  if (!config.promptPath) {
+    throw new Error("TIFA_PROMPT_PATH is empty");
+  }
+  if (config.gemini.timeoutMs < 1_000 || config.gemini.timeoutMs > 120_000) {
+    throw new Error("GEMINI_TIMEOUT_MS must be between 1000 and 120000");
+  }
+  if (config.gemini.maxOutputTokens < 64 || config.gemini.maxOutputTokens > 8_192) {
+    throw new Error("GEMINI_MAX_OUTPUT_TOKENS must be between 64 and 8192");
+  }
+}
+
+export function resolveRuntimePath(relativeOrAbsolute: string) {
+  if (path.isAbsolute(relativeOrAbsolute)) return relativeOrAbsolute;
+  return path.join(/*turbopackIgnore: true*/ process.cwd(), relativeOrAbsolute);
+}
+
+export function ensureRuntimeDir(config = getTifaRuntimeConfig()) {
+  const absolute = resolveRuntimePath(config.runtimeDir);
+  if (!fs.existsSync(absolute)) {
+    fs.mkdirSync(absolute, { recursive: true });
+  }
+  return absolute;
+}

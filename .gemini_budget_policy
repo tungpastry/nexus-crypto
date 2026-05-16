@@ -1,0 +1,12 @@
+# Nexus Crypto Gemini budget policy
+# Non-secret, versioned
+
+NEXUS_GEMINI_MONTHLY_CAP_USD=5.00
+NEXUS_GEMINI_HARD_STOP_USD=4.50
+NEXUS_GEMINI_DEGRADE_THRESHOLD_USD=4.00
+NEXUS_GEMINI_MAX_REQUESTS_PER_MONTH=500
+NEXUS_GEMINI_EST_COST_PER_CHAT_USD=0.010000
+
+NEXUS_GEMINI_BUDGET_FAILURE_MODE=fail_closed
+NEXUS_GEMINI_LEDGER_FILE=runtime/gemini_budget/gemini_monthly_ledger.csv
+NEXUS_GEMINI_STATE_FILE=runtime/gemini_budget/gemini_budget_state.json
