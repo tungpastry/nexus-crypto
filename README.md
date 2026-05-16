@@ -42,6 +42,7 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - Provider health endpoint with cache freshness insight.
 - Release metadata endpoint (`/api/version`) and UI version badge.
 - LAN local authentication with proxy-based page protection.
+- TifaWidget Assistant with grounded market/asset context and Gemini budget guard.
 
 ## Tech Stack
 - Next.js `16.2.6`
@@ -107,7 +108,13 @@ Primary endpoints:
 - `/api/crypto-klines`
 - `/api/market-snapshot`
 - `/api/provider-health`
+- `/api/provider-health/deep`
 - `/api/version`
+- `/api/tifa`
+- `/api/tifa/stream`
+- `/api/tifa-tools/market-context`
+- `/api/tifa-tools/asset-analysis`
+- `/api/tifa-tools/budget-status`
 - legacy `/api/btc-price`
 - legacy `/api/btc-klines`
 
@@ -120,6 +127,7 @@ Full contracts and examples are documented in [docs/api-reference.md](docs/api-r
 - [docs/troubleshooting.md](docs/troubleshooting.md)
 - [docs/auth-lan-local.md](docs/auth-lan-local.md)
 - [docs/release-checklist.md](docs/release-checklist.md)
+- [docs/tifa-assistant-phase1.md](docs/tifa-assistant-phase1.md)
 
 ## Project Structure
 ```text

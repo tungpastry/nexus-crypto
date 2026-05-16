@@ -24,6 +24,13 @@
 - P12: Session rotation through the auth status route.
 - Provider health deep endpoint for multi-asset Binance diagnostics.
 - Nexus Algorithm v1.1 with ATR volatility, volume confirmation, support/resistance context, optional MTF agreement, and workflow state output.
+- TifaWidget Assistant Phase 1:
+  - floating chat widget on Home, Asset Workspace, and Ops
+  - `/api/tifa` and `/api/tifa/stream` (SSE pseudo-stream)
+  - tool routes for market context, asset analysis, and Gemini budget status
+  - Gemini provider gateway with tool-only fallback when key is missing
+  - Gemini budget guard (5 USD/month policy, hard stop, fail-closed ledger flow)
+  - Gemini assistant status panel on `/ops`
 
 ### Changed
 
