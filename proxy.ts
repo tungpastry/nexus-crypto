@@ -15,7 +15,7 @@ function isProtectedPath(pathname: string) {
   return pathname === "/" || pathname.startsWith("/asset/");
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const config = getAuthConfig();
   const { pathname, search } = req.nextUrl;
 
