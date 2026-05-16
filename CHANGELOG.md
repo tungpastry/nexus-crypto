@@ -31,6 +31,11 @@
   - Gemini provider gateway with tool-only fallback when key is missing
   - Gemini budget guard (5 USD/month policy, hard stop, fail-closed ledger flow)
   - Gemini assistant status panel on `/ops`
+- TifaWidget Assistant Phase 1.1 hardening:
+  - contract coverage for `/api/tifa` and `/api/tifa/stream`
+  - no-secret leakage tests for JSON/SSE/provider-health outputs
+  - Gemini stream path with safe fallback to tool-only pseudo stream
+  - Gemini circuit breaker with open/half-open/closed states and health exposure
 
 ### Changed
 

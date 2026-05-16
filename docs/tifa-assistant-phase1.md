@@ -36,6 +36,29 @@ Policy file: `.gemini_budget_policy`
 
 If budget guard is unavailable and mode is fail-closed, Gemini requests are blocked.
 
+## Phase 1.1 Hardening
+
+- Contract tests for:
+  - `POST /api/tifa`
+  - `POST /api/tifa/stream`
+- Secret-leak prevention tests for:
+  - `/api/tifa`
+  - `/api/tifa/stream`
+  - `/api/tifa-tools/budget-status`
+  - `/api/provider-health/gemini`
+- True Gemini streaming path is enabled when:
+  - `GEMINI_STREAM_ENABLED=1`
+- Safe fallback path:
+  - stream error -> tool-only pseudo stream
+  - missing key -> tool-only mode
+  - budget hard stop -> blocked provider call
+- Circuit breaker controls provider calls:
+  - `GEMINI_CIRCUIT_BREAKER_ENABLED=1`
+  - `GEMINI_CIRCUIT_FAILURE_THRESHOLD=3`
+  - `GEMINI_CIRCUIT_COOLDOWN_MS=60000`
+- Provider health endpoint now returns circuit + stream request settings:
+  - `GET /api/provider-health/gemini`
+
 ## Smoke Validation
 
 Run:

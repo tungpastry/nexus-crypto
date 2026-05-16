@@ -43,6 +43,7 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - Release metadata endpoint (`/api/version`) and UI version badge.
 - LAN local authentication with proxy-based page protection.
 - TifaWidget Assistant with grounded market/asset context and Gemini budget guard.
+  - Includes Phase 1.1 hardening: contract tests, no-secret leakage tests, true-stream fallback path, and Gemini circuit breaker.
 
 ## Tech Stack
 - Next.js `16.2.6`

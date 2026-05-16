@@ -86,6 +86,20 @@ assert "monthly_spend_usd" in payload
 print("TIFA_BUDGET_STATUS=PASS")
 PY
 
+provider_file="$TMP_DIR/provider-health-gemini.json"
+curl_with_auth "${BASE_URL}/api/provider-health/gemini" -o "$provider_file"
+python3 - "$provider_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("provider") == "gemini"
+assert isinstance(payload.get("circuit"), dict), "missing circuit"
+assert payload["circuit"].get("state") in ("closed", "open", "half_open")
+print("TIFA_PROVIDER_HEALTH_GEMINI=PASS")
+PY
+
 tifa_file="$TMP_DIR/tifa.json"
 curl_with_auth \
   -H "Content-Type: application/json" \
@@ -106,4 +120,26 @@ if api_key:
     assert api_key not in serialized
 assert "GEMINI_API_KEY" not in serialized
 print("TIFA_CHAT_NO_SECRET_LEAK=PASS")
+PY
+
+stream_file="$TMP_DIR/tifa-stream.txt"
+curl_with_auth \
+  -N \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Market hôm nay thế nào?","context":{"page":"/"}}' \
+  "${BASE_URL}/api/tifa/stream" -o "$stream_file"
+python3 - "$stream_file" <<'PY'
+import os
+import sys
+from pathlib import Path
+
+payload = Path(sys.argv[1]).read_text()
+assert "event: start" in payload
+assert ("event: delta" in payload) or ("event: error" in payload)
+secret = os.getenv("GEMINI_API_KEY", "")
+if secret:
+    assert secret not in payload
+assert "key=" not in payload.lower()
+print("TIFA_STREAM_CONTRACT=PASS")
+print("TIFA_STREAM_NO_SECRET_LEAK=PASS")
 PY
