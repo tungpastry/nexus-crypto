@@ -100,7 +100,7 @@ chmod 600 "$ENV_FILE"
 load_local_env "$ENV_FILE"
 
 section "INSTALL"
-npm install
+npm ci
 
 section "LINT"
 npm run lint
