@@ -69,9 +69,19 @@ const ASSET_ACTIONS = [
 
 const OPS_ACTIONS = [
   {
+    id: "ops-summary",
+    label: "Ops Summary",
+    prompt: "Cho tôi ops executive summary hiện tại.",
+  },
+  {
     id: "provider-health",
     label: "Provider Health",
     prompt: "Tóm tắt provider health hiện tại và điểm cần theo dõi.",
+  },
+  {
+    id: "deep-health",
+    label: "Deep Health",
+    prompt: "Tóm tắt deep health cho toàn bộ Binance-enabled symbols.",
   },
   {
     id: "budget-status",

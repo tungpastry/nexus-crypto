@@ -27,7 +27,8 @@ export default function TifaQuickActions({
           type="button"
           disabled={disabled}
           onClick={() => onPick(action.prompt)}
-          className="rounded-full border border-[var(--border-soft)] bg-[rgba(255,255,255,0.05)] px-2.5 py-1 text-[11px] text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:bg-[rgba(125,211,252,0.1)] disabled:cursor-not-allowed disabled:opacity-50"
+          title={action.prompt}
+          className="rounded-full border border-[var(--border-soft)] bg-[rgba(255,255,255,0.05)] px-2.5 py-1 text-[11px] text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:bg-[rgba(125,211,252,0.1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {action.label}
         </button>

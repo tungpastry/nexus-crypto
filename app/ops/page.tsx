@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Activity, ArrowLeft, Radar } from "lucide-react";
 import ProviderDeepHealthCard from "../components/insights/ProviderDeepHealthCard";
 import GeminiAssistantStatusPanel from "../components/insights/GeminiAssistantStatusPanel";
+import OpsExecutiveSummaryPanel from "../components/insights/OpsExecutiveSummaryPanel";
 import ProviderHealthPanel from "../components/insights/ProviderHealthPanel";
 import ClientErrorBoundary from "../components/layout/ClientErrorBoundary";
 import NexusFooter from "../components/layout/NexusFooter";
@@ -44,6 +45,10 @@ export default function OpsPage() {
             </div>
           </div>
         </header>
+
+        <ClientErrorBoundary>
+          <OpsExecutiveSummaryPanel />
+        </ClientErrorBoundary>
 
         <ClientErrorBoundary>
           <ProviderHealthPanel />
