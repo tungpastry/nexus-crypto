@@ -16,6 +16,20 @@ Retro black-pink crypto decision-support dashboard for the Top 10 Nexus Universe
 
 Nexus Crypto is market-data-first tooling for observation and workflow discipline. It does not execute trades, does not custody funds, and does not provide financial or trading advice.
 
+## Web App Screenshots
+
+### Home Dashboard
+![Home Dashboard](public/screenshots/home-dashboard.png)
+
+### Asset Workspace (BTC)
+![Asset Workspace BTC](public/screenshots/asset-workspace-btc.png)
+
+### Ops Dashboard
+![Ops Dashboard](public/screenshots/ops-dashboard.png)
+
+### Tifa Widget
+![Tifa Widget](public/screenshots/tifa-widget.png)
+
 ## Current Verified Baseline
 
 - Latest reviewed commit: `fce6b64e92a6acb404a7272aa96fef1cae3a11fb`
@@ -26,6 +40,7 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 
 ## Table of Contents
 
+- [Web App Screenshots](#web-app-screenshots)
 - [Features](#features)
 - [Architecture Layers](#architecture-layers)
 - [Tech Stack](#tech-stack)
