@@ -12,7 +12,7 @@ function isPublicPath(pathname: string) {
 }
 
 function isProtectedPath(pathname: string) {
-  return pathname === "/" || pathname.startsWith("/asset/");
+  return pathname === "/" || pathname.startsWith("/asset/") || pathname.startsWith("/ops");
 }
 
 export async function proxy(req: NextRequest) {

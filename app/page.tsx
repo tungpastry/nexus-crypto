@@ -1,9 +1,8 @@
+import Link from "next/link";
 import { Activity, ShieldCheck } from "lucide-react";
 import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
-import ProviderHealthPanel from "./components/insights/ProviderHealthPanel";
-import ProviderDeepHealthCard from "./components/insights/ProviderDeepHealthCard";
 import NexusFooter from "./components/layout/NexusFooter";
 
 export default function Home() {
@@ -20,8 +19,8 @@ export default function Home() {
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-muted)]">
               Scan BTC, ETH, stablecoins, majors, altcoins, and meme assets from one clean market
-              overview. Open an asset workspace for TradingView context, Nexus Decision Matrix,
-              and provider diagnostics.
+              overview. Open an asset workspace for TradingView context, live price flow, and
+              Nexus Decision Matrix.
             </p>
           </div>
 
@@ -30,10 +29,13 @@ export default function Home() {
               <Activity className="mb-2 h-4 w-4 text-[var(--cyan-accent)]" />
               Binance + CoinGecko
             </div>
-            <div className="rounded-xl border border-[rgba(94,234,212,0.28)] bg-[rgba(255,255,255,0.1)] p-3 shadow-[var(--shadow-pink)]">
+            <Link
+              href="/ops"
+              className="rounded-xl border border-[rgba(94,234,212,0.28)] bg-[rgba(255,255,255,0.1)] p-3 shadow-[var(--shadow-pink)] transition hover:border-[var(--border-pink)] hover:bg-[rgba(255,95,162,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+            >
               <ShieldCheck className="mb-2 h-4 w-4 text-[var(--mint-positive)]" />
-              Zenora Health Ready
-            </div>
+              Zenora Ops Center
+            </Link>
           </div>
         </header>
 
@@ -43,14 +45,6 @@ export default function Home() {
 
         <ClientErrorBoundary>
           <AssetWatchlist />
-        </ClientErrorBoundary>
-
-        <ClientErrorBoundary>
-          <ProviderHealthPanel />
-        </ClientErrorBoundary>
-
-        <ClientErrorBoundary>
-          <ProviderDeepHealthCard />
         </ClientErrorBoundary>
 
         <NexusFooter />
