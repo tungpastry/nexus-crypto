@@ -3,6 +3,7 @@ import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import ProviderHealthPanel from "./components/insights/ProviderHealthPanel";
+import ProviderDeepHealthCard from "./components/insights/ProviderDeepHealthCard";
 import NexusFooter from "./components/layout/NexusFooter";
 
 export default function Home() {
@@ -46,6 +47,10 @@ export default function Home() {
 
         <ClientErrorBoundary>
           <ProviderHealthPanel />
+        </ClientErrorBoundary>
+
+        <ClientErrorBoundary>
+          <ProviderDeepHealthCard />
         </ClientErrorBoundary>
 
         <NexusFooter />
