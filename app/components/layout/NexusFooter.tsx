@@ -5,18 +5,18 @@ import ClientErrorBoundary from "./ClientErrorBoundary";
 
 export default function NexusFooter() {
   return (
-    <footer className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.025))] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]">
+    <footer className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04))] p-4 shadow-[var(--shadow-panel),var(--shadow-pink)]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-pink)] bg-[rgba(255,95,162,0.08)] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
             <Sparkles className="h-3.5 w-3.5 text-[var(--pink-soft)]" />
             Nexus Crypto SaaS 2026
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-1 text-xs text-[var(--text-muted)]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-cyan)] bg-[rgba(125,211,252,0.08)] px-3 py-1 text-xs text-[var(--text-main)]">
             <Activity className="h-3.5 w-3.5 text-[var(--cyan-accent)]" />
             Binance + CoinGecko
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-1 text-xs text-[var(--text-muted)]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(94,234,212,0.32)] bg-[rgba(94,234,212,0.08)] px-3 py-1 text-xs text-[var(--text-main)]">
             <ShieldCheck className="h-3.5 w-3.5 text-[var(--mint-positive)]" />
             Zenora Health Ready
           </span>

@@ -62,11 +62,17 @@ export default function MarketSnapshot() {
         label: "Market Cap",
         value: compactUsd(data?.global.market_cap_usd),
         icon: BarChart3,
+        iconClass: "text-[var(--pink-soft)]",
+        cardClass:
+          "border-[rgba(255,95,162,0.24)] hover:border-[rgba(255,95,162,0.38)]",
       },
       {
         label: "24h Volume",
         value: compactUsd(data?.global.volume_24h_usd),
         icon: Activity,
+        iconClass: "text-[var(--cyan-accent)]",
+        cardClass:
+          "border-[rgba(125,211,252,0.24)] hover:border-[rgba(125,211,252,0.38)]",
       },
       {
         label: "BTC Dominance",
@@ -75,6 +81,9 @@ export default function MarketSnapshot() {
             ? `${data.global.btc_dominance.toFixed(1)}%`
             : "--",
         icon: Bitcoin,
+        iconClass: "text-[var(--yellow-accent)]",
+        cardClass:
+          "border-[rgba(251,191,36,0.24)] hover:border-[rgba(251,191,36,0.38)]",
       },
       {
         label: "ETH Dominance",
@@ -83,6 +92,9 @@ export default function MarketSnapshot() {
             ? `${data.global.eth_dominance.toFixed(1)}%`
             : "--",
         icon: Clock3,
+        iconClass: "text-[var(--violet-accent)]",
+        cardClass:
+          "border-[rgba(196,181,253,0.24)] hover:border-[rgba(196,181,253,0.38)]",
       },
     ],
     [data]
@@ -101,13 +113,13 @@ export default function MarketSnapshot() {
         {cards.map((card) => (
           <div
             key={card.label}
-            className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
+            className={`rounded-xl border bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4 shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition hover:bg-[rgba(255,255,255,0.09)] ${card.cardClass}`}
           >
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">{card.label}</p>
-              <card.icon className="h-4 w-4 text-[var(--pink-soft)]" />
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-soft)]">{card.label}</p>
+              <card.icon className={`h-4 w-4 ${card.iconClass}`} />
             </div>
-            <p className="mt-3 font-mono text-2xl font-semibold text-[#fff7fb]">{card.value}</p>
+            <p className="mt-3 font-mono text-2xl font-semibold text-[var(--text-main)]">{card.value}</p>
           </div>
         ))}
       </div>

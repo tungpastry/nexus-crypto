@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #0b0710;
-  --bg-surface: #15101c;
-  --bg-surface-soft: #1d1627;
-  --bg-card: rgba(255, 255, 255, 0.055);
-  --bg-card-hover: rgba(255, 255, 255, 0.085);
-  --text-main: #f8f4ff;
-  --text-muted: #b8adc8;
-  --text-soft: #8f839f;
+  --bg-main: #0b0713;
+  --bg-panel: rgba(255, 255, 255, 0.065);
+  --bg-panel-strong: rgba(255, 255, 255, 0.095);
+  --bg-surface: #171121;
+  --bg-surface-soft: #21182e;
+  --bg-card: rgba(255, 255, 255, 0.075);
+  --bg-card-hover: rgba(255, 255, 255, 0.115);
+  --text-main: #f8f5ff;
+  --text-muted: #c9bed6;
+  --text-soft: #9689a6;
   --pink-primary: #ff5fa2;
+  --pink-accent: #ff5fa2;
   --pink-soft: #ff8fbd;
   --pink-muted: #d96c9f;
   --pink-glow: rgba(255, 95, 162, 0.28);
@@ -17,7 +20,16 @@
   --mint-positive: #5eead4;
   --red-negative: #fb7185;
   --amber-warning: #fbbf24;
+  --violet-accent: #c4b5fd;
+  --orange-accent: #fb923c;
+  --yellow-accent: #fde047;
   --border-soft: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-pink: rgba(255, 95, 162, 0.34);
+  --border-cyan: rgba(125, 211, 252, 0.34);
+  --shadow-pink: 0 0 28px rgba(255, 95, 162, 0.18);
+  --shadow-cyan: 0 0 28px rgba(125, 211, 252, 0.14);
+  --shadow-panel: 0 18px 60px rgba(0, 0, 0, 0.28);
   --background: var(--bg-main);
   --foreground: var(--text-main);
 }
@@ -30,13 +42,14 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--bg-main);
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
-  background-image:
-    radial-gradient(circle at top left, rgba(255, 95, 162, 0.18), transparent 32%),
-    radial-gradient(circle at top right, rgba(125, 211, 252, 0.1), transparent 28%),
-    linear-gradient(180deg, #0b0710 0%, #100a17 45%, #08060c 100%);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 95, 162, 0.16), transparent 32%),
+    radial-gradient(circle at 85% 12%, rgba(125, 211, 252, 0.1), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(196, 181, 253, 0.08), transparent 36%),
+    linear-gradient(180deg, #0b0713 0%, #110a1a 44%, #090711 100%);
   background-attachment: fixed;
 }
 

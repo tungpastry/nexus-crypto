@@ -96,7 +96,7 @@ export default function ProviderDeepHealthCard() {
   return (
     <RetroPanel title="Provider Deep Health" eyebrow="Multi-asset Binance diagnostics">
       <div className="grid gap-4 p-5 lg:grid-cols-[260px_1fr]">
-        <div className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-4">
+        <div className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4">
           <div className="flex items-center gap-2">
             <StatusIcon status={topStatus} />
             <span
@@ -129,7 +129,7 @@ export default function ProviderDeepHealthCard() {
               void fetchDeepHealth();
             }}
             disabled={loading}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[rgba(125,211,252,0.35)] bg-[rgba(125,211,252,0.1)] px-3 py-2 text-xs font-semibold text-[var(--cyan-accent)] transition hover:bg-[rgba(125,211,252,0.16)] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[rgba(125,211,252,0.35)] bg-[rgba(125,211,252,0.1)] px-3 py-2 text-xs font-semibold text-[var(--cyan-accent)] transition hover:bg-[rgba(125,211,252,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Checking..." : "Refresh Deep Check"}
@@ -141,7 +141,11 @@ export default function ProviderDeepHealthCard() {
             symbols.map(([symbol, check]) => (
               <div
                 key={symbol}
-                className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] p-4"
+                className={`rounded-xl border p-4 ${
+                  check.status === "ok"
+                    ? "border-[rgba(94,234,212,0.26)] bg-[rgba(94,234,212,0.06)]"
+                    : "border-[rgba(251,113,133,0.26)] bg-[rgba(251,113,133,0.06)]"
+                }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="font-mono text-sm font-semibold text-[var(--text-main)]">{symbol}</p>

@@ -26,6 +26,16 @@ type ProviderHealth = {
   };
 };
 
+function getStatusClass(status: "ok" | "warn" | "error" | "degraded") {
+  if (status === "ok") {
+    return "border-[rgba(94,234,212,0.35)] bg-[rgba(94,234,212,0.08)] text-[var(--mint-positive)]";
+  }
+  if (status === "warn" || status === "degraded") {
+    return "border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.08)] text-[var(--amber-warning)]";
+  }
+  return "border-[rgba(251,113,133,0.35)] bg-[rgba(251,113,133,0.08)] text-[var(--red-negative)]";
+}
+
 const CHECK_LABELS: Partial<Record<keyof ProviderHealth["checks"], string>> = {
   binance_price: "Binance price",
   binance_klines: "Binance klines",
@@ -67,14 +77,18 @@ export default function ProviderHealthPanel() {
   return (
     <RetroPanel title="Provider Health" eyebrow="Zenora-compatible checks">
       <div className="grid gap-4 p-5 lg:grid-cols-[240px_1fr]">
-        <div className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-4">
+        <div className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4">
           <div className="flex items-center gap-2">
             {degraded ? (
               <AlertTriangle className="h-5 w-5 text-[var(--amber-warning)]" />
             ) : (
               <CheckCircle2 className="h-5 w-5 text-[var(--mint-positive)]" />
             )}
-            <p className="font-mono text-sm uppercase tracking-[0.18em] text-[var(--text-main)]">
+            <p
+              className={`rounded-full border px-2 py-1 font-mono text-xs uppercase tracking-[0.14em] ${getStatusClass(
+                health?.status || "degraded"
+              )}`}
+            >
               {health?.status || "loading"}
             </p>
           </div>
@@ -98,7 +112,13 @@ export default function ProviderHealthPanel() {
                 return (
                   <div
                     key={key}
-                    className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] p-4"
+                    className={`rounded-xl border p-4 ${
+                      ok
+                        ? "border-[rgba(94,234,212,0.26)] bg-[rgba(94,234,212,0.06)]"
+                        : warn
+                          ? "border-[rgba(251,191,36,0.26)] bg-[rgba(251,191,36,0.06)]"
+                          : "border-[rgba(251,113,133,0.26)] bg-[rgba(251,113,133,0.06)]"
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-[var(--text-main)]">{label}</p>

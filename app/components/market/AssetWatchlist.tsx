@@ -81,7 +81,7 @@ export default function AssetWatchlist() {
     <RetroPanel title="Asset Watchlist" eyebrow="Top 10 Nexus universe">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left text-sm">
-          <thead className="border-b border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.07)] text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">
+          <thead className="border-b border-[var(--border-soft)] bg-[rgba(255,255,255,0.1)] text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">
             <tr>
               <th className="px-4 py-3">Asset</th>
               <th className="px-4 py-3">Price</th>
@@ -102,7 +102,7 @@ export default function AssetWatchlist() {
                   data-testid={`asset-row-${asset.symbol}`}
                   role="button"
                   tabIndex={0}
-                  className="cursor-pointer border-b border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.035)] transition hover:bg-[rgba(255,95,162,0.08)] focus:outline-none focus-visible:bg-[rgba(255,95,162,0.08)]"
+                  className="cursor-pointer border-b border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.045)] transition hover:bg-[linear-gradient(90deg,rgba(255,95,162,0.12),rgba(125,211,252,0.08))] focus-visible:bg-[linear-gradient(90deg,rgba(255,95,162,0.12),rgba(125,211,252,0.08))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
                   onClick={() => openWorkspace(asset.id)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -131,7 +131,13 @@ export default function AssetWatchlist() {
                     {formatCompact(row?.volume_24h)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-2 py-1 text-xs text-[var(--text-muted)]">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs ${
+                        asset.enableChecklist
+                          ? "border-[rgba(125,211,252,0.34)] bg-[rgba(125,211,252,0.08)] text-[var(--cyan-accent)]"
+                          : "border-[rgba(251,191,36,0.34)] bg-[rgba(251,191,36,0.08)] text-[var(--amber-warning)]"
+                      }`}
+                    >
                       {asset.enableChecklist ? (
                         <LineChart className="h-3 w-3 text-[var(--cyan-accent)]" />
                       ) : (
@@ -141,7 +147,7 @@ export default function AssetWatchlist() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-2 rounded-lg border border-[rgba(255,95,162,0.35)] bg-[linear-gradient(135deg,#ff5fa2,#ff8fbd)] px-3 py-2 text-xs font-semibold text-[#120712] shadow-[0_0_24px_rgba(255,95,162,0.28)] transition hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(255,95,162,0.42)]">
+                    <span className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-pink)] bg-[linear-gradient(135deg,#ff5fa2,#ff7fb5,#ff93c4)] px-3 py-2 text-xs font-semibold text-[#1a0a17] shadow-[0_0_24px_rgba(255,95,162,0.24)] transition hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_0_36px_rgba(255,95,162,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]">
                       Open Workspace
                       <ArrowRight className="h-3.5 w-3.5" />
                     </span>
