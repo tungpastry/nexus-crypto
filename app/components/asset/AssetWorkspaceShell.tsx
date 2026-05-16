@@ -25,17 +25,19 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
 
   const trendRing =
     trend === "UPTREND"
-      ? "ring-2 ring-[rgba(94,234,212,0.6)] shadow-[0_0_24px_rgba(94,234,212,0.2)]"
+      ? "ring-2 ring-[rgba(94,234,212,0.56)] shadow-[0_0_28px_rgba(94,234,212,0.24)]"
       : trend === "DOWNTREND"
-        ? "ring-2 ring-[rgba(251,113,133,0.6)] shadow-[0_0_24px_rgba(251,113,133,0.2)]"
-        : "ring-1 ring-[rgba(255,255,255,0.16)]";
+        ? "ring-2 ring-[rgba(251,113,133,0.56)] shadow-[0_0_28px_rgba(251,113,133,0.24)]"
+        : trend === "DISABLED"
+          ? "ring-1 ring-[rgba(255,255,255,0.2)] shadow-[0_0_16px_rgba(255,255,255,0.1)]"
+          : "ring-1 ring-[rgba(255,255,255,0.22)] shadow-[0_0_18px_rgba(255,255,255,0.1)]";
 
   return (
     <main className="min-h-screen bg-[var(--bg-main)] px-4 py-6 text-[var(--text-main)] sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <Link
           href="/"
-          className="inline-flex w-fit items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.06)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] transition hover:bg-[rgba(255,95,162,0.14)]"
+          className="inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.075)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[0_10px_28px_rgba(0,0,0,0.22)] transition hover:border-[var(--border-pink)] hover:bg-[rgba(255,95,162,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Top 10 Nexus Universe
@@ -58,8 +60,8 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
                   onSelectTimeframe={setSelectedTimeframe}
                 />
                 <p className="text-xs leading-5 text-[var(--text-muted)]">
-                  Timeframe controls chart interval, Nexus MA context, and checklist confirmations.
-                  Market data only; no trade execution or recommendations.
+                  Timeframe controls chart interval, Nexus MA context, and Decision Matrix
+                  confirmations. Market data only; no trade execution or recommendations.
                 </p>
               </div>
             </RetroPanel>
@@ -72,12 +74,14 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
             eyebrow={`${asset.symbol} ${selectedTimeframe.label}`}
           >
             <div className="p-4">
-              <TradingViewChart
-                asset={asset}
-                timeframe={selectedTimeframe}
-                theme="dark"
-                height={680}
-              />
+              <div className="overflow-hidden rounded-xl border border-[rgba(125,211,252,0.16)] bg-[#05070b] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_18px_44px_rgba(0,0,0,0.28)]">
+                <TradingViewChart
+                  asset={asset}
+                  timeframe={selectedTimeframe}
+                  theme="dark"
+                  height={680}
+                />
+              </div>
             </div>
           </RetroPanel>
         </ClientErrorBoundary>

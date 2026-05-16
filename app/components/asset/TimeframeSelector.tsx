@@ -19,10 +19,10 @@ export default function TimeframeSelector({
           key={timeframe.binance}
           type="button"
           onClick={() => onSelectTimeframe(timeframe)}
-          className={`rounded-lg border px-3 py-2 font-mono text-xs transition ${
+          className={`rounded-lg border px-3 py-2.5 font-mono text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] ${
             selectedTimeframe.binance === timeframe.binance
-              ? "border-[rgba(255,95,162,0.5)] bg-[rgba(255,95,162,0.2)] text-[var(--text-main)]"
-              : "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)] hover:bg-[rgba(255,95,162,0.1)]"
+              ? "border-[var(--border-pink)] bg-[linear-gradient(135deg,rgba(255,95,162,0.28),rgba(255,143,189,0.2))] text-[var(--text-main)] shadow-[0_0_22px_rgba(255,95,162,0.22)]"
+              : "border-[var(--border-soft)] bg-[rgba(255,255,255,0.08)] text-[var(--text-muted)] hover:border-[var(--border-cyan)] hover:bg-[rgba(125,211,252,0.1)]"
           }`}
         >
           {timeframe.label}

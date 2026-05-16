@@ -114,7 +114,7 @@ function MetricCard({
 }) {
   return (
     <div
-      className={`rounded-xl border px-3 py-2 ${getMetricToneClass(
+      className={`rounded-xl border px-3 py-2 transition hover:bg-[rgba(255,255,255,0.12)] ${getMetricToneClass(
         tone
       )}`}
     >
@@ -124,6 +124,16 @@ function MetricCard({
       <p className="mt-1 font-mono text-sm font-bold">{value}</p>
     </div>
   );
+}
+
+function getRuleRowClass(status: NexusChecklistRule["status"]) {
+  if (status === "pass") {
+    return "border-[rgba(94,234,212,0.28)] bg-[rgba(94,234,212,0.06)]";
+  }
+  if (status === "warn" || status === "neutral") {
+    return "border-[rgba(251,191,36,0.28)] bg-[rgba(251,191,36,0.06)]";
+  }
+  return "border-[rgba(251,113,133,0.28)] bg-[rgba(251,113,133,0.06)]";
 }
 
 function RuleIcon({ rule }: { rule: NexusChecklistRule }) {
@@ -138,7 +148,9 @@ function RuleIcon({ rule }: { rule: NexusChecklistRule }) {
 
 function RuleRow({ rule }: { rule: NexusChecklistRule }) {
   return (
-    <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] px-3 py-2">
+    <div
+      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 ${getRuleRowClass(rule.status)}`}
+    >
       <span className="flex items-center gap-2 text-sm text-[var(--text-main)]">
         <RuleIcon rule={rule} />
         {rule.label}
@@ -223,9 +235,11 @@ export default function NexusAutoChecklist({
   return (
     <RetroPanel title="Nexus Decision Matrix" eyebrow={`${signal.symbol} ${timeframe.label}`}>
       <div className="grid gap-4 p-5 lg:grid-cols-[200px_1fr]">
-        <div className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-4">
+        <div className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.05))] p-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Nexus Score</p>
-          <p className="mt-2 font-mono text-5xl font-bold text-[var(--text-main)]">{signal.score}</p>
+          <p className="mt-2 bg-[linear-gradient(90deg,#ffffff,#ff8fbd,#7dd3fc)] bg-clip-text font-mono text-5xl font-bold text-transparent drop-shadow-[0_0_16px_rgba(255,95,162,0.2)]">
+            {signal.score}
+          </p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.16)]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-pink-500 to-cyan-300"
@@ -240,12 +254,22 @@ export default function NexusAutoChecklist({
               {signal.state}
             </span>
           </div>
-          <div className="mt-4 space-y-1 text-xs text-[var(--text-muted)]">
-            <p>Direction: {signal.direction.toUpperCase()}</p>
-            <p>Trend: {signal.trend}</p>
-            <p>Bias: {signal.bias}</p>
-            <p>Setup: {signal.setup}</p>
-            <p>Risk: {signal.risk}</p>
+          <div className="mt-4 space-y-1 text-xs">
+            {[
+              ["Direction", signal.direction.toUpperCase()],
+              ["Trend", signal.trend],
+              ["Bias", signal.bias],
+              ["Setup", signal.setup],
+              ["Risk", signal.risk],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="flex items-center justify-between rounded-md border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] px-2 py-1"
+              >
+                <span className="text-[var(--text-soft)]">{label}</span>
+                <span className="font-mono text-[var(--text-main)]">{value}</span>
+              </div>
+            ))}
           </div>
           <div className="mt-3">
             <DataFreshnessBadge updatedAt={signal.updated_at} />

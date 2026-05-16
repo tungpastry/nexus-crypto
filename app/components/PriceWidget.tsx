@@ -71,14 +71,14 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
 
   const ringColor =
     direction === "up"
-      ? "ring-[rgba(94,234,212,0.55)] shadow-[0_0_12px_rgba(94,234,212,0.28)]"
+      ? "ring-[rgba(94,234,212,0.52)] shadow-[0_0_14px_rgba(94,234,212,0.24)]"
       : direction === "down"
-      ? "ring-[rgba(251,113,133,0.55)] shadow-[0_0_12px_rgba(251,113,133,0.28)]"
-      : "ring-[rgba(255,255,255,0.16)] shadow-[0_0_10px_rgba(255,255,255,0.12)]";
+      ? "ring-[rgba(251,113,133,0.5)] shadow-[0_0_14px_rgba(251,113,133,0.22)]"
+      : "ring-[rgba(253,224,71,0.42)] shadow-[0_0_12px_rgba(253,224,71,0.2)]";
 
   return (
     <motion.div
-      className={`relative mx-auto flex w-full max-w-md items-center justify-between overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-5 text-[var(--text-main)] ring-2 ${ringColor} transition-all duration-700`}
+      className={`relative flex w-full items-center justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.045))] p-5 text-[var(--text-main)] ring-2 ${ringColor} shadow-[var(--shadow-panel)] transition-all duration-700`}
       animate={{
         scale: pulse ? 1.04 : 1,
         opacity: pulse ? 1 : 0.98,
@@ -117,15 +117,15 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
               direction === "up"
                 ? "text-[var(--mint-positive)] drop-shadow-[0_0_6px_rgba(94,234,212,0.7)]"
                 : direction === "down"
-                ? "text-[var(--red-negative)] drop-shadow-[0_0_6px_rgba(251,113,133,0.7)]"
-                : "text-[var(--text-main)]"
+                ? "text-rose-300 drop-shadow-[0_0_6px_rgba(251,113,133,0.55)]"
+                : "text-[var(--yellow-accent)]"
             }`}
           >
             {asset.binanceSymbol ? formatPrice(price) : "Market data only"}
           </motion.p>
         </AnimatePresence>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          {error || `${asset.name} price via Nexus crypto-price`}
+          {error || "Live crypto-price feed"}
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         {direction === "down" && (
           <TrendingDown
             size={38}
-            className="text-[var(--red-negative)] drop-shadow-[0_0_8px_rgba(251,113,133,0.7)]"
+            className="text-rose-300 drop-shadow-[0_0_8px_rgba(251,113,133,0.55)]"
           />
         )}
         {!direction && <Shield size={34} className="text-[var(--pink-soft)]" />}
