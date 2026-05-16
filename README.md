@@ -4,416 +4,167 @@
   <img src="public/logo.png" alt="Nexus Crypto Logo" width="320" />
 </p>
 
-> Retro black-pink crypto dashboard built with Next.js 16, React 19, TradingView Widget, Binance API, and CoinGecko-style market data.
+<p align="center">
+  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.2.6-000000?logo=nextdotjs&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19.2.0-149ECA?logo=react&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white">
+  <img alt="License MIT" src="https://img.shields.io/badge/License-MIT-22c55e">
+  <img alt="Status Active" src="https://img.shields.io/badge/Status-Active-2563eb">
+</p>
 
-Nexus Crypto is a decision-support dashboard for watching the top 10 Nexus assets, syncing price/chart/timeframe context, and running a structured Nexus checklist. It does not execute trades and does not make trading recommendations.
+Retro black-pink crypto decision-support dashboard for the Top 10 Nexus Universe. Built with Next.js 16 + React 19, TradingView widget charts, Binance price/klines routes, and CoinGecko-style market snapshot APIs.
 
-## SaaS 2026 Blueprint
+Nexus Crypto is market-data-first tooling for observation and workflow discipline. It does not execute trades, does not custody funds, and does not provide financial or trading advice.
 
-| Area | Runtime behavior |
-|---|---|
-| Asset universe | BTC, ETH, USDT, BNB, XRP, USDC, SOL, TRX, SHIB, DOGE |
-| Market table | CoinGecko-style price, 24h/7d change, volume, and market data |
-| Home overview | `/` shows the Top 10 Nexus Universe market overview |
-| Asset workspace | `/asset/[id]` contains PriceWidget, timeframe picker, chart, and the Nexus checklist |
-| Chart | TradingView widget with unique container id per asset/timeframe |
-| Nexus checklist | Direction-aware MA20/MA50/MA200 auto rules, hybrid confirmations, manual discipline |
-| Stablecoins | USDT and USDC show market data only; MA/checklist/chart are disabled |
-| Freshness | UI badges classify data as fresh, ok, stale, or offline |
-| Provider health | `/api/provider-health` returns Zenora/Nexus-compatible provider checks |
-| Legacy BTC contract | `/api/btc-price` still returns `price` + `updated_at` |
+## Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Validation](#validation)
+- [Production Deployment On Ubuntu](#production-deployment-on-ubuntu)
+- [API Overview](#api-overview)
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
 
-## Page Split UX
+## Features
+- Top 10 Nexus Universe market overview at `/`.
+- Dedicated asset workspace at `/asset/[id]`.
+- TradingView chart with unique container per asset/timeframe.
+- Binance-backed `PriceWidget` and kline context.
+- CoinGecko-style market snapshot route with cache/stale fallback.
+- Nexus checklist with MA20/MA50/MA200 direction-aware scoring.
+- Stablecoin market-only mode (USDT/USDC: no chart/MA/checklist automation).
+- Provider health endpoint with cache freshness insight.
+- Release metadata endpoint (`/api/version`) and UI version badge.
+- LAN local authentication with proxy-based page protection.
 
-`/` is the Top 10 Nexus Universe page. It stays focused on market overview: header, market snapshot, asset watchlist, provider health, and footer.
+## Tech Stack
+- Next.js `16.2.6`
+- React `19.2.0` + React DOM `19.2.0`
+- TypeScript + Tailwind CSS v4
+- Vitest + ESLint
+- Axios
+- Framer Motion
+- Lucide React
 
-`/asset/[id]` is the Asset Workspace page. It contains the heavier workflow: TradingView Chart and one Nexus Auto Checklist panel. That checklist combines Auto Rules, Hybrid Confirmation, and Manual Discipline so users do not have to tick duplicate manual panels.
+## Prerequisites
+- Node.js 22 LTS recommended (production reference uses Node `v22.18.0`).
+- npm
+- Optional for production: Ubuntu Server + `systemd`.
 
-Stablecoins such as USDT and USDC use Market Mode. They can still open a workspace for market context, but TradingView charting and Nexus MA automation remain disabled. Nexus does not execute trades and does not provide trading recommendations.
-
-Route examples:
-
-```text
-/asset/bitcoin
-/asset/ethereum
-/asset/solana
-/asset/shiba-inu
-/asset/dogecoin
-/asset/tether
-/asset/usd-coin
-```
-
-## Asset And Timeframe Config
-
-Canonical asset metadata lives in:
-
-```text
-app/config/assets.ts
-```
-
-Canonical timeframe mapping lives in:
-
-```text
-app/config/timeframes.ts
-```
-
-Supported Binance symbols:
-
-```text
-BTCUSDT ETHUSDT BNBUSDT XRPUSDT SOLUSDT TRXUSDT SHIBUSDT DOGEUSDT
-```
-
-Supported timeframes:
-
-```text
-15m 30m 1h 4h 1d 1w
-```
-
-TradingView mappings:
-
-```text
-15m -> 15
-30m -> 30
-1h  -> 60
-4h  -> 240
-1D  -> D
-1W  -> W
-```
-
-## API Contracts
-
-### `GET /api/crypto-price?symbol=BTCUSDT`
-
-Returns a validated Binance price payload.
-
-```json
-{
-  "provider": "binance",
-  "symbol": "BTCUSDT",
-  "price": "80457.17000000",
-  "updated_at": "2026-05-15T00:00:00.000Z",
-  "cache": {
-    "status": "miss",
-    "age_ms": 0,
-    "ttl_ms": 5000
-  }
-}
-```
-
-Unsupported symbols return:
-
-```json
-{
-  "error": {
-    "code": "UNSUPPORTED_SYMBOL",
-    "message": "Symbol is not allowed",
-    "allowed": ["BTCUSDT", "ETHUSDT"]
-  }
-}
-```
-
-### `GET /api/crypto-klines?symbol=BTCUSDT&tf=4h`
-
-Returns validated Binance OHLCV candles.
-
-```json
-{
-  "provider": "binance",
-  "symbol": "BTCUSDT",
-  "tf": "4h",
-  "updated_at": "2026-05-15T00:00:00.000Z",
-  "candles": [
-    {
-      "time": 1710000000000,
-      "open": 68000,
-      "high": 69000,
-      "low": 67500,
-      "close": 68500,
-      "volume": 1234.56
-    }
-  ],
-  "cache": {
-    "status": "miss",
-    "age_ms": 0,
-    "ttl_ms": 60000
-  }
-}
-```
-
-### `GET /api/market-snapshot`
-
-Returns CoinGecko-style global market data and the 10 Nexus assets. The route keeps a server-side TTL cache plus a persistent last-good snapshot so production can serve stale market data during provider rate limits.
-
-### `GET /api/provider-health`
-
-Returns Zenora/Nexus provider health. The market snapshot check calls the live `/api/market-snapshot` route and reports cache state:
-
-```json
-{
-  "provider": "nexus_crypto",
-  "status": "ok",
-  "updated_at": "2026-05-15T00:00:00.000Z",
-  "checks": {
-    "binance_price": { "status": "ok", "latency_ms": 120 },
-    "binance_klines": { "status": "ok", "latency_ms": 180 },
-    "market_snapshot": { "status": "ok", "latency_ms": 240 },
-    "market_snapshot_cache_status": { "status": "ok", "value": "hit" },
-    "market_snapshot_age_ms": { "status": "ok", "value": 1240 }
-  }
-}
-```
-
-Binance price responses use a 5 second server TTL cache. Binance klines use a 60 second server TTL cache. If Binance is temporarily unavailable and stale data exists, those routes return HTTP 200 with `status: "degraded"` and `cache.status: "stale"` while preserving the normal response shape.
-
-### Legacy BTC Routes
-
-`/api/btc-price` is preserved for Zenora compatibility and still returns:
-
-```json
-{
-  "price": "80169.73000000",
-  "updated_at": "2026-05-15T00:00:00.000Z"
-}
-```
-
-`/api/btc-klines?tf=4h` is preserved and still returns the legacy candle array.
-
-## Project Structure
-
-```text
-nexus-crypto/
-├── app/
-│   ├── api/
-│   │   ├── btc-klines/route.ts
-│   │   ├── btc-price/route.ts
-│   │   ├── crypto-klines/route.ts
-│   │   ├── crypto-price/route.ts
-│   │   ├── market-snapshot/route.ts
-│   │   ├── provider-health/route.ts
-│   │   └── version/route.ts
-│   ├── asset/[id]/page.tsx
-│   ├── components/
-│   │   ├── asset/AssetWorkspaceHeader.tsx
-│   │   ├── asset/AssetWorkspaceShell.tsx
-│   │   ├── asset/TimeframeSelector.tsx
-│   │   ├── auth/LoginForm.tsx
-│   │   ├── auth/LogoutButton.tsx
-│   │   ├── checklist/ManualDisciplineChecklist.tsx
-│   │   ├── checklist/NexusAutoChecklist.tsx
-│   │   ├── insights/ProviderHealthPanel.tsx
-│   │   ├── insights/VersionBadge.tsx
-│   │   ├── layout/RetroPanel.tsx
-│   │   ├── market/AssetWatchlist.tsx
-│   │   ├── market/DataFreshnessBadge.tsx
-│   │   ├── market/MarketSnapshot.tsx
-│   │   ├── ManualChecklist.tsx
-│   │   ├── PriceWidget.tsx
-│   │   └── TradingViewChart.tsx
-│   ├── config/
-│   │   ├── assets.ts
-│   │   ├── theme.ts
-│   │   └── timeframes.ts
-│   ├── lib/
-│   │   ├── binance.ts
-│   │   ├── nexusAlgorithm.ts
-│   │   ├── serverCache.ts
-│   │   └── validators.ts
-│   └── page.tsx
-├── scripts/
-│   ├── deploy_ubuntu_server.sh
-│   ├── smoke_btc_price_contract.sh
-│   └── smoke_crypto_assets_contract.sh
-├── docs/
-│   ├── auth-lan-local.md
-│   └── release-checklist.md
-├── CHANGELOG.md
-└── package.json
-```
-
-## Local Development
-
-Install dependencies:
+## Quick Start
+Local development install:
 
 ```bash
 npm install
 ```
 
-Run dev server on port 3200:
+Run local app:
 
 ```bash
 npm run dev
 ```
 
-Open:
+Default local URL:
 
 ```text
 http://localhost:3200
 ```
 
-For LAN usage in this deployment:
-
-```text
-Mac Mini: 192.168.1.7
-Ubuntu Server: 192.168.1.30
-Ubuntu path: /home/nexus/projects/nexus-crypto
-```
+Note: local development uses `npm install`. Production deploy uses `npm ci` for deterministic installs.
 
 ## Validation
-
-Run local validation:
-
 ```bash
 npm run lint
 npm run test
 npm run build
-```
-
-Run the app:
-
-```bash
-npm run dev
-```
-
-Run smoke checks against the dev server:
-
-```bash
-./scripts/smoke_btc_price_contract.sh
-./scripts/smoke_crypto_assets_contract.sh
-```
-
-Override the base URL:
-
-```bash
-NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" ./scripts/smoke_crypto_assets_contract.sh
-```
-
-Expected multi-asset output includes:
-
-```text
-CRYPTO_PRICE_BTCUSDT=PASS
-CRYPTO_KLINES_BTCUSDT=PASS
-CRYPTO_PRICE_ETHUSDT=PASS
-CRYPTO_KLINES_ETHUSDT=PASS
-PROVIDER_HEALTH=PASS
-```
-
-Health and version checks:
-
-```bash
-curl -sS "http://127.0.0.1:3200/api/provider-health" | python3 -m json.tool
-curl -sS "http://127.0.0.1:3200/api/version" | python3 -m json.tool
-```
-
-`/api/version` reports the app version, Next.js version, Node.js version, environment, commit, short commit, build time, and request timestamp. The homepage footer shows the same release metadata in a compact Nexus version badge.
-
-`npm audit` may still report moderate advisories from bundled Next/PostCSS metadata. Do not use `npm audit fix --force`; review framework upgrades explicitly.
-
-## LAN Local Authentication
-
-Auth is disabled by default. To enable a LAN-local login gate for `/` and `/asset/*`, configure local environment variables in `.env.production.local`:
-
-```bash
-node scripts/generate_auth_password_hash.mjs "your-password"
-openssl rand -hex 32
-```
-
-Required env when enabled:
-
-```text
-NEXUS_AUTH_ENABLED=1
-NEXUS_AUTH_USERNAME=admin
-NEXUS_AUTH_PASSWORD_HASH=scrypt:...
-NEXUS_AUTH_SECRET=...
-NEXUS_SMOKE_AUTH_TOKEN=...
-```
-
-See [docs/auth-lan-local.md](docs/auth-lan-local.md) for the full setup. When auth is enabled, selected market-data APIs require a browser session or `Authorization: Bearer $NEXUS_SMOKE_AUTH_TOKEN`; `/api/version`, `/api/provider-health`, and auth routes remain public.
-
-Smoke with auth enabled:
-
-```bash
-NEXUS_SMOKE_AUTH_TOKEN="..." \
-NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
-./scripts/smoke_crypto_assets_contract.sh
 ```
 
 ## Production Deployment On Ubuntu
+Preferred production deploy uses [`scripts/deploy_ubuntu_server.sh`](scripts/deploy_ubuntu_server.sh), which runs:
+dirty guard -> fetch/pull `--ff-only` -> release metadata injection -> `npm ci` -> lint/test/build -> systemd restart -> provider-health wait loop -> version check -> smoke -> final clean-tree check.
 
-Preferred deploy flow:
-
-```bash
-NEXUS_CRYPTO_REPO_DIR="/home/nexus/projects/nexus-crypto" ./scripts/deploy_ubuntu_server.sh
-```
-
-The deploy script fetches/pulls `main`, writes safe release metadata to ignored `.env.production.local`, installs dependencies, runs lint/test/build, restarts `nexus-crypto.service`, waits for `/api/provider-health`, verifies `/api/version`, runs smoke checks, and exits non-zero if the repo is dirty after deploy.
-
-Release metadata generated by the deploy script:
-
-```text
-GIT_COMMIT_SHA
-NEXT_PUBLIC_GIT_COMMIT_SHA
-BUILD_TIME
-NEXT_PUBLIC_BUILD_TIME
-```
-
-Release hygiene docs:
-
-```text
-CHANGELOG.md
-docs/auth-lan-local.md
-docs/release-checklist.md
-```
-
-Build:
+Copy/paste deploy command:
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
-npm install
-npm run lint
-npm run test
-npm run build
+
+NEXUS_CRYPTO_REPO_DIR="/home/nexus/projects/nexus-crypto" \
+NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
+NEXUS_CRYPTO_SERVICE="nexus-crypto.service" \
+NEXUS_CRYPTO_BRANCH="main" \
+./scripts/deploy_ubuntu_server.sh
 ```
 
-Start manually on port 3200:
+## API Overview
+Primary endpoints:
+- `/api/crypto-price`
+- `/api/crypto-klines`
+- `/api/market-snapshot`
+- `/api/provider-health`
+- `/api/version`
+- legacy `/api/btc-price`
+- legacy `/api/btc-klines`
 
-```bash
-npm start -- -p 3200
+Full contracts and examples are documented in [docs/api-reference.md](docs/api-reference.md).
+
+## Documentation
+- [docs/architecture.md](docs/architecture.md)
+- [docs/api-reference.md](docs/api-reference.md)
+- [docs/deployment.md](docs/deployment.md)
+- [docs/troubleshooting.md](docs/troubleshooting.md)
+- [docs/auth-lan-local.md](docs/auth-lan-local.md)
+- [docs/release-checklist.md](docs/release-checklist.md)
+
+## Project Structure
+```text
+nexus-crypto/
+├── app/
+│   ├── api/
+│   ├── components/
+│   │   ├── layout/NexusFooter.tsx
+│   │   └── layout/ClientErrorBoundary.tsx
+│   ├── config/
+│   │   ├── assets.ts
+│   │   └── timeframes.ts
+│   ├── asset/[id]/page.tsx
+│   ├── favicon.ico
+│   └── page.tsx
+├── docs/
+│   ├── architecture.md
+│   ├── api-reference.md
+│   ├── deployment.md
+│   ├── troubleshooting.md
+│   ├── auth-lan-local.md
+│   └── release-checklist.md
+├── public/
+│   ├── logo.png
+│   └── favicon.png
+├── proxy.ts
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── LICENSE
+└── scripts/
 ```
 
-Example systemd unit:
+## Roadmap
+- Documentation and public repo hygiene improvements.
+- Provider health deep checks beyond representative BTC probes.
+- Nexus Algorithm v1.1 volatility/context tuning.
+- Stablecoin market-mode UX polish.
+- Optional Cloudflare Tunnel HTTPS deployment profile.
+- Optional CI depth expansion.
 
-```ini
-[Unit]
-Description=Nexus Crypto Next.js App
-After=network.target
-
-[Service]
-Type=simple
-User=nexus
-WorkingDirectory=/home/nexus/projects/nexus-crypto
-Environment=NODE_ENV=production
-ExecStart=/home/nexus/.nvm/versions/node/v22.18.0/bin/npm start -- -p 3200
-Restart=always
-RestartSec=5
-StandardOutput=append:/home/nexus/projects/nexus-crypto/nexus-crypto.log
-StandardError=append:/home/nexus/projects/nexus-crypto/nexus-crypto-error.log
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Reload and start:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now nexus-crypto.service
-sudo systemctl status nexus-crypto.service --no-pager
-```
-
-## Zenora Integration Notes
-
-Zenora reads Nexus Crypto as provider `nexus_crypto`. Keep `/api/btc-price` backward compatible with `price` and timezone-aware `updated_at`, and use `/api/provider-health` for the fuller SaaS 2026 health surface.
+## Contributing
+Please read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
+This project is licensed under the [MIT License](LICENSE).
 
-MIT License © 2025 tungpastry
+## Author
+- GitHub: [tungpastry](https://github.com/tungpastry)

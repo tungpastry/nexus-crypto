@@ -4,6 +4,15 @@
 
 ### Added
 
+- Public repository documentation set:
+  - `docs/architecture.md`
+  - `docs/api-reference.md`
+  - `docs/deployment.md`
+  - `docs/troubleshooting.md`
+- Community and metadata files:
+  - `CONTRIBUTING.md`
+  - `CODE_OF_CONDUCT.md`
+  - `LICENSE`
 - P11: LAN local credential authentication.
 - P11: HTTP-only signed session cookie.
 - P11: Login, logout, and auth status routes.
@@ -13,6 +22,16 @@
 - P12: Smoke/deploy bearer token support for protected API checks.
 - P12: Login attempt rate limiting.
 - P12: Session rotation through the auth status route.
+
+### Changed
+
+- Next.js convention migration: root `middleware.ts` replaced by `proxy.ts`.
+- Ubuntu production deploy dependency install is deterministic via `npm ci`.
+- Branding/UI polish landed:
+  - logo banner in README
+  - Nexus logo/favicon asset refresh
+  - reusable Nexus SaaS footer
+  - Black Pink Glass SaaS 2026 visual rollout
 
 ## 2026-05-15 - Nexus Crypto Hardening Batch
 

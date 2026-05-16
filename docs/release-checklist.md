@@ -5,11 +5,14 @@
 - [ ] Confirm branch is `main`.
 - [ ] Confirm git status is clean.
 - [ ] Review latest commit.
-- [ ] Run `npm install`.
+- [ ] For local development only: run `npm install` when dependencies changed.
+- [ ] For release validation and production parity: run `npm ci`.
 - [ ] Run `npm run lint`.
 - [ ] Run `npm run test`.
 - [ ] Run `npm run build`.
 - [ ] Review `npm audit`; confirm no critical vulnerabilities.
+- [ ] Confirm `proxy.ts` exists and `middleware.ts` does not exist.
+- [ ] Confirm build has no middleware convention deprecation warning.
 
 ## Deploy
 
@@ -19,6 +22,7 @@
 - [ ] Confirm `/api/version` commit matches `git rev-parse HEAD`.
 - [ ] Confirm `smoke_crypto_assets_contract.sh` passes.
 - [ ] Confirm `.env.production.local` has `NEXUS_AUTH_ENABLED=1` if auth is desired.
+- [ ] Confirm deploy script prints `DEPLOY_PASS=1`.
 
 ## Post-deploy
 
@@ -49,7 +53,7 @@
 
 - Identify previous stable commit.
 - Use `git checkout` or `git reset` only with explicit approval.
-- Run `npm install`.
+- Run `npm ci`.
 - Run `npm run build`.
 - Restart service.
 - Confirm health and smoke tests.

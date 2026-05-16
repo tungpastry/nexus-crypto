@@ -82,6 +82,8 @@ Auth protects UI pages:
 - `/`
 - `/asset/*`
 
+UI protection is enforced by root [`proxy.ts`](../proxy.ts) (Next.js proxy convention), not the deprecated `middleware.ts` file convention.
+
 These routes remain public for deploy, readiness, and login workflows:
 
 - `/api/version`
