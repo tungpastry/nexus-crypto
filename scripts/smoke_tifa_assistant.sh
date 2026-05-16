@@ -100,6 +100,66 @@ assert payload["circuit"].get("state") in ("closed", "open", "half_open")
 print("TIFA_PROVIDER_HEALTH_GEMINI=PASS")
 PY
 
+provider_explainer_file="$TMP_DIR/provider-health-explainer.json"
+curl_with_auth "${BASE_URL}/api/tifa-tools/provider-health-explainer" -o "$provider_explainer_file"
+python3 - "$provider_explainer_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("ok") is True
+assert payload.get("context_type") == "provider_health_explainer"
+assert payload.get("status") in ("ok", "degraded")
+print("TIFA_PROVIDER_HEALTH_EXPLAINER=PASS")
+PY
+
+deep_explainer_file="$TMP_DIR/deep-health-explainer.json"
+curl_with_auth "${BASE_URL}/api/tifa-tools/deep-health-explainer" -o "$deep_explainer_file"
+python3 - "$deep_explainer_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("ok") is True
+assert payload.get("context_type") == "deep_health_explainer"
+assert payload.get("status") in ("ok", "degraded", "error")
+print("TIFA_DEEP_HEALTH_EXPLAINER=PASS")
+PY
+
+ops_summary_file="$TMP_DIR/ops-summary.json"
+curl_with_auth "${BASE_URL}/api/tifa-tools/ops-summary" -o "$ops_summary_file"
+python3 - "$ops_summary_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("ok") is True
+assert payload.get("context_type") == "ops_summary"
+assert payload.get("status") in ("ok", "degraded", "error")
+assert isinstance(payload.get("issues"), list)
+print("TIFA_OPS_SUMMARY=PASS")
+PY
+
+orchestrate_file="$TMP_DIR/orchestrate.json"
+curl_with_auth \
+  -H "Content-Type: application/json" \
+  -d '{"message":"ops executive summary","context":{"page":"/ops"}}' \
+  "${BASE_URL}/api/tifa-tools/orchestrate" -o "$orchestrate_file"
+python3 - "$orchestrate_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("ok") is True
+assert "tools_used" in payload
+assert isinstance(payload.get("warnings"), list)
+print("TIFA_TOOL_ORCHESTRATOR=PASS")
+PY
+
 tifa_file="$TMP_DIR/tifa.json"
 curl_with_auth \
   -H "Content-Type: application/json" \
@@ -142,4 +202,27 @@ if secret:
 assert "key=" not in payload.lower()
 print("TIFA_STREAM_CONTRACT=PASS")
 print("TIFA_STREAM_NO_SECRET_LEAK=PASS")
+PY
+
+python3 - "$tifa_file" "$stream_file" "$ops_summary_file" "$orchestrate_file" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+secret = os.getenv("GEMINI_API_KEY", "")
+blobs = [
+    Path(sys.argv[1]).read_text(),
+    Path(sys.argv[2]).read_text(),
+    Path(sys.argv[3]).read_text(),
+    Path(sys.argv[4]).read_text(),
+]
+for blob in blobs:
+    low = blob.lower()
+    assert "key=" not in low
+    assert "nexus_smoke_auth_token" not in low
+    if secret:
+        assert secret not in blob
+
+print("TIFA_PHASE2_NO_SECRET_LEAK=PASS")
 PY

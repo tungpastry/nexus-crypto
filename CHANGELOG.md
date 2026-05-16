@@ -36,6 +36,12 @@
   - no-secret leakage tests for JSON/SSE/provider-health outputs
   - Gemini stream path with safe pre-stream fallback to tool-only pseudo stream, plus sanitized `STREAM_PROVIDER_ERROR` handling after partial provider deltas
   - Gemini circuit breaker with open/half-open/closed states and health exposure
+- TifaWidget Assistant Phase 2 orchestration:
+  - provider/deep health explainer modules and normalized ops summaries
+  - tool orchestration allowlist registry and orchestrate endpoint
+  - new routes: `/api/tifa-tools/provider-health-explainer`, `/api/tifa-tools/deep-health-explainer`, `/api/tifa-tools/ops-summary`, `/api/tifa-tools/orchestrate`
+  - richer `/ops` summary panels (executive summary, provider summary, deep summary, issues list)
+  - extended smoke checks for Phase 2 orchestration and no-secret assertions
 
 ### Changed
 
