@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireApiAuth } from "../../lib/auth/api";
 import { runTifaChat } from "../../lib/tifa-core/chat";
+import { sanitizeProviderError } from "../../lib/tifa-provider-gateway/redaction";
 import { validateTifaChatInput } from "../../lib/tifa-widget/validation";
 
 export const runtime = "nodejs";
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         error: {
           code: "TIFA_REQUEST_ERROR",
-          message: error instanceof Error ? error.message : "Failed to process tifa request",
+          message: sanitizeProviderError(error, "Failed to process tifa request"),
         },
       },
       { status: 400 }
