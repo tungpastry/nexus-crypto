@@ -35,3 +35,11 @@ Nexus Crypto is a Next.js App Router dashboard focused on market-data observatio
 - No trade execution and no custody/account integration.
 - Default `/api/provider-health` remains lightweight (BTC representative checks + market snapshot).
 - Deep diagnostics are exposed separately at `/api/provider-health/deep` across all Binance-enabled symbols to avoid heavy default readiness probes.
+
+## Nexus Algorithm v1.1
+- Adds ATR14 and volatility regime (`Low`, `Normal`, `High`, `Unknown`).
+- Adds volume confirmation scoring and ratio context.
+- Adds support/resistance location context from recent candle window.
+- Adds optional higher-timeframe agreement hook (non-breaking optional input).
+- Adds workflow state output: `No Trade`, `Watch`, `Ready`, `Confirmed`.
+- Output remains workflow decision-support only (no trade execution and no financial advice).

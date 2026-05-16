@@ -8,12 +8,19 @@ const asset = NEXUS_ASSETS[0];
 const timeframe = NEXUS_TIMEFRAMES[2];
 const now = "2026-05-15T12:00:00.000Z";
 
-function makeCandles(closes: number[]): NexusCandle[] {
+function makeCandles(
+  closes: number[],
+  options?: {
+    volumeAt?: (index: number) => number;
+    rangeAt?: (index: number, open: number, close: number) => { high: number; low: number };
+  }
+): NexusCandle[] {
   return closes.map((close, index) => {
     const previous = closes[index - 1] ?? close;
     const open = index === 0 ? close - 0.2 : previous;
-    const high = Math.max(open, close) + 1;
-    const low = Math.min(open, close) - 1;
+    const range = options?.rangeAt?.(index, open, close);
+    const high = range?.high ?? Math.max(open, close) + 1;
+    const low = range?.low ?? Math.min(open, close) - 1;
 
     return {
       time: Date.parse(now) - (closes.length - index) * 60_000,
@@ -21,7 +28,7 @@ function makeCandles(closes: number[]): NexusCandle[] {
       high,
       low,
       close,
-      volume: 1_000 + index,
+      volume: options?.volumeAt?.(index) ?? 1_000 + index,
     };
   });
 }
@@ -129,5 +136,117 @@ describe("buildNexusSignal", () => {
     );
 
     expect(ruleStatus(signal, "freshness")).toBe("warn");
+  });
+
+  it("computes atr14 and atrPercent with enough candles", () => {
+    vi.setSystemTime(new Date(now));
+    const signal = buildNexusSignal(
+      asset,
+      timeframe,
+      makeCandles(linearCloses(100, 0.2)),
+      now
+    );
+
+    expect(signal.atr14).toBeGreaterThan(0);
+    expect(signal.atrPercent).toBeGreaterThan(0);
+  });
+
+  it("classifies high volatility when candle ranges are large", () => {
+    vi.setSystemTime(new Date(now));
+    const candles = makeCandles(linearCloses(200, 0.1), {
+      rangeAt: (_index, open, close) => ({
+        high: Math.max(open, close) + 30,
+        low: Math.min(open, close) - 30,
+      }),
+    });
+    const signal = buildNexusSignal(asset, timeframe, candles, now);
+
+    expect(signal.volatility).toBe("High");
+    expect(ruleStatus(signal, "volatility_atr")).toBe("fail");
+  });
+
+  it("marks volume confirmation pass when latest volume is above average", () => {
+    vi.setSystemTime(new Date(now));
+    const closes = linearCloses(100, 0.15);
+    const candles = makeCandles(closes, {
+      volumeAt: (index) => (index === closes.length - 1 ? 3_000 : 1_000),
+    });
+    const signal = buildNexusSignal(asset, timeframe, candles, now);
+
+    expect(signal.volumeRatio).toBeGreaterThan(1.05);
+    expect(signal.volumeConfirmation).toBe("pass");
+    expect(ruleStatus(signal, "volume_confirmation")).toBe("pass");
+  });
+
+  it("marks volume confirmation fail when trend volume is weak", () => {
+    vi.setSystemTime(new Date(now));
+    const closes = linearCloses(100, 0.2);
+    const candles = makeCandles(closes, {
+      volumeAt: (index) => (index === closes.length - 1 ? 200 : 1_000),
+    });
+    const signal = buildNexusSignal(asset, timeframe, candles, now);
+
+    expect(signal.direction).toBe("bull");
+    expect(signal.volumeRatio).toBeLessThan(0.8);
+    expect(signal.volumeConfirmation).toBe("fail");
+    expect(ruleStatus(signal, "volume_confirmation")).toBe("fail");
+  });
+
+  it("classifies support/resistance context for near support", () => {
+    vi.setSystemTime(new Date(now));
+    const closes = [
+      ...linearCloses(100, 40 / 149, 150),
+      ...Array.from({ length: 49 }, () => 140),
+      140.1,
+    ];
+    const outlierIndex = closes.length - 45;
+    const signal = buildNexusSignal(
+      asset,
+      timeframe,
+      makeCandles(closes, {
+        rangeAt: (index, open, close) => ({
+          high:
+            index === outlierIndex
+              ? Math.max(open, close) + 12
+              : Math.max(open, close) + 0.1,
+          low: Math.min(open, close),
+        }),
+      }),
+      now
+    );
+
+    expect(signal.supportResistance.position).toBe("near_support");
+    expect(ruleStatus(signal, "support_resistance_context")).toBe("pass");
+  });
+
+  it("sets state Confirmed for strong aligned context", () => {
+    vi.setSystemTime(new Date(now));
+    const closes = linearCloses(100, 0.02);
+    const signal = buildNexusSignal(
+      asset,
+      timeframe,
+      makeCandles(closes, {
+        volumeAt: (index) => (index === closes.length - 1 ? 3_200 : 1_000),
+      }),
+      now,
+      { higherTimeframeDirection: "bull" }
+    );
+
+    expect(signal.score).toBeGreaterThanOrEqual(80);
+    expect(signal.state).toBe("Confirmed");
+  });
+
+  it("sets state No Trade for high-risk overextended context", () => {
+    vi.setSystemTime(new Date(now));
+    const closes = [...Array.from({ length: 199 }, () => 100), 140];
+    const signal = buildNexusSignal(
+      asset,
+      timeframe,
+      makeCandles(closes),
+      now
+    );
+
+    expect(signal.risk).toBe("High");
+    expect(signal.state).toBe("No Trade");
   });
 });

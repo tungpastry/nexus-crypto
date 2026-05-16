@@ -23,6 +23,7 @@
 - P12: Login attempt rate limiting.
 - P12: Session rotation through the auth status route.
 - Provider health deep endpoint for multi-asset Binance diagnostics.
+- Nexus Algorithm v1.1 with ATR volatility, volume confirmation, support/resistance context, optional MTF agreement, and workflow state output.
 
 ### Changed
 
