@@ -49,15 +49,26 @@ If budget guard is unavailable and mode is fail-closed, Gemini requests are bloc
 - True Gemini streaming path is enabled when:
   - `GEMINI_STREAM_ENABLED=1`
 - Safe fallback path:
-  - stream error -> tool-only pseudo stream
   - missing key -> tool-only mode
   - budget hard stop -> blocked provider call
+  - circuit open -> tool-only pseudo stream
+  - provider stream init failure (before any provider delta) -> tool-only pseudo stream
+- Provider stream failure after partial delta:
+  - emit sanitized `STREAM_PROVIDER_ERROR`
+  - close SSE stream safely (no second fallback answer)
 - Circuit breaker controls provider calls:
   - `GEMINI_CIRCUIT_BREAKER_ENABLED=1`
   - `GEMINI_CIRCUIT_FAILURE_THRESHOLD=3`
   - `GEMINI_CIRCUIT_COOLDOWN_MS=60000`
 - Provider health endpoint now returns circuit + stream request settings:
   - `GET /api/provider-health/gemini`
+
+### True Streaming Fallback Behavior
+
+- Missing key, budget block, circuit open, or provider stream init failure -> tool-only pseudo stream.
+- Provider stream failure after partial delta -> emit sanitized `STREAM_PROVIDER_ERROR` and close the SSE stream.
+
+This avoids mixing partial vendor output with a second fallback answer after the client has already received provider-generated deltas.
 
 ## Smoke Validation
 

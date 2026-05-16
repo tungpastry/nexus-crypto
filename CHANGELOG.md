@@ -34,7 +34,7 @@
 - TifaWidget Assistant Phase 1.1 hardening:
   - contract coverage for `/api/tifa` and `/api/tifa/stream`
   - no-secret leakage tests for JSON/SSE/provider-health outputs
-  - Gemini stream path with safe fallback to tool-only pseudo stream
+  - Gemini stream path with safe pre-stream fallback to tool-only pseudo stream, plus sanitized `STREAM_PROVIDER_ERROR` handling after partial provider deltas
   - Gemini circuit breaker with open/half-open/closed states and health exposure
 
 ### Changed
