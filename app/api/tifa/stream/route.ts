@@ -98,6 +98,9 @@ export async function POST(req: NextRequest) {
               has_asset: Boolean(result.toolContext.asset_analysis_context),
               has_budget: Boolean(result.toolContext.budget_context),
               has_provider_health: Boolean(result.toolContext.provider_health_context),
+              has_deep_health: Boolean(result.toolContext.deep_health_context),
+              has_gemini_health: Boolean(result.toolContext.gemini_provider_health_context),
+              has_ops_summary: Boolean(result.toolContext.ops_summary_context),
             })
           )
         );

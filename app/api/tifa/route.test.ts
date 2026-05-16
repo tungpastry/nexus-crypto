@@ -45,7 +45,7 @@ describe("/api/tifa contract", () => {
       answer: "Market snapshot summary",
       provider: "tool-only",
       model: "gemini-3-flash-preview",
-      tool_context: { intent: "market_overview", market_context: { ok: true } },
+      tool_context: { intent: "market_snapshot", market_context: { ok: true } },
       budget: { status: "ok" },
     });
 

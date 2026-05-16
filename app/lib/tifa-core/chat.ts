@@ -1,18 +1,19 @@
-import axios from "axios";
 import type { NextRequest } from "next/server";
 import { runBudgetPreflight, writeBudgetPostflight } from "../gemini-budget/guard";
-import { getGeminiBudgetStatus } from "../gemini-budget/status";
-import { getAssetAnalysisContext } from "../tifa-nexus/assetAnalysisContext";
 import { resolveTifaIntent } from "../tifa-nexus/intent";
-import { buildInternalAuthHeaders, getMarketContext } from "../tifa-nexus/marketContext";
 import { buildUserPrompt, loadTifaRuntimePrompt } from "../tifa-nexus/promptBuilder";
 import {
-  getTifaProviderHealth,
-  runTifaProviderGateway,
-  runTifaProviderGatewayStream,
+  getTifaProviderHealth, runTifaProviderGateway, runTifaProviderGatewayStream,
 } from "../tifa-provider-gateway/gateway";
 import { appendTifaChatSession } from "../tifa-runtime/chatSessions";
 import { assertTifaRuntimeSafe, getTifaRuntimeConfig } from "../tifa-runtime/config";
+import {
+  formatDeepHealthForAssistant,
+  formatGeminiHealthForAssistant,
+  formatProviderHealthForAssistant,
+} from "../tifa-tools/formatters/healthFormatter";
+import { formatOpsSummaryForAssistant } from "../tifa-tools/formatters/opsFormatter";
+import { mapOrchestrationToToolContext, orchestrateTifaTools } from "../tifa-tools/orchestrator";
 import { createRequestId } from "./requestId";
 import type { TifaChatInput, TifaChatResult, TifaToolContext } from "./types";
 
@@ -33,14 +34,6 @@ type TifaStreamPreparation = {
   stream?: AsyncIterable<string>;
   streamErrorCode?: string;
 };
-
-async function fetchProviderHealth(origin: string, req?: NextRequest) {
-  const response = await axios.get(`${origin}/api/provider-health`, {
-    timeout: 8_000,
-    headers: buildInternalAuthHeaders(req),
-  });
-  return response.data;
-}
 
 function asNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -64,6 +57,43 @@ function formatCurrency(value: unknown) {
 function buildToolOnlyAnswer(message: string, toolContext: TifaToolContext) {
   const sections: string[] = [];
   const lowerMessage = message.toLowerCase();
+
+  if (toolContext.ops_summary_context && typeof toolContext.ops_summary_context === "object") {
+    sections.push(formatOpsSummaryForAssistant(toolContext.ops_summary_context as Parameters<typeof formatOpsSummaryForAssistant>[0]));
+  } else {
+    if (
+      toolContext.provider_health_explainer_context &&
+      typeof toolContext.provider_health_explainer_context === "object"
+    ) {
+      sections.push(
+        formatProviderHealthForAssistant(
+          toolContext.provider_health_explainer_context as Parameters<typeof formatProviderHealthForAssistant>[0]
+        )
+      );
+    }
+
+    if (
+      toolContext.deep_health_explainer_context &&
+      typeof toolContext.deep_health_explainer_context === "object"
+    ) {
+      sections.push(
+        formatDeepHealthForAssistant(
+          toolContext.deep_health_explainer_context as Parameters<typeof formatDeepHealthForAssistant>[0]
+        )
+      );
+    }
+
+    if (
+      toolContext.gemini_provider_health_context &&
+      typeof toolContext.gemini_provider_health_context === "object"
+    ) {
+      sections.push(
+        formatGeminiHealthForAssistant(
+          toolContext.gemini_provider_health_context as Parameters<typeof formatGeminiHealthForAssistant>[0]
+        )
+      );
+    }
+  }
 
   if (toolContext.market_context && typeof toolContext.market_context === "object") {
     const market = toolContext.market_context as {
@@ -180,29 +210,15 @@ async function buildToolContext(
 ): Promise<TifaToolContext> {
   const intent = resolveTifaIntent(input.message, input.context);
   const origin = new URL(req.url).origin;
-  const context: TifaToolContext = { intent };
+  const orchestration = await orchestrateTifaTools({
+    req,
+    origin,
+    intent,
+    message: input.message,
+    context: input.context,
+  });
 
-  if (intent === "market_overview" || intent === "general") {
-    context.market_context = await getMarketContext(origin, req);
-  }
-
-  if (intent === "asset_analysis" || input.context?.assetId) {
-    const assetId = input.context?.assetId || "bitcoin";
-    context.asset_analysis_context = await getAssetAnalysisContext(
-      assetId,
-      input.context?.timeframe
-    );
-  }
-
-  if (intent === "budget_status" || intent === "provider_health") {
-    context.budget_context = await getGeminiBudgetStatus();
-  }
-
-  if (intent === "provider_health") {
-    context.provider_health_context = await fetchProviderHealth(origin, req);
-  }
-
-  return context;
+  return mapOrchestrationToToolContext(orchestration);
 }
 
 async function prepareTifaChat(req: NextRequest, input: TifaChatInput) {

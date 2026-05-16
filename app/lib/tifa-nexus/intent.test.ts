@@ -15,7 +15,19 @@ describe("resolveTifaIntent", () => {
     ).toBe("asset_analysis");
   });
 
-  it("detects market overview", () => {
-    expect(resolveTifaIntent("market snapshot hôm nay")).toBe("market_overview");
+  it("detects market snapshot", () => {
+    expect(resolveTifaIntent("market snapshot hôm nay")).toBe("market_snapshot");
+  });
+
+  it("detects deep health intent", () => {
+    expect(resolveTifaIntent("show deep health diagnostics")).toBe("deep_health");
+  });
+
+  it("detects ops summary intent", () => {
+    expect(resolveTifaIntent("ops executive summary now")).toBe("ops_summary");
+  });
+
+  it("detects stablecoin explain intent", () => {
+    expect(resolveTifaIntent("phân tích usdt giúp mình")).toBe("stablecoin_explain");
   });
 });

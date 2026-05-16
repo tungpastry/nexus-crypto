@@ -40,7 +40,7 @@ describe("/api/tifa/stream contract", () => {
     runTifaChatStreamMock.mockResolvedValue({
       requestId: "req_1",
       providerModel: "gemini-3-flash-preview",
-      toolContext: { intent: "market_overview" },
+      toolContext: { intent: "market_snapshot" },
       budget: { status: "ok" },
       answerForFallback: "",
       postflight: { estimatedCostUsd: 0.01, monthlySpendBefore: 0.02 },
@@ -109,7 +109,7 @@ describe("/api/tifa/stream contract", () => {
     runTifaChatStreamMock.mockResolvedValue({
       requestId: "req_err",
       providerModel: "gemini-3-flash-preview",
-      toolContext: { intent: "market_overview" },
+      toolContext: { intent: "market_snapshot" },
       budget: { status: "ok" },
       answerForFallback: "",
       postflight: null,
