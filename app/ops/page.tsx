@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Activity, ArrowLeft, Radar } from "lucide-react";
 import ProviderDeepHealthCard from "../components/insights/ProviderDeepHealthCard";
+import GeminiAssistantStatusPanel from "../components/insights/GeminiAssistantStatusPanel";
 import ProviderHealthPanel from "../components/insights/ProviderHealthPanel";
 import ClientErrorBoundary from "../components/layout/ClientErrorBoundary";
 import NexusFooter from "../components/layout/NexusFooter";
+import TifaWidget from "../components/tifa/TifaWidget";
 
 export default function OpsPage() {
   return (
@@ -48,11 +50,16 @@ export default function OpsPage() {
         </ClientErrorBoundary>
 
         <ClientErrorBoundary>
+          <GeminiAssistantStatusPanel />
+        </ClientErrorBoundary>
+
+        <ClientErrorBoundary>
           <ProviderDeepHealthCard />
         </ClientErrorBoundary>
 
         <NexusFooter />
       </div>
+      <TifaWidget page="ops" context={{ page: "/ops" }} />
     </main>
   );
 }

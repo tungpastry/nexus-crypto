@@ -12,6 +12,7 @@ import NexusAutoChecklist from "../checklist/NexusAutoChecklist";
 import ClientErrorBoundary from "../layout/ClientErrorBoundary";
 import NexusFooter from "../layout/NexusFooter";
 import RetroPanel from "../layout/RetroPanel";
+import TifaWidget from "../tifa/TifaWidget";
 import AssetWorkspaceHeader from "./AssetWorkspaceHeader";
 import TimeframeSelector from "./TimeframeSelector";
 
@@ -98,6 +99,14 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
 
         <NexusFooter />
       </div>
+      <TifaWidget
+        page="asset"
+        context={{
+          page: `/asset/${asset.id}`,
+          assetId: asset.id,
+          timeframe: selectedTimeframe.binance,
+        }}
+      />
     </main>
   );
 }

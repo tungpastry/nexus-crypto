@@ -4,6 +4,7 @@ import ClientErrorBoundary from "./components/layout/ClientErrorBoundary";
 import AssetWatchlist from "./components/market/AssetWatchlist";
 import MarketSnapshot from "./components/market/MarketSnapshot";
 import NexusFooter from "./components/layout/NexusFooter";
+import TifaWidget from "./components/tifa/TifaWidget";
 
 export default function Home() {
   return (
@@ -49,6 +50,7 @@ export default function Home() {
 
         <NexusFooter />
       </div>
+      <TifaWidget page="home" context={{ page: "/" }} />
     </main>
   );
 }
