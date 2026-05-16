@@ -26,6 +26,23 @@ type GeminiProviderHealth = {
   model: string;
   status: "ok" | "degraded" | "blocked" | "disabled";
   reason?: string;
+  stream: {
+    enabled: boolean;
+    timeout_ms: number;
+    retry_limit: number;
+  };
+  request: {
+    timeout_ms: number;
+    retry_limit: number;
+  };
+  circuit: {
+    enabled: boolean;
+    state: "closed" | "open" | "half_open";
+    failure_count: number;
+    cooldown_ms: number;
+    opened_until: string | null;
+    threshold: number;
+  };
 };
 
 function statusClass(status: "ok" | "degraded" | "blocked" | "disabled") {
@@ -128,6 +145,54 @@ export default function GeminiAssistantStatusPanel() {
               {budget?.monthly_requests ?? 0}
             </p>
           </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Stream
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider?.stream.enabled ? "enabled" : "disabled"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Circuit
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider?.circuit.state || "closed"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Failures
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider ? `${provider.circuit.failure_count}/${provider.circuit.threshold}` : "0/0"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Timeout
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider?.request.timeout_ms ?? 0}ms
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Retry
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider?.request.retry_limit ?? 0}
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+              Cooldown
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[var(--text-main)]">
+              {provider?.circuit.cooldown_ms ?? 0}ms
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
@@ -157,6 +222,11 @@ export default function GeminiAssistantStatusPanel() {
 
         {provider?.reason ? (
           <p className="text-xs text-[var(--text-muted)]">Provider note: {provider.reason}</p>
+        ) : null}
+        {provider?.circuit.opened_until ? (
+          <p className="text-xs text-[var(--text-muted)]">
+            Circuit open until: {provider.circuit.opened_until}
+          </p>
         ) : null}
       </div>
     </RetroPanel>

@@ -17,6 +17,16 @@ export async function GET() {
     model: provider.model,
     status: provider.configured ? budget.status : "disabled",
     reason: provider.reason,
+    stream: {
+      enabled: provider.stream_enabled,
+      timeout_ms: provider.stream_timeout_ms,
+      retry_limit: provider.stream_retry_limit,
+    },
+    request: {
+      timeout_ms: provider.timeout_ms,
+      retry_limit: provider.retry_limit,
+    },
+    circuit: provider.circuit,
     budget,
     updated_at: new Date().toISOString(),
   });

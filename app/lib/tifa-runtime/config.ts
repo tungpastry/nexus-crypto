@@ -14,8 +14,17 @@ export type TifaRuntimeConfig = {
     model: string;
     apiUrl: string;
     timeoutMs: number;
+    retryLimit: number;
     maxOutputTokens: number;
     temperature: number;
+    streamEnabled: boolean;
+    streamTimeoutMs: number;
+    streamRetryLimit: number;
+    circuitBreaker: {
+      enabled: boolean;
+      failureThreshold: number;
+      cooldownMs: number;
+    };
   };
 };
 
@@ -54,8 +63,17 @@ export function getTifaRuntimeConfig(): TifaRuntimeConfig {
         process.env.GEMINI_API_URL ||
         "https://generativelanguage.googleapis.com/v1beta",
       timeoutMs: parsePositiveInt(process.env.GEMINI_TIMEOUT_MS, 20_000),
+      retryLimit: parsePositiveInt(process.env.GEMINI_RETRY_LIMIT, 1),
       maxOutputTokens: parsePositiveInt(process.env.GEMINI_MAX_OUTPUT_TOKENS, 900),
       temperature: parseNumber(process.env.GEMINI_TEMPERATURE, 0.3),
+      streamEnabled: process.env.GEMINI_STREAM_ENABLED !== "0",
+      streamTimeoutMs: parsePositiveInt(process.env.GEMINI_STREAM_TIMEOUT_MS, 25_000),
+      streamRetryLimit: parsePositiveInt(process.env.GEMINI_STREAM_RETRY_LIMIT, 1),
+      circuitBreaker: {
+        enabled: process.env.GEMINI_CIRCUIT_BREAKER_ENABLED !== "0",
+        failureThreshold: parsePositiveInt(process.env.GEMINI_CIRCUIT_FAILURE_THRESHOLD, 3),
+        cooldownMs: parsePositiveInt(process.env.GEMINI_CIRCUIT_COOLDOWN_MS, 60_000),
+      },
     },
   };
 }
@@ -72,6 +90,9 @@ export function assertTifaRuntimeSafe(config = getTifaRuntimeConfig()) {
   }
   if (config.gemini.maxOutputTokens < 64 || config.gemini.maxOutputTokens > 8_192) {
     throw new Error("GEMINI_MAX_OUTPUT_TOKENS must be between 64 and 8192");
+  }
+  if (config.gemini.streamTimeoutMs < 1_000 || config.gemini.streamTimeoutMs > 120_000) {
+    throw new Error("GEMINI_STREAM_TIMEOUT_MS must be between 1000 and 120000");
   }
 }
 

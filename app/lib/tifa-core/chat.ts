@@ -2,18 +2,37 @@ import axios from "axios";
 import type { NextRequest } from "next/server";
 import { runBudgetPreflight, writeBudgetPostflight } from "../gemini-budget/guard";
 import { getGeminiBudgetStatus } from "../gemini-budget/status";
+import { getAssetAnalysisContext } from "../tifa-nexus/assetAnalysisContext";
 import { resolveTifaIntent } from "../tifa-nexus/intent";
 import { buildInternalAuthHeaders, getMarketContext } from "../tifa-nexus/marketContext";
-import { getAssetAnalysisContext } from "../tifa-nexus/assetAnalysisContext";
 import { buildUserPrompt, loadTifaRuntimePrompt } from "../tifa-nexus/promptBuilder";
 import {
   getTifaProviderHealth,
   runTifaProviderGateway,
+  runTifaProviderGatewayStream,
 } from "../tifa-provider-gateway/gateway";
 import { appendTifaChatSession } from "../tifa-runtime/chatSessions";
 import { assertTifaRuntimeSafe, getTifaRuntimeConfig } from "../tifa-runtime/config";
-import type { TifaChatInput, TifaChatResult, TifaToolContext } from "./types";
 import { createRequestId } from "./requestId";
+import type { TifaChatInput, TifaChatResult, TifaToolContext } from "./types";
+
+type TifaStreamPreparation = {
+  requestId: string;
+  providerModel: string;
+  toolContext: TifaToolContext;
+  budget: {
+    status: "ok" | "degraded" | "blocked";
+    reason?: string;
+  };
+  answerForFallback: string;
+  postflight: {
+    estimatedCostUsd: number;
+    monthlySpendBefore: number;
+  } | null;
+  mode: "tool-only" | "provider-stream";
+  stream?: AsyncIterable<string>;
+  streamErrorCode?: string;
+};
 
 async function fetchProviderHealth(origin: string, req?: NextRequest) {
   const response = await axios.get(`${origin}/api/provider-health`, {
@@ -89,7 +108,7 @@ function buildToolOnlyAnswer(message: string, toolContext: TifaToolContext) {
     const asset = toolContext.asset_analysis_context as {
       mode?: string;
       reason?: string;
-      asset?: { symbol?: string; name?: string };
+      asset?: { symbol?: string };
       timeframe?: { label?: string };
       signal?: {
         score?: number;
@@ -186,11 +205,11 @@ async function buildToolContext(
   return context;
 }
 
-export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promise<TifaChatResult> {
+async function prepareTifaChat(req: NextRequest, input: TifaChatInput) {
   const config = getTifaRuntimeConfig();
   if (!config.enabled) {
     return {
-      ok: false,
+      ok: false as const,
       error: {
         code: "TIFA_DISABLED",
         message: "Tifa assistant is disabled.",
@@ -202,7 +221,7 @@ export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promi
     assertTifaRuntimeSafe(config);
   } catch (error) {
     return {
-      ok: false,
+      ok: false as const,
       error: {
         code: "TIFA_CONFIG_ERROR",
         message: error instanceof Error ? error.message : "Invalid Tifa config.",
@@ -214,83 +233,109 @@ export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promi
   const providerHealth = getTifaProviderHealth();
   const toolContext = await buildToolContext(req, input);
   const preflight = await runBudgetPreflight(requestId, providerHealth.model);
-
   const toolOnlyAnswer = buildToolOnlyAnswer(input.message, toolContext);
 
-  if (!preflight.allowed) {
+  return {
+    ok: true as const,
+    config,
+    requestId,
+    providerHealth,
+    toolContext,
+    preflight,
+    toolOnlyAnswer,
+    input,
+  };
+}
+
+export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promise<TifaChatResult> {
+  const prepared = await prepareTifaChat(req, input);
+  if (!prepared.ok) {
+    return {
+      ok: false,
+      error: prepared.error,
+    };
+  }
+
+  if (!prepared.preflight.allowed) {
     return {
       ok: true,
-      answer: toolOnlyAnswer,
+      answer: prepared.toolOnlyAnswer,
       provider: "tool-only",
-      model: providerHealth.model,
-      tool_context: toolContext,
+      model: prepared.providerHealth.model,
+      tool_context: prepared.toolContext,
       budget: {
         status: "blocked",
-        reason: preflight.reason,
+        reason: prepared.preflight.reason,
       },
     };
   }
 
-  if (!providerHealth.configured) {
+  if (!prepared.providerHealth.configured) {
     return {
       ok: true,
-      answer: toolOnlyAnswer,
+      answer: prepared.toolOnlyAnswer,
       provider: "tool-only",
-      model: providerHealth.model,
-      tool_context: toolContext,
+      model: prepared.providerHealth.model,
+      tool_context: prepared.toolContext,
       budget: {
-        status: preflight.status,
+        status: prepared.preflight.status,
         reason: "GEMINI_NOT_CONFIGURED",
       },
     };
   }
 
   const systemPrompt = await loadTifaRuntimePrompt();
-  const userPrompt = buildUserPrompt(input.message, toolContext, config.timezone);
+  const userPrompt = buildUserPrompt(
+    input.message,
+    prepared.toolContext,
+    prepared.config.timezone
+  );
+
   const providerResult = await runTifaProviderGateway({
     systemPrompt,
     userPrompt,
-    temperature: config.gemini.temperature,
-    maxOutputTokens: preflight.maxOutputTokensOverride ?? config.gemini.maxOutputTokens,
+    temperature: prepared.config.gemini.temperature,
+    maxOutputTokens:
+      prepared.preflight.maxOutputTokensOverride ?? prepared.config.gemini.maxOutputTokens,
   });
 
   if (!providerResult.ok) {
     await writeBudgetPostflight({
-      requestId,
-      model: providerHealth.model,
+      requestId: prepared.requestId,
+      model: prepared.providerHealth.model,
       status: "failed",
       reason: providerResult.error.code,
-      estimatedCostUsd: preflight.estimatedCostUsd,
-      monthlySpendBefore: preflight.monthlySpendUsd,
+      estimatedCostUsd: prepared.preflight.estimatedCostUsd,
+      monthlySpendBefore: prepared.preflight.monthlySpendUsd,
     });
 
     return {
       ok: true,
-      answer: toolOnlyAnswer,
+      answer: prepared.toolOnlyAnswer,
       provider: "tool-only",
-      model: providerHealth.model,
-      tool_context: toolContext,
+      model: prepared.providerHealth.model,
+      tool_context: prepared.toolContext,
       budget: {
-        status: preflight.status,
+        status: prepared.preflight.status,
         reason: providerResult.error.code,
       },
     };
   }
 
   await writeBudgetPostflight({
-    requestId,
-    model: providerHealth.model,
+    requestId: prepared.requestId,
+    model: prepared.providerHealth.model,
     status: "success",
-    reason: preflight.status === "degraded" ? "GEMINI_BUDGET_DEGRADED" : "OK",
-    estimatedCostUsd: preflight.estimatedCostUsd,
-    totalCostUsd: preflight.estimatedCostUsd,
+    reason: prepared.preflight.status === "degraded" ? "GEMINI_BUDGET_DEGRADED" : "OK",
+    estimatedCostUsd: prepared.preflight.estimatedCostUsd,
+    totalCostUsd: prepared.preflight.estimatedCostUsd,
     inputTokens: providerResult.usage?.promptTokenCount,
     outputTokens: providerResult.usage?.candidatesTokenCount,
-    monthlySpendBefore: preflight.monthlySpendUsd,
+    monthlySpendBefore: prepared.preflight.monthlySpendUsd,
   });
 
   await appendTifaChatSession({
-    request_id: requestId,
+    request_id: prepared.requestId,
     timestamp_utc: new Date().toISOString(),
     message: input.message,
     answer: providerResult.text,
@@ -304,10 +349,125 @@ export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promi
     answer: providerResult.text,
     provider: providerResult.provider,
     model: providerResult.model,
-    tool_context: toolContext,
+    tool_context: prepared.toolContext,
     budget: {
-      status: preflight.status,
-      reason: preflight.reason,
+      status: prepared.preflight.status,
+      reason: prepared.preflight.reason,
     },
   };
+}
+
+export async function runTifaChatStream(
+  req: NextRequest,
+  input: TifaChatInput
+): Promise<TifaStreamPreparation | { ok: false; error: { code: string; message: string } }> {
+  const prepared = await prepareTifaChat(req, input);
+  if (!prepared.ok) {
+    return { ok: false, error: prepared.error };
+  }
+
+  if (!prepared.preflight.allowed) {
+    return {
+      requestId: prepared.requestId,
+      providerModel: prepared.providerHealth.model,
+      toolContext: prepared.toolContext,
+      budget: { status: "blocked", reason: prepared.preflight.reason },
+      answerForFallback: prepared.toolOnlyAnswer,
+      postflight: null,
+      mode: "tool-only",
+    };
+  }
+
+  if (!prepared.providerHealth.configured) {
+    return {
+      requestId: prepared.requestId,
+      providerModel: prepared.providerHealth.model,
+      toolContext: prepared.toolContext,
+      budget: { status: prepared.preflight.status, reason: "GEMINI_NOT_CONFIGURED" },
+      answerForFallback: prepared.toolOnlyAnswer,
+      postflight: null,
+      mode: "tool-only",
+    };
+  }
+
+  const systemPrompt = await loadTifaRuntimePrompt();
+  const userPrompt = buildUserPrompt(
+    input.message,
+    prepared.toolContext,
+    prepared.config.timezone
+  );
+
+  const providerStream = await runTifaProviderGatewayStream({
+    systemPrompt,
+    userPrompt,
+    temperature: prepared.config.gemini.temperature,
+    maxOutputTokens:
+      prepared.preflight.maxOutputTokensOverride ?? prepared.config.gemini.maxOutputTokens,
+  });
+
+  if (!providerStream.ok) {
+    await writeBudgetPostflight({
+      requestId: prepared.requestId,
+      model: prepared.providerHealth.model,
+      status: "failed",
+      reason: providerStream.error.code,
+      estimatedCostUsd: prepared.preflight.estimatedCostUsd,
+      monthlySpendBefore: prepared.preflight.monthlySpendUsd,
+    });
+
+    return {
+      requestId: prepared.requestId,
+      providerModel: prepared.providerHealth.model,
+      toolContext: prepared.toolContext,
+      budget: { status: prepared.preflight.status, reason: providerStream.error.code },
+      answerForFallback: prepared.toolOnlyAnswer,
+      postflight: null,
+      mode: "tool-only",
+      streamErrorCode: providerStream.error.code,
+    };
+  }
+
+  return {
+    requestId: prepared.requestId,
+    providerModel: prepared.providerHealth.model,
+    toolContext: prepared.toolContext,
+    budget: { status: prepared.preflight.status, reason: prepared.preflight.reason },
+    answerForFallback: prepared.toolOnlyAnswer,
+    postflight: {
+      estimatedCostUsd: prepared.preflight.estimatedCostUsd,
+      monthlySpendBefore: prepared.preflight.monthlySpendUsd,
+    },
+    mode: "provider-stream",
+    stream: providerStream.stream,
+  };
+}
+
+export async function finalizeTifaStreamSuccess(params: {
+  requestId: string;
+  model: string;
+  estimatedCostUsd: number;
+  monthlySpendBefore: number;
+  answer: string;
+  message: string;
+  context?: Record<string, unknown>;
+}) {
+  await writeBudgetPostflight({
+    requestId: params.requestId,
+    model: params.model,
+    status: "success",
+    reason: "OK",
+    estimatedCostUsd: params.estimatedCostUsd,
+    totalCostUsd: params.estimatedCostUsd,
+    monthlySpendBefore: params.monthlySpendBefore,
+  });
+
+  await appendTifaChatSession({
+    request_id: params.requestId,
+    timestamp_utc: new Date().toISOString(),
+    message: params.message,
+    answer: params.answer,
+    context: params.context,
+    provider: "gemini",
+    model: params.model,
+  });
 }

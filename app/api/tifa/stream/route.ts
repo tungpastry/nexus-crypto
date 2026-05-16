@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { requireApiAuth } from "../../../lib/auth/api";
-import { runTifaChat } from "../../../lib/tifa-core/chat";
+import {
+  finalizeTifaStreamSuccess,
+  runTifaChatStream,
+} from "../../../lib/tifa-core/chat";
+import { sanitizeProviderError } from "../../../lib/tifa-provider-gateway/redaction";
 import { validateTifaChatInput } from "../../../lib/tifa-widget/validation";
 
 export const runtime = "nodejs";
@@ -8,6 +12,12 @@ export const dynamic = "force-dynamic";
 
 function sseEvent(event: string, data: unknown) {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+function isStreamErrorResult(
+  result: Awaited<ReturnType<typeof runTifaChatStream>>
+): result is { ok: false; error: { code: string; message: string } } {
+  return "ok" in result && result.ok === false;
 }
 
 function chunkText(text: string, size = 72) {
@@ -33,7 +43,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  let input;
+  let input: ReturnType<typeof validateTifaChatInput>;
   try {
     const body = await req.json();
     input = validateTifaChatInput(body);
@@ -60,8 +70,8 @@ export async function POST(req: NextRequest) {
       const encoder = new TextEncoder();
 
       try {
-        const result = await runTifaChat(req, input);
-        if (!result.ok) {
+        const result = await runTifaChatStream(req, input);
+        if (isStreamErrorResult(result)) {
           controller.enqueue(
             encoder.encode(
               sseEvent("error", {
@@ -74,31 +84,83 @@ export async function POST(req: NextRequest) {
           return;
         }
 
+        const provider = result.mode === "provider-stream" ? "gemini" : "tool-only";
         controller.enqueue(
           encoder.encode(
-            sseEvent("start", { provider: result.provider, model: result.model })
+            sseEvent("start", { provider, model: result.providerModel })
           )
         );
         controller.enqueue(
           encoder.encode(
             sseEvent("tool", {
-              intent: result.tool_context.intent,
-              has_market: Boolean(result.tool_context.market_context),
-              has_asset: Boolean(result.tool_context.asset_analysis_context),
-              has_budget: Boolean(result.tool_context.budget_context),
-              has_provider_health: Boolean(result.tool_context.provider_health_context),
+              intent: result.toolContext.intent,
+              has_market: Boolean(result.toolContext.market_context),
+              has_asset: Boolean(result.toolContext.asset_analysis_context),
+              has_budget: Boolean(result.toolContext.budget_context),
+              has_provider_health: Boolean(result.toolContext.provider_health_context),
             })
           )
         );
         controller.enqueue(encoder.encode(sseEvent("budget", result.budget)));
 
-        for (const chunk of chunkText(result.answer)) {
-          controller.enqueue(encoder.encode(sseEvent("delta", { text: chunk })));
-          await new Promise((resolve) => setTimeout(resolve, 8));
+        let finalAnswer = "";
+
+        if (result.mode === "provider-stream" && result.stream) {
+          try {
+            for await (const text of result.stream) {
+              if (!text) continue;
+              finalAnswer += text;
+              controller.enqueue(encoder.encode(sseEvent("delta", { text })));
+            }
+          } catch (streamError) {
+            const message = sanitizeProviderError(
+              streamError,
+              "Provider stream failed"
+            );
+            controller.enqueue(
+              encoder.encode(
+                sseEvent("error", {
+                  code: "STREAM_PROVIDER_ERROR",
+                  message,
+                })
+              )
+            );
+            controller.close();
+            return;
+          }
+        } else {
+          if (result.streamErrorCode) {
+            controller.enqueue(
+              encoder.encode(
+                sseEvent("error", {
+                  code: result.streamErrorCode,
+                  message: "Provider stream unavailable. Falling back to tool-only mode.",
+                })
+              )
+            );
+          }
+
+          for (const chunk of chunkText(result.answerForFallback)) {
+            finalAnswer += chunk;
+            controller.enqueue(encoder.encode(sseEvent("delta", { text: chunk })));
+            await new Promise((resolve) => setTimeout(resolve, 8));
+          }
+        }
+
+        if (result.mode === "provider-stream" && result.postflight) {
+          await finalizeTifaStreamSuccess({
+            requestId: result.requestId,
+            model: result.providerModel,
+            estimatedCostUsd: result.postflight.estimatedCostUsd,
+            monthlySpendBefore: result.postflight.monthlySpendBefore,
+            answer: finalAnswer,
+            message: input.message,
+            context: input.context as Record<string, unknown> | undefined,
+          });
         }
 
         controller.enqueue(
-          encoder.encode(sseEvent("done", { provider: result.provider, model: result.model }))
+          encoder.encode(sseEvent("done", { provider, model: result.providerModel }))
         );
         controller.close();
       } catch (error) {
@@ -106,7 +168,7 @@ export async function POST(req: NextRequest) {
           encoder.encode(
             sseEvent("error", {
               code: "STREAM_ERROR",
-              message: error instanceof Error ? error.message : "Streaming failed",
+              message: sanitizeProviderError(error, "Streaming failed"),
             })
           )
         );
