@@ -19,6 +19,19 @@ type NexusAutoChecklistProps = {
   onTrendChange?: (trend: NexusSignal["trend"] | "DISABLED") => void;
 };
 
+type MetricTone =
+  | "price"
+  | "ma20"
+  | "ma50"
+  | "ma200"
+  | "atr"
+  | "atrPercent"
+  | "volatilityLow"
+  | "volatilityNormal"
+  | "volatilityHigh"
+  | "volatilityUnknown"
+  | "volume";
+
 function formatNumber(value: number) {
   if (!Number.isFinite(value)) return "--";
   return value.toLocaleString("en-US", {
@@ -49,11 +62,68 @@ function getStateClass(state: NexusSignal["state"]) {
   return "border-[rgba(94,234,212,0.45)] bg-[rgba(94,234,212,0.12)] text-[var(--mint-positive)]";
 }
 
-function getVolatilityClass(volatility: NexusSignal["volatility"]) {
-  if (volatility === "Normal") return "text-[var(--mint-positive)]";
-  if (volatility === "Low") return "text-[var(--amber-warning)]";
-  if (volatility === "High") return "text-[var(--red-negative)]";
-  return "text-[var(--text-soft)]";
+function getMetricToneClass(tone: MetricTone) {
+  if (tone === "price") {
+    return "border-[rgba(250,204,21,0.35)] bg-[rgba(250,204,21,0.07)] text-yellow-300";
+  }
+  if (tone === "ma20") {
+    return "border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.07)] text-red-300";
+  }
+  if (tone === "ma50") {
+    return "border-[rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.07)] text-green-300";
+  }
+  if (tone === "ma200") {
+    return "border-[rgba(56,189,248,0.35)] bg-[rgba(56,189,248,0.07)] text-sky-300";
+  }
+  if (tone === "atr") {
+    return "border-[rgba(196,181,253,0.35)] bg-[rgba(196,181,253,0.07)] text-violet-300";
+  }
+  if (tone === "atrPercent") {
+    return "border-[rgba(244,114,182,0.35)] bg-[rgba(244,114,182,0.07)] text-pink-300";
+  }
+  if (tone === "volatilityLow") {
+    return "border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.07)] text-[var(--amber-warning)]";
+  }
+  if (tone === "volatilityNormal") {
+    return "border-[rgba(94,234,212,0.35)] bg-[rgba(94,234,212,0.07)] text-[var(--mint-positive)]";
+  }
+  if (tone === "volatilityHigh") {
+    return "border-[rgba(251,113,133,0.35)] bg-[rgba(251,113,133,0.07)] text-[var(--red-negative)]";
+  }
+  if (tone === "volatilityUnknown") {
+    return "border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.045)] text-[var(--text-muted)]";
+  }
+  return "border-[rgba(251,146,60,0.35)] bg-[rgba(251,146,60,0.07)] text-orange-300";
+}
+
+function getVolatilityTone(volatility: NexusSignal["volatility"]): MetricTone {
+  if (volatility === "Low") return "volatilityLow";
+  if (volatility === "Normal") return "volatilityNormal";
+  if (volatility === "High") return "volatilityHigh";
+  return "volatilityUnknown";
+}
+
+function MetricCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: MetricTone;
+}) {
+  return (
+    <div
+      className={`rounded-xl border px-3 py-2 ${getMetricToneClass(
+        tone
+      )}`}
+    >
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-soft)]">
+        {label}
+      </p>
+      <p className="mt-1 font-mono text-sm font-bold">{value}</p>
+    </div>
+  );
 }
 
 function RuleIcon({ rule }: { rule: NexusChecklistRule }) {
@@ -183,17 +253,27 @@ export default function NexusAutoChecklist({
         </div>
 
         <div className="space-y-4">
-          <div className="grid gap-2 font-mono text-xs text-[var(--text-muted)] sm:grid-cols-4">
-            <span>Price {formatNumber(signal.price)}</span>
-            <span>MA20 {formatNumber(signal.ma20)}</span>
-            <span>MA50 {formatNumber(signal.ma50)}</span>
-            <span>MA200 {formatNumber(signal.ma200)}</span>
-            <span>ATR14 {formatNumber(signal.atr14)}</span>
-            <span>ATR % {formatPercent(signal.atrPercent)}</span>
-            <span className={getVolatilityClass(signal.volatility)}>
-              Volatility {signal.volatility}
-            </span>
-            <span>Volume Ratio {formatRatio(signal.volumeRatio)}</span>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard label="Price" value={formatNumber(signal.price)} tone="price" />
+            <MetricCard label="MA20" value={formatNumber(signal.ma20)} tone="ma20" />
+            <MetricCard label="MA50" value={formatNumber(signal.ma50)} tone="ma50" />
+            <MetricCard label="MA200" value={formatNumber(signal.ma200)} tone="ma200" />
+            <MetricCard label="ATR14" value={formatNumber(signal.atr14)} tone="atr" />
+            <MetricCard
+              label="ATR %"
+              value={formatPercent(signal.atrPercent)}
+              tone="atrPercent"
+            />
+            <MetricCard
+              label="Volatility"
+              value={signal.volatility}
+              tone={getVolatilityTone(signal.volatility)}
+            />
+            <MetricCard
+              label="Volume Ratio"
+              value={formatRatio(signal.volumeRatio)}
+              tone="volume"
+            />
           </div>
 
           <div>
