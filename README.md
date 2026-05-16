@@ -50,7 +50,7 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - TradingView chart with unique container per asset/timeframe.
 - Binance-backed `PriceWidget` and kline context.
 - CoinGecko-style market snapshot route with cache/stale fallback.
-- Nexus checklist with MA20/MA50/MA200 direction-aware scoring.
+- Nexus Decision Matrix: multi-factor workflow scoring that combines MA20/MA50/MA200 structure, trend/bias state, ATR volatility regime, volume confirmation, support/resistance location, and optional higher-timeframe agreement into a clear decision-support state (`No Trade`, `Watch`, `Ready`, `Confirmed`).
 - Stablecoin market-only mode (USDT/USDC: no chart/MA/checklist automation).
 - Provider health endpoint with cache freshness insight.
 - Deep provider health endpoint for all Binance-enabled Nexus symbols.
