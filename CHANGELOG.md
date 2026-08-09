@@ -42,18 +42,14 @@
   - new routes: `/api/tifa-tools/provider-health-explainer`, `/api/tifa-tools/deep-health-explainer`, `/api/tifa-tools/ops-summary`, `/api/tifa-tools/orchestrate`
   - richer `/ops` summary panels (executive summary, provider summary, deep summary, issues list)
   - extended smoke checks for Phase 2 orchestration and no-secret assertions
-- Gemini CLI DevOps Agent documentation:
-  - `docs/gemini-cli-devops.md`
-  - README DevOps Agent section
-  - architecture layer for local Gemini CLI repository maintenance
-  - deployment notes for Gemini live provider and Phase 2 smoke validation
+- Gemini live provider deployment notes and Phase 2 smoke validation docs.
 
 ### Changed
 
 - Next.js convention migration: root `middleware.ts` replaced by `proxy.ts`.
 - Ubuntu production deploy dependency install is deterministic via `npm ci`.
-- Commit `fce6b64e92a6acb404a7272aa96fef1cae3a11fb` updated the Gemini CLI bootstrap/system prompt context for Phase 2 DevOps-safe repository work.
 - Documentation refreshed to align README, architecture, API reference, deployment, and Phase 2 Tifa docs with the current `fce6b64e` baseline.
+- Removed the unsupported local Gemini CLI DevOps layer (`bin/nxgcli.sh`, bootstrap context files, and CLI-specific docs). The Tifa Gemini API provider, budget guard, and circuit breaker remain in place.
 - Branding/UI polish landed:
   - logo banner in README
   - Nexus logo/favicon asset refresh

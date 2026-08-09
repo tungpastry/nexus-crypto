@@ -10,11 +10,11 @@ Current reviewed baseline:
 - Runtime: Next.js 16 App Router
 - Main production port: `3200`
 - Production reference: Ubuntu Server + `systemd`
-- Latest DevOps context commit: `fce6b64e92a6acb404a7272aa96fef1cae3a11fb`
+- Latest reviewed commit: `05a7953cab919705d3db2e30e80f2215a7a7c27b`
 
 ## Layered Architecture
 
-Nexus Crypto now has five operational layers:
+Nexus Crypto now has four operational layers:
 
 1. **Market Layer**
    - fixed Top 10 Nexus Universe
@@ -46,13 +46,6 @@ Nexus Crypto now has five operational layers:
    - budget guard
    - circuit breaker
    - Phase 2 tool orchestration
-
-5. **DevOps Agent Layer**
-   - `bin/nxgcli.sh`
-   - `bootstrap.txt`
-   - `load_context.txt`
-   - `system_prompt.txt`
-   - safe Gemini CLI repository maintenance workflow
 
 ## Runtime Architecture
 
@@ -132,27 +125,6 @@ The orchestrator degrades safely: per-tool failures are captured as warnings whe
 - Deploy script writes a managed release metadata block into `.env.production.local`.
 - `/api/version` exposes runtime metadata (`commit`, `short_commit`, `build_time`, `next`, `node`, `env`).
 - `VersionBadge` surfaces this metadata in the UI footer.
-
-## Gemini CLI DevOps Architecture
-
-Commit `fce6b64e92a6acb404a7272aa96fef1cae3a11fb` updates the local Gemini CLI DevOps layer.
-
-Entrypoint:
-
-```bash
-./bin/nxgcli.sh "inspect repo and propose next safe slice"
-```
-
-Context chain:
-
-```text
-bin/nxgcli.sh
-→ gemini --context @bootstrap.txt
-→ load_context.txt
-→ system_prompt.txt
-```
-
-The DevOps agent is scoped to repository maintenance, not runtime trading analysis. It must preserve auth, budget guard, circuit breaker, no-secret leakage tests, and API compatibility.
 
 ## Nexus Algorithm v1.1
 

@@ -32,8 +32,8 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 
 ## Current Verified Baseline
 
-- Latest reviewed commit: `fce6b64e92a6acb404a7272aa96fef1cae3a11fb`
-- Commit theme: Gemini CLI DevOps bootstrap/system prompt update for Phase 2
+- Latest reviewed commit: `05a7953cab919705d3db2e30e80f2215a7a7c27b`
+- Commit theme: README web app screenshots
 - Previous Phase 2 completion commit: `eb816232596ccf02216d4b08366ba7c99e6f97f3`
 - Production reference: Ubuntu Server, `nexus-crypto.service`, port `3200`
 - Runtime status after live validation: Phase 2 + Gemini live provider smoke passed
@@ -49,7 +49,6 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - [Validation](#validation)
 - [Production Deployment On Ubuntu](#production-deployment-on-ubuntu)
 - [Gemini Live Provider](#gemini-live-provider)
-- [Gemini CLI DevOps Agent](#gemini-cli-devops-agent)
 - [API Overview](#api-overview)
 - [Documentation](#documentation)
 - [Project Structure](#project-structure)
@@ -74,11 +73,10 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - TifaWidget Assistant with grounded market/asset context and Gemini budget guard.
   - Phase 1.1 hardening: contract tests, no-secret leakage tests, Gemini true-stream path, safe pre-stream fallback to tool-only pseudo stream, sanitized `STREAM_PROVIDER_ERROR`, and Gemini circuit breaker.
   - Phase 2 ops orchestration: provider/deep health explainers, ops summary endpoint, allowlisted orchestration endpoint, and richer `/ops` diagnostic summaries.
-- Gemini CLI DevOps context layer for safe repository maintenance.
 
 ## Architecture Layers
 
-Nexus Crypto is organized into five practical layers:
+Nexus Crypto is organized into four practical layers:
 
 1. **Market Layer**
    - Top 10 universe config
@@ -106,13 +104,6 @@ Nexus Crypto is organized into five practical layers:
    - budget guard + circuit breaker
    - Phase 2 tool orchestration
 
-5. **DevOps Agent Layer**
-   - `bin/nxgcli.sh`
-   - `bootstrap.txt`
-   - `load_context.txt`
-   - `system_prompt.txt`
-   - safe slice workflow for Gemini CLI repository work
-
 ## Tech Stack
 
 - Next.js `16.2.6`
@@ -128,7 +119,6 @@ Nexus Crypto is organized into five practical layers:
 - Node.js 22 LTS recommended (production reference uses Node `v22.18.0`).
 - npm
 - Optional for production: Ubuntu Server + `systemd`.
-- Optional for repository DevOps: Gemini CLI installed and logged in.
 
 ## Quick Start
 
@@ -230,34 +220,6 @@ Expected live provider indicators:
 }
 ```
 
-## Gemini CLI DevOps Agent
-
-Commit `fce6b64e92a6acb404a7272aa96fef1cae3a11fb` updates the repository DevOps context for Gemini CLI.
-
-Canonical entrypoint:
-
-```bash
-./bin/nxgcli.sh "inspect repo and propose next safe slice"
-```
-
-The wrapper loads:
-
-```text
-bootstrap.txt -> load_context.txt -> system_prompt.txt
-```
-
-DevOps agent rules:
-
-- inspect before patching
-- preserve auth boundaries
-- preserve Gemini budget guard
-- preserve circuit breaker behavior
-- preserve no-secret leakage behavior
-- avoid broad refactors without a slice plan
-- never claim tests passed without output
-
-See [`docs/gemini-cli-devops.md`](docs/gemini-cli-devops.md).
-
 ## API Overview
 
 Primary endpoints:
@@ -293,7 +255,6 @@ Full contracts and examples are documented in [docs/api-reference.md](docs/api-r
 - [docs/release-checklist.md](docs/release-checklist.md)
 - [docs/tifa-assistant-phase1.md](docs/tifa-assistant-phase1.md)
 - [docs/tifa-assistant-phase2.md](docs/tifa-assistant-phase2.md)
-- [docs/gemini-cli-devops.md](docs/gemini-cli-devops.md)
 
 ## Project Structure
 
@@ -315,14 +276,9 @@ nexus-crypto/
 │   │   └── tifa-tools/
 │   ├── asset/[id]/page.tsx
 │   └── page.tsx
-├── bin/
-│   └── nxgcli.sh
 ├── docs/
 ├── public/
 ├── scripts/
-├── bootstrap.txt
-├── load_context.txt
-├── system_prompt.txt
 ├── proxy.ts
 └── package.json
 ```
