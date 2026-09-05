@@ -1,13 +1,20 @@
 "use client";
 
-import { Send, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Send, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { TifaPageContext } from "../../lib/tifa-core/types";
 import TifaBudgetBadge from "./TifaBudgetBadge";
 import TifaMessageBubble from "./TifaMessageBubble";
 import TifaAvatar from "./TifaAvatar";
 import TifaProviderBadge from "./TifaProviderBadge";
 import TifaQuickActions from "./TifaQuickActions";
+import {
+  TIFA_WELCOME_MESSAGE,
+  clearChatHistory,
+  loadChatHistory,
+  persistChatHistory,
+  type TifaChatMessage,
+} from "./chatHistory";
 
 type TifaChatPanelProps = {
   page: "home" | "asset" | "ops";
@@ -15,11 +22,7 @@ type TifaChatPanelProps = {
   onClose: () => void;
 };
 
-type ChatMessage = {
-  id: string;
-  role: "user" | "assistant";
-  text: string;
-};
+type ChatMessage = TifaChatMessage;
 
 type BudgetBadgeState = {
   status: "ok" | "degraded" | "blocked";
@@ -101,19 +104,26 @@ function mapAssistantError(message: string) {
 }
 
 export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      text: "Chào bạn, mình là Tifa. Mình sẽ bám dữ liệu Nexus hiện có để trả lời ngắn gọn, có ngữ cảnh, và không bịa số.",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatHistory(page));
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [provider, setProvider] = useState({ provider: "tool-only", model: "gemini-3-flash-preview" });
   const [budget, setBudget] = useState<BudgetBadgeState>({ status: "ok" });
   const [error, setError] = useState<string | null>(null);
   const quickActions = useMemo(() => getQuickActions(page), [page]);
+
+  // Persist per-page thread so closing/reopening the panel keeps history.
+  useEffect(() => {
+    persistChatHistory(page, messages);
+  }, [page, messages]);
+
+  const handleClear = () => {
+    if (pending) return;
+    if (typeof window !== "undefined" && !window.confirm("Xóa lịch sử chat trang này?")) return;
+    clearChatHistory(page);
+    setMessages([TIFA_WELCOME_MESSAGE]);
+    setError(null);
+  };
 
   const updateAssistantMessage = (id: string, text: string) => {
     setMessages((prev) => prev.map((item) => (item.id === id ? { ...item, text } : item)));
@@ -272,14 +282,26 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
             <p className="text-sm font-semibold text-[var(--text-main)]">Nexus Crypto Chat</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.04)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-pink)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
-          aria-label="Close Tifa panel"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleClear}
+            disabled={pending}
+            className="rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.04)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Clear chat history"
+            title="Xóa lịch sử chat trang này"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.04)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-pink)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+            aria-label="Close Tifa panel"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-soft)] px-4 py-2">
