@@ -1,13 +1,15 @@
 "use client";
 
-import { Send, Trash2, X } from "lucide-react";
+import { Send, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { TifaPageContext } from "../../lib/tifa-core/types";
+import { safeReadJson, safeWriteJson } from "../../lib/clientStorage";
 import TifaBudgetBadge from "./TifaBudgetBadge";
 import TifaMessageBubble from "./TifaMessageBubble";
 import TifaAvatar from "./TifaAvatar";
 import TifaProviderBadge from "./TifaProviderBadge";
 import TifaQuickActions from "./TifaQuickActions";
+import { useTifaSpeech } from "./useTifaSpeech";
 import {
   TIFA_WELCOME_MESSAGE,
   clearChatHistory,
@@ -110,7 +112,36 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
   const [provider, setProvider] = useState({ provider: "tool-only", model: "gemini-3-flash-preview" });
   const [budget, setBudget] = useState<BudgetBadgeState>({ status: "ok" });
   const [error, setError] = useState<string | null>(null);
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [autoRead, setAutoRead] = useState<boolean>(() =>
+    safeReadJson<boolean>(
+      "tifa-auto-read",
+      false,
+      (value): value is boolean => typeof value === "boolean"
+    )
+  );
   const quickActions = useMemo(() => getQuickActions(page), [page]);
+  const speech = useTifaSpeech();
+
+  useEffect(() => {
+    safeWriteJson("tifa-auto-read", autoRead);
+  }, [autoRead]);
+
+  const stopSpeaking = () => {
+    speech.stop();
+    setSpeakingId(null);
+  };
+
+  const speakMessage = (id: string, text: string) => {
+    if (speakingId === id) {
+      stopSpeaking();
+      return;
+    }
+    stopSpeaking();
+    if (speech.speak(text, () => setSpeakingId(null))) {
+      setSpeakingId(id);
+    }
+  };
 
   // Persist per-page thread so closing/reopening the panel keeps history.
   useEffect(() => {
@@ -155,6 +186,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
     updateAssistantMessage(assistantId, payload.answer);
     setProvider({ provider: payload.provider, model: payload.model });
     if (payload.budget) setBudget(payload.budget);
+    return payload.answer;
   };
 
   const sendStream = async (message: string, assistantId: string) => {
@@ -232,6 +264,8 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
     if (!assistantText.trim()) {
       throw new Error("Stream returned empty assistant content");
     }
+
+    return assistantText;
   };
 
   const handleSend = async (message: string) => {
@@ -247,15 +281,22 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
     ]);
     setInput("");
     setPending(true);
+    stopSpeaking();
+
+    const maybeAutoRead = (finalText: string) => {
+      if (autoRead && finalText.trim()) {
+        speakMessage(assistantId, finalText);
+      }
+    };
 
     try {
-      await sendStream(trimmed, assistantId);
+      maybeAutoRead(await sendStream(trimmed, assistantId));
     } catch (streamError) {
       const streamMessage =
         streamError instanceof Error ? streamError.message : "Unknown streaming error";
       updateAssistantMessage(assistantId, mapAssistantError(streamMessage));
       try {
-        await sendNonStream(trimmed, assistantId);
+        maybeAutoRead(await sendNonStream(trimmed, assistantId));
       } catch (fallbackError) {
         updateAssistantMessage(
           assistantId,
@@ -307,11 +348,42 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-soft)] px-4 py-2">
         <TifaProviderBadge provider={provider.provider} model={provider.model} />
         <TifaBudgetBadge budget={budget} />
+        <button
+          type="button"
+          onClick={() => setAutoRead((value) => !value)}
+          disabled={!speech.supported}
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50 ${
+            autoRead
+              ? "border-[var(--border-cyan)] bg-[rgba(125,211,252,0.08)] text-[var(--cyan-accent)]"
+              : "border-[var(--border-soft)] bg-black text-[var(--text-muted)]"
+          }`}
+          title={
+            !speech.supported
+              ? "Trình duyệt không hỗ trợ đọc to"
+              : !speech.hasVietnameseVoice
+                ? "Tự động đọc trả lời (trình duyệt chưa có giọng Việt, sẽ dùng giọng mặc định)"
+                : "Tự động đọc trả lời mới"
+          }
+        >
+          {autoRead ? (
+            <Volume2 className="h-3 w-3" />
+          ) : (
+            <VolumeX className="h-3 w-3" />
+          )}
+          Tự đọc
+        </button>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
         {messages.map((message) => (
-          <TifaMessageBubble key={message.id} role={message.role} text={message.text} />
+          <TifaMessageBubble
+            key={message.id}
+            role={message.role}
+            text={message.text}
+            speechSupported={speech.supported}
+            speaking={speakingId === message.id}
+            onToggleSpeech={() => speakMessage(message.id, message.text)}
+          />
         ))}
       </div>
 
