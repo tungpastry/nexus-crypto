@@ -1,18 +1,30 @@
 import { getTifaRuntimeConfig } from "../tifa-runtime/config";
 import {
-  beginGeminiCircuitAttempt,
-  finalizeGeminiCircuitAttempt,
-  getGeminiCircuitSnapshot,
+  beginLlmCircuitAttempt,
+  finalizeLlmCircuitAttempt,
+  getLlmCircuitSnapshot,
 } from "./circuitBreaker";
 import { runGeminiChat, runGeminiChatStream } from "./gemini";
+import { runOllamaChat, runOllamaChatStream } from "./ollama";
 import type {
+  LlmProviderName,
   ProviderChatRequest,
   ProviderGatewayResult,
   ProviderHealth,
   ProviderStreamGatewayResult,
 } from "./types";
 
+function activeProvider(): LlmProviderName {
+  return getTifaRuntimeConfig().llmProvider;
+}
+
+function activeModel(): string {
+  const config = getTifaRuntimeConfig();
+  return config.llmProvider === "ollama" ? config.ollama.model : config.gemini.model;
+}
+
 async function runWithRetry(
+  provider: LlmProviderName,
   task: () => Promise<ProviderGatewayResult>,
   retryLimit: number
 ): Promise<ProviderGatewayResult> {
@@ -27,17 +39,18 @@ async function runWithRetry(
   return (
     lastResult || {
       ok: false,
-      provider: "gemini",
-      model: getTifaRuntimeConfig().gemini.model,
+      provider,
+      model: activeModel(),
       error: {
-        code: "GEMINI_REQUEST_FAILED",
-        message: "Gemini request failed.",
+        code: provider === "ollama" ? "OLLAMA_REQUEST_FAILED" : "GEMINI_REQUEST_FAILED",
+        message: provider === "ollama" ? "Ollama request failed." : "Gemini request failed.",
       },
     }
   );
 }
 
 async function runStreamWithRetry(
+  provider: LlmProviderName,
   task: () => Promise<ProviderStreamGatewayResult>,
   retryLimit: number
 ): Promise<ProviderStreamGatewayResult> {
@@ -52,36 +65,44 @@ async function runStreamWithRetry(
   return (
     lastResult || {
       ok: false,
-      provider: "gemini",
-      model: getTifaRuntimeConfig().gemini.model,
+      provider,
+      model: activeModel(),
       error: {
-        code: "GEMINI_STREAM_FAILED",
-        message: "Gemini stream failed.",
+        code: provider === "ollama" ? "OLLAMA_STREAM_FAILED" : "GEMINI_STREAM_FAILED",
+        message: provider === "ollama" ? "Ollama stream failed." : "Gemini stream failed.",
       },
     }
   );
 }
 
-function blockedByCircuitError(): ProviderGatewayResult {
+function blockedByCircuitError(provider: LlmProviderName): ProviderGatewayResult {
   return {
     ok: false,
-    provider: "gemini",
-    model: getTifaRuntimeConfig().gemini.model,
+    provider,
+    model: activeModel(),
     error: {
-      code: "GEMINI_CIRCUIT_OPEN",
-      message: "Gemini provider is temporarily disabled by circuit breaker.",
+      code: provider === "ollama" ? "OLLAMA_CIRCUIT_OPEN" : "GEMINI_CIRCUIT_OPEN",
+      message:
+        provider === "ollama"
+          ? "Ollama provider is temporarily disabled by circuit breaker."
+          : "Gemini provider is temporarily disabled by circuit breaker.",
     },
   };
 }
 
-function blockedByCircuitStreamError(): ProviderStreamGatewayResult {
+function blockedByCircuitStreamError(
+  provider: LlmProviderName
+): ProviderStreamGatewayResult {
   return {
     ok: false,
-    provider: "gemini",
-    model: getTifaRuntimeConfig().gemini.model,
+    provider,
+    model: activeModel(),
     error: {
-      code: "GEMINI_CIRCUIT_OPEN",
-      message: "Gemini provider is temporarily disabled by circuit breaker.",
+      code: provider === "ollama" ? "OLLAMA_CIRCUIT_OPEN" : "GEMINI_CIRCUIT_OPEN",
+      message:
+        provider === "ollama"
+          ? "Ollama provider is temporarily disabled by circuit breaker."
+          : "Gemini provider is temporarily disabled by circuit breaker.",
     },
   };
 }
@@ -90,13 +111,19 @@ export async function runTifaProviderGateway(
   request: ProviderChatRequest
 ): Promise<ProviderGatewayResult> {
   const config = getTifaRuntimeConfig();
-  const attempt = beginGeminiCircuitAttempt();
+  const provider = activeProvider();
+  const attempt = beginLlmCircuitAttempt(provider);
   if (!attempt.allowed) {
-    return blockedByCircuitError();
+    return blockedByCircuitError(provider);
   }
 
-  const result = await runWithRetry(() => runGeminiChat(request), config.gemini.retryLimit);
-  finalizeGeminiCircuitAttempt(result.ok);
+  // Ollama-only runtime: never auto-fallback to Gemini here. Failures fall
+  // through to the tool-only answer in tifa-core/chat.ts.
+  const result =
+    provider === "ollama"
+      ? await runWithRetry(provider, () => runOllamaChat(request), config.ollama.retryLimit)
+      : await runWithRetry(provider, () => runGeminiChat(request), config.gemini.retryLimit);
+  finalizeLlmCircuitAttempt(provider, result.ok);
   return result;
 }
 
@@ -104,26 +131,54 @@ export async function runTifaProviderGatewayStream(
   request: ProviderChatRequest
 ): Promise<ProviderStreamGatewayResult> {
   const config = getTifaRuntimeConfig();
-  const attempt = beginGeminiCircuitAttempt();
+  const provider = activeProvider();
+  const attempt = beginLlmCircuitAttempt(provider);
   if (!attempt.allowed) {
-    return blockedByCircuitStreamError();
+    return blockedByCircuitStreamError(provider);
   }
 
-  const result = await runStreamWithRetry(
-    () => runGeminiChatStream(request),
-    config.gemini.streamRetryLimit
-  );
-  finalizeGeminiCircuitAttempt(result.ok);
+  const result =
+    provider === "ollama"
+      ? await runStreamWithRetry(
+          provider,
+          () => runOllamaChatStream(request),
+          config.ollama.streamRetryLimit
+        )
+      : await runStreamWithRetry(
+          provider,
+          () => runGeminiChatStream(request),
+          config.gemini.streamRetryLimit
+        );
+  finalizeLlmCircuitAttempt(provider, result.ok);
   return result;
 }
 
 export function getTifaProviderHealth(): ProviderHealth {
   const config = getTifaRuntimeConfig();
   const enabled = config.enabled;
+  const provider = activeProvider();
+
+  if (provider === "ollama") {
+    const configured = Boolean(config.ollama.host && config.ollama.model);
+    return {
+      provider,
+      model: config.ollama.model,
+      enabled,
+      configured,
+      stream_enabled: true,
+      retry_limit: config.ollama.retryLimit,
+      timeout_ms: config.ollama.timeoutMs,
+      stream_retry_limit: config.ollama.streamRetryLimit,
+      stream_timeout_ms: config.ollama.streamTimeoutMs,
+      circuit: getLlmCircuitSnapshot("ollama"),
+      reason: configured ? undefined : "OLLAMA_HOST or OLLAMA_MODEL is missing",
+    };
+  }
+
   const configured = Boolean(config.gemini.apiKey);
 
   return {
-    provider: "gemini",
+    provider,
     model: config.gemini.model,
     enabled,
     configured,
@@ -132,7 +187,7 @@ export function getTifaProviderHealth(): ProviderHealth {
     timeout_ms: config.gemini.timeoutMs,
     stream_retry_limit: config.gemini.streamRetryLimit,
     stream_timeout_ms: config.gemini.streamTimeoutMs,
-    circuit: getGeminiCircuitSnapshot(),
+    circuit: getLlmCircuitSnapshot("gemini"),
     reason: configured ? undefined : "GEMINI_API_KEY is missing",
   };
 }

@@ -1,3 +1,5 @@
+import type { LlmProviderName } from "./types";
+
 type CircuitState = "closed" | "open" | "half_open";
 
 type CircuitConfig = {
@@ -15,18 +17,65 @@ type CircuitSnapshot = {
   threshold: number;
 };
 
+type CircuitReason = "GEMINI_CIRCUIT_OPEN" | "OLLAMA_CIRCUIT_OPEN";
+
 type CircuitAttempt =
   | { allowed: true; state: CircuitState }
-  | { allowed: false; reason: "GEMINI_CIRCUIT_OPEN"; state: CircuitState };
+  | { allowed: false; reason: CircuitReason; state: CircuitState };
 
-const store = {
-  state: "closed" as CircuitState,
-  failureCount: 0,
-  openedUntilMs: 0,
-  halfOpenInFlight: false,
+type CircuitStore = {
+  state: CircuitState;
+  failureCount: number;
+  openedUntilMs: number;
+  halfOpenInFlight: boolean;
 };
 
-function getConfig(): CircuitConfig {
+const stores: Record<LlmProviderName, CircuitStore> = {
+  gemini: {
+    state: "closed",
+    failureCount: 0,
+    openedUntilMs: 0,
+    halfOpenInFlight: false,
+  },
+  ollama: {
+    state: "closed",
+    failureCount: 0,
+    openedUntilMs: 0,
+    halfOpenInFlight: false,
+  },
+};
+
+// Legacy alias used by older imports/tests.
+const store = stores.gemini;
+
+function circuitReason(provider: LlmProviderName): CircuitReason {
+  return provider === "ollama" ? "OLLAMA_CIRCUIT_OPEN" : "GEMINI_CIRCUIT_OPEN";
+}
+
+function getConfig(provider: LlmProviderName = "gemini"): CircuitConfig {
+  if (provider === "ollama") {
+    const enabled = process.env.OLLAMA_CIRCUIT_BREAKER_ENABLED !== "0";
+    const failureThreshold = Number.parseInt(
+      process.env.OLLAMA_CIRCUIT_FAILURE_THRESHOLD ||
+        process.env.GEMINI_CIRCUIT_FAILURE_THRESHOLD ||
+        "3",
+      10
+    );
+    const cooldownMs = Number.parseInt(
+      process.env.OLLAMA_CIRCUIT_COOLDOWN_MS ||
+        process.env.GEMINI_CIRCUIT_COOLDOWN_MS ||
+        "60000",
+      10
+    );
+
+    return {
+      enabled,
+      failureThreshold:
+        Number.isFinite(failureThreshold) && failureThreshold > 0 ? failureThreshold : 3,
+      cooldownMs: Number.isFinite(cooldownMs) && cooldownMs > 0 ? cooldownMs : 60_000,
+    };
+  }
+
   const enabled = process.env.GEMINI_CIRCUIT_BREAKER_ENABLED !== "0";
   const failureThreshold = Number.parseInt(
     process.env.GEMINI_CIRCUIT_FAILURE_THRESHOLD || "3",
@@ -44,66 +93,79 @@ function getConfig(): CircuitConfig {
   };
 }
 
-function refreshState(now = Date.now()) {
+function refreshState(store: CircuitStore, now = Date.now()) {
   if (store.state === "open" && now >= store.openedUntilMs) {
     store.state = "half_open";
     store.halfOpenInFlight = false;
   }
 }
 
-export function beginGeminiCircuitAttempt(now = Date.now()): CircuitAttempt {
-  const config = getConfig();
+export function beginLlmCircuitAttempt(
+  provider: LlmProviderName = "gemini",
+  now = Date.now()
+): CircuitAttempt {
+  const config = getConfig(provider);
+  const target = stores[provider];
   if (!config.enabled) {
     return { allowed: true, state: "closed" };
   }
 
-  refreshState(now);
+  refreshState(target, now);
 
-  if (store.state === "open") {
-    return { allowed: false, reason: "GEMINI_CIRCUIT_OPEN", state: "open" };
+  if (target.state === "open") {
+    return { allowed: false, reason: circuitReason(provider), state: "open" };
   }
 
-  if (store.state === "half_open") {
-    if (store.halfOpenInFlight) {
-      return { allowed: false, reason: "GEMINI_CIRCUIT_OPEN", state: "half_open" };
+  if (target.state === "half_open") {
+    if (target.halfOpenInFlight) {
+      return { allowed: false, reason: circuitReason(provider), state: "half_open" };
     }
-    store.halfOpenInFlight = true;
+    target.halfOpenInFlight = true;
   }
 
-  return { allowed: true, state: store.state };
+  return { allowed: true, state: target.state };
 }
 
-export function finalizeGeminiCircuitAttempt(success: boolean, now = Date.now()) {
-  const config = getConfig();
+export function finalizeLlmCircuitAttempt(
+  provider: LlmProviderName = "gemini",
+  success: boolean,
+  now = Date.now()
+) {
+  const config = getConfig(provider);
+  const target = stores[provider];
   if (!config.enabled) return;
 
-  refreshState(now);
+  refreshState(target, now);
 
   if (success) {
-    store.state = "closed";
-    store.failureCount = 0;
-    store.openedUntilMs = 0;
-    store.halfOpenInFlight = false;
+    target.state = "closed";
+    target.failureCount = 0;
+    target.openedUntilMs = 0;
+    target.halfOpenInFlight = false;
     return;
   }
 
-  if (store.state === "half_open") {
-    store.state = "open";
-    store.failureCount = config.failureThreshold;
-    store.openedUntilMs = now + config.cooldownMs;
-    store.halfOpenInFlight = false;
+  if (target.state === "half_open") {
+    target.state = "open";
+    target.failureCount = config.failureThreshold;
+    target.openedUntilMs = now + config.cooldownMs;
+    target.halfOpenInFlight = false;
     return;
   }
 
-  store.failureCount += 1;
-  if (store.failureCount >= config.failureThreshold) {
-    store.state = "open";
-    store.openedUntilMs = now + config.cooldownMs;
+  target.failureCount += 1;
+  if (target.failureCount >= config.failureThreshold) {
+    target.state = "open";
+    target.openedUntilMs = now + config.cooldownMs;
   }
 }
 
-export function getGeminiCircuitSnapshot(now = Date.now()): CircuitSnapshot {
-  const config = getConfig();
+export function getLlmCircuitSnapshot(
+  provider: LlmProviderName = "gemini",
+  now = Date.now()
+): CircuitSnapshot {
+  const config = getConfig(provider);
+  const target = stores[provider];
   if (!config.enabled) {
     return {
       enabled: false,
@@ -115,24 +177,62 @@ export function getGeminiCircuitSnapshot(now = Date.now()): CircuitSnapshot {
     };
   }
 
-  refreshState(now);
+  refreshState(target, now);
 
   return {
     enabled: true,
-    state: store.state,
-    failure_count: store.failureCount,
+    state: target.state,
+    failure_count: target.failureCount,
     cooldown_ms: config.cooldownMs,
     opened_until:
-      store.state === "open" && store.openedUntilMs > now
-        ? new Date(store.openedUntilMs).toISOString()
+      target.state === "open" && target.openedUntilMs > now
+        ? new Date(target.openedUntilMs).toISOString()
         : null,
     threshold: config.failureThreshold,
   };
 }
 
-export function resetGeminiCircuitForTests() {
-  store.state = "closed";
-  store.failureCount = 0;
-  store.openedUntilMs = 0;
-  store.halfOpenInFlight = false;
+export function resetLlmCircuitForTests(provider?: LlmProviderName) {
+  const targets = provider ? [stores[provider]] : Object.values(stores);
+  for (const target of targets) {
+    target.state = "closed";
+    target.failureCount = 0;
+    target.openedUntilMs = 0;
+    target.halfOpenInFlight = false;
+  }
 }
+
+// Backwards-compatible Gemini-specific helpers.
+export function beginGeminiCircuitAttempt(now = Date.now()): CircuitAttempt {
+  return beginLlmCircuitAttempt("gemini", now);
+}
+
+export function finalizeGeminiCircuitAttempt(success: boolean, now = Date.now()) {
+  finalizeLlmCircuitAttempt("gemini", success, now);
+}
+
+export function getGeminiCircuitSnapshot(now = Date.now()): CircuitSnapshot {
+  return getLlmCircuitSnapshot("gemini", now);
+}
+
+export function resetGeminiCircuitForTests() {
+  resetLlmCircuitForTests("gemini");
+}
+
+export function beginOllamaCircuitAttempt(now = Date.now()): CircuitAttempt {
+  return beginLlmCircuitAttempt("ollama", now);
+}
+
+export function finalizeOllamaCircuitAttempt(success: boolean, now = Date.now()) {
+  finalizeLlmCircuitAttempt("ollama", success, now);
+}
+
+export function getOllamaCircuitSnapshot(now = Date.now()): CircuitSnapshot {
+  return getLlmCircuitSnapshot("ollama", now);
+}
+
+export function resetOllamaCircuitForTests() {
+  resetLlmCircuitForTests("ollama");
+}
+
+export { store };

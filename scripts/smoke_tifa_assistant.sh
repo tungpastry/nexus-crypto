@@ -80,7 +80,7 @@ import sys
 from pathlib import Path
 
 payload = json.loads(Path(sys.argv[1]).read_text())
-assert payload.get("provider") == "gemini"
+assert payload.get("provider") in ("gemini", "ollama")
 assert payload.get("status") in ("ok", "degraded", "blocked")
 assert "monthly_spend_usd" in payload
 print("TIFA_BUDGET_STATUS=PASS")
@@ -94,10 +94,39 @@ import sys
 from pathlib import Path
 
 payload = json.loads(Path(sys.argv[1]).read_text())
-assert payload.get("provider") == "gemini"
+assert payload.get("provider") in ("gemini", "ollama")
 assert isinstance(payload.get("circuit"), dict), "missing circuit"
 assert payload["circuit"].get("state") in ("closed", "open", "half_open")
 print("TIFA_PROVIDER_HEALTH_GEMINI=PASS")
+PY
+
+ollama_file="$TMP_DIR/provider-health-ollama.json"
+curl_with_auth "${BASE_URL}/api/provider-health/ollama" -o "$ollama_file"
+python3 - "$ollama_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("provider") == "ollama", payload.get("provider")
+assert payload.get("active_provider") == "ollama", payload.get("active_provider")
+assert payload.get("configured") is True
+assert isinstance(payload.get("circuit"), dict), "missing circuit"
+assert payload["circuit"].get("state") in ("closed", "open", "half_open")
+print("TIFA_PROVIDER_HEALTH_OLLAMA=PASS")
+PY
+
+llm_file="$TMP_DIR/provider-health-llm.json"
+curl_with_auth "${BASE_URL}/api/provider-health/llm" -o "$llm_file"
+python3 - "$llm_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("active_provider") == "ollama", payload.get("active_provider")
+assert payload.get("configured") is True
+print("TIFA_PROVIDER_HEALTH_LLM_ALIAS=PASS")
 PY
 
 provider_explainer_file="$TMP_DIR/provider-health-explainer.json"
@@ -174,6 +203,7 @@ from pathlib import Path
 payload = json.loads(Path(sys.argv[1]).read_text())
 assert payload.get("ok") is True
 assert isinstance(payload.get("answer"), str) and payload["answer"]
+assert payload.get("provider") == "ollama", payload.get("provider")
 serialized = json.dumps(payload)
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:

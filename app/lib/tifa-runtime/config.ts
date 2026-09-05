@@ -6,9 +6,19 @@ export type TifaRuntimeConfig = {
   timezone: string;
   runtimeDir: string;
   promptPath: string;
-  llmProvider: "gemini";
+  llmProvider: "gemini" | "ollama";
   routingPolicy: string;
   fallbackOrder: string[];
+  ollama: {
+    host: string;
+    model: string;
+    timeoutMs: number;
+    retryLimit: number;
+    streamTimeoutMs: number;
+    streamRetryLimit: number;
+    think: boolean;
+    keepAlive: string;
+  };
   gemini: {
     apiKey?: string;
     model: string;
@@ -40,6 +50,10 @@ function parseNumber(value: string | undefined, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function parseLlmProvider(value: string | undefined): "gemini" | "ollama" {
+  return value?.trim().toLowerCase() === "ollama" ? "ollama" : "gemini";
+}
+
 export function getTifaRuntimeConfig(): TifaRuntimeConfig {
   const runtimeDir = process.env.TIFA_RUNTIME_DIR || "runtime";
   const promptPath =
@@ -50,12 +64,26 @@ export function getTifaRuntimeConfig(): TifaRuntimeConfig {
     timezone: process.env.TIFA_TIMEZONE || "Asia/Ho_Chi_Minh",
     runtimeDir,
     promptPath,
-    llmProvider: "gemini",
+    llmProvider: parseLlmProvider(process.env.TIFA_LLM_PROVIDER),
     routingPolicy: process.env.TIFA_LLM_ROUTING_POLICY || "cost-aware",
-    fallbackOrder: (process.env.TIFA_LLM_FALLBACK_ORDER || "gemini")
+    fallbackOrder: (process.env.TIFA_LLM_FALLBACK_ORDER || "ollama")
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean),
+    ollama: {
+      host:
+        process.env.OLLAMA_HOST === undefined
+          ? "http://192.168.1.7:11434"
+          : process.env.OLLAMA_HOST,
+      model:
+        process.env.OLLAMA_MODEL === undefined ? "gemma4:e4b-it-qat" : process.env.OLLAMA_MODEL,
+      timeoutMs: parsePositiveInt(process.env.OLLAMA_TIMEOUT_MS, 20_000),
+      retryLimit: parsePositiveInt(process.env.OLLAMA_RETRY_LIMIT, 1),
+      streamTimeoutMs: parsePositiveInt(process.env.OLLAMA_STREAM_TIMEOUT_MS, 25_000),
+      streamRetryLimit: parsePositiveInt(process.env.OLLAMA_STREAM_RETRY_LIMIT, 1),
+      think: process.env.OLLAMA_THINK === "1",
+      keepAlive: process.env.OLLAMA_KEEP_ALIVE || "30m",
+    },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY,
       model: process.env.GEMINI_MODEL || "gemini-3-flash-preview",
@@ -93,6 +121,23 @@ export function assertTifaRuntimeSafe(config = getTifaRuntimeConfig()) {
   }
   if (config.gemini.streamTimeoutMs < 1_000 || config.gemini.streamTimeoutMs > 120_000) {
     throw new Error("GEMINI_STREAM_TIMEOUT_MS must be between 1000 and 120000");
+  }
+  if (config.llmProvider === "ollama") {
+    if (!config.ollama.host) {
+      throw new Error("OLLAMA_HOST is empty");
+    }
+    if (!config.ollama.model) {
+      throw new Error("OLLAMA_MODEL is empty");
+    }
+    if (config.ollama.timeoutMs < 1_000 || config.ollama.timeoutMs > 120_000) {
+      throw new Error("OLLAMA_TIMEOUT_MS must be between 1000 and 120000");
+    }
+    if (
+      config.ollama.streamTimeoutMs < 1_000 ||
+      config.ollama.streamTimeoutMs > 120_000
+    ) {
+      throw new Error("OLLAMA_STREAM_TIMEOUT_MS must be between 1000 and 120000");
+    }
   }
 }
 

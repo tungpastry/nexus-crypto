@@ -4,6 +4,7 @@ export function redactSecrets(input: string) {
   let text = input;
   const secrets = [
     process.env.GEMINI_API_KEY,
+    process.env.OLLAMA_HOST,
     process.env.NEXUS_SMOKE_AUTH_TOKEN,
     process.env.NEXUS_AUTH_SECRET,
   ].filter((value): value is string => Boolean(value));

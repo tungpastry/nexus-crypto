@@ -295,7 +295,10 @@ export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promi
       tool_context: prepared.toolContext,
       budget: {
         status: prepared.preflight.status,
-        reason: "GEMINI_NOT_CONFIGURED",
+        reason:
+          prepared.config.llmProvider === "ollama"
+            ? "OLLAMA_NOT_CONFIGURED"
+            : "GEMINI_NOT_CONFIGURED",
       },
     };
   }
@@ -306,11 +309,15 @@ export async function runTifaChat(req: NextRequest, input: TifaChatInput): Promi
     prepared.toolContext,
     prepared.config.timezone
   );
+  const activeTemperature =
+    prepared.config.llmProvider === "ollama"
+      ? 0.3
+      : prepared.config.gemini.temperature;
 
   const providerResult = await runTifaProviderGateway({
     systemPrompt,
     userPrompt,
-    temperature: prepared.config.gemini.temperature,
+    temperature: activeTemperature,
     maxOutputTokens:
       prepared.preflight.maxOutputTokensOverride ?? prepared.config.gemini.maxOutputTokens,
   });
@@ -399,7 +406,13 @@ export async function runTifaChatStream(
       requestId: prepared.requestId,
       providerModel: prepared.providerHealth.model,
       toolContext: prepared.toolContext,
-      budget: { status: prepared.preflight.status, reason: "GEMINI_NOT_CONFIGURED" },
+      budget: {
+        status: prepared.preflight.status,
+        reason:
+          prepared.config.llmProvider === "ollama"
+            ? "OLLAMA_NOT_CONFIGURED"
+            : "GEMINI_NOT_CONFIGURED",
+      },
       answerForFallback: prepared.toolOnlyAnswer,
       postflight: null,
       mode: "tool-only",
@@ -416,7 +429,8 @@ export async function runTifaChatStream(
   const providerStream = await runTifaProviderGatewayStream({
     systemPrompt,
     userPrompt,
-    temperature: prepared.config.gemini.temperature,
+    temperature:
+      prepared.config.llmProvider === "ollama" ? 0.3 : prepared.config.gemini.temperature,
     maxOutputTokens:
       prepared.preflight.maxOutputTokensOverride ?? prepared.config.gemini.maxOutputTokens,
   });
@@ -483,7 +497,7 @@ export async function finalizeTifaStreamSuccess(params: {
     message: params.message,
     answer: params.answer,
     context: params.context,
-    provider: "gemini",
+    provider: getTifaRuntimeConfig().llmProvider,
     model: params.model,
   });
 }

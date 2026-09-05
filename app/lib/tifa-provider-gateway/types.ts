@@ -11,9 +11,11 @@ export type ProviderChatRequest = {
   maxOutputTokens: number;
 };
 
+export type LlmProviderName = "gemini" | "ollama";
+
 export type ProviderChatResponse = {
   ok: true;
-  provider: "gemini";
+  provider: LlmProviderName;
   model: string;
   text: string;
   usage?: LlmUsage;
@@ -23,7 +25,7 @@ export type ProviderGatewayResult =
   | ProviderChatResponse
   | {
       ok: false;
-      provider: "gemini";
+      provider: LlmProviderName;
       model: string;
       error: {
         code: string;
@@ -34,13 +36,13 @@ export type ProviderGatewayResult =
 export type ProviderStreamGatewayResult =
   | {
       ok: true;
-      provider: "gemini";
+      provider: LlmProviderName;
       model: string;
       stream: AsyncIterable<string>;
     }
   | {
       ok: false;
-      provider: "gemini";
+      provider: LlmProviderName;
       model: string;
       error: {
         code: string;
@@ -49,7 +51,7 @@ export type ProviderStreamGatewayResult =
     };
 
 export type ProviderHealth = {
-  provider: "gemini";
+  provider: LlmProviderName;
   configured: boolean;
   enabled: boolean;
   model: string;

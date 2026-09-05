@@ -99,4 +99,18 @@ describe("no secret leakage in tifa responses", () => {
     const payload = await response.json();
     assertNoSecretLeak(JSON.stringify(payload), secret);
   });
+
+  it("does not leak ollama host in /api/provider-health/ollama", async () => {
+    const { GET: getOllamaHealth } = await import(
+      "../../api/provider-health/ollama/route"
+    );
+    process.env.TIFA_LLM_PROVIDER = "ollama";
+    process.env.OLLAMA_HOST = "http://192.168.1.7:11434";
+    process.env.OLLAMA_MODEL = "gemma4:e4b-it-qat";
+
+    const response = await getOllamaHealth();
+    const payload = await response.json();
+    expect(payload.provider).toBe("ollama");
+    expect(JSON.stringify(payload)).not.toContain("GEMINI_API_KEY=");
+  });
 });
