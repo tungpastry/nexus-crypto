@@ -15,7 +15,7 @@ export default function TifaMessageBubble({ role, text }: TifaMessageBubbleProps
       <div className="flex justify-start">
         <div className="flex max-w-[92%] items-end gap-2">
           <TifaAvatar size="sm" />
-          <div className="max-w-[85%] rounded-2xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] px-3 py-2 text-sm leading-6 text-[var(--text-muted)]">
+          <div className="max-w-[85%] rounded-2xl border border-[var(--border-soft)] bg-black px-3 py-2 text-sm leading-6 text-[var(--text-main)]">
             {text}
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function TifaMessageBubble({ role, text }: TifaMessageBubbleProps
   return (
     <div className="flex justify-end">
       <div
-        className="max-w-[85%] rounded-2xl border border-[var(--border-pink)] bg-[rgba(255,95,162,0.14)] px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
+        className="max-w-[85%] rounded-2xl border border-[var(--border-pink)] bg-black px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
       >
         {text}
       </div>

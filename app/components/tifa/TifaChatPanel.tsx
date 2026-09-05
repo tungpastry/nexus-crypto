@@ -271,7 +271,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04))] shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.12)] backdrop-blur-xl">
+    <div className="flex h-full flex-col rounded-2xl border border-[var(--border-soft)] bg-black shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.12)]">
       <div className="flex items-center justify-between border-b border-[var(--border-soft)] px-4 py-3">
         <div className="flex items-center gap-3">
           <TifaAvatar size="sm" />
@@ -333,7 +333,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
               }
             }}
             placeholder="Ask Tifa about market, asset, risk, or budget..."
-            className="h-10 flex-1 rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.05)] px-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+            className="h-10 flex-1 rounded-xl border border-[var(--border-soft)] bg-black px-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
             disabled={pending}
           />
           <button
