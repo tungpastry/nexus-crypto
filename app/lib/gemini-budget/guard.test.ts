@@ -27,6 +27,7 @@ describe("gemini budget guard", () => {
 
   it("allows requests when spend is below thresholds", async () => {
     await setupBudgetEnv();
+    process.env.TIFA_LLM_PROVIDER = "gemini";
     process.env.NEXUS_GEMINI_MONTHLY_CAP_USD = "5";
     process.env.NEXUS_GEMINI_HARD_STOP_USD = "4.5";
     process.env.NEXUS_GEMINI_DEGRADE_THRESHOLD_USD = "4.0";
@@ -39,6 +40,7 @@ describe("gemini budget guard", () => {
 
   it("blocks requests when projected spend hits hard stop", async () => {
     await setupBudgetEnv();
+    process.env.TIFA_LLM_PROVIDER = "gemini";
     process.env.NEXUS_GEMINI_MONTHLY_CAP_USD = "1";
     process.env.NEXUS_GEMINI_HARD_STOP_USD = "0.005";
     process.env.NEXUS_GEMINI_DEGRADE_THRESHOLD_USD = "0.004";
@@ -66,6 +68,7 @@ describe("gemini budget guard", () => {
 
   it("fails closed when guard policy is invalid", async () => {
     await setupBudgetEnv();
+    process.env.TIFA_LLM_PROVIDER = "gemini";
     process.env.NEXUS_GEMINI_MONTHLY_CAP_USD = "0";
     process.env.NEXUS_GEMINI_BUDGET_FAILURE_MODE = "fail_closed";
 
