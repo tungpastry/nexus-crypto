@@ -5,6 +5,25 @@ export async function getGeminiBudgetStatus() {
   const policy = getGeminiBudgetPolicy();
   await ensureLedgerFiles(policy);
   const totals = await readMonthlyTotals(policy, getCurrentMonthUtc());
+  const isOllama = process.env.TIFA_LLM_PROVIDER?.trim().toLowerCase() === "ollama";
+  if (isOllama) {
+    return {
+      provider: "ollama",
+      model: process.env.OLLAMA_MODEL || "gemma4:e4b-it-qat",
+      current_month: totals.month,
+      monthly_cap_usd: policy.monthlyCapUsd,
+      hard_stop_usd: policy.hardStopUsd,
+      degrade_threshold_usd: policy.degradeThresholdUsd,
+      monthly_spend_usd: Number(totals.monthlySpendUsd.toFixed(6)),
+      monthly_requests: totals.monthlyRequests,
+      remaining_hard_stop_usd: Number(
+        Math.max(0, policy.hardStopUsd - totals.monthlySpendUsd).toFixed(6)
+      ),
+      status: "ok",
+      failure_mode: policy.failureMode,
+      note: "OLLAMA_LOCAL_FREE",
+    };
+  }
   const remainingHardStop = Math.max(0, policy.hardStopUsd - totals.monthlySpendUsd);
   const projected = totals.monthlySpendUsd + policy.estCostPerChatUsd;
 

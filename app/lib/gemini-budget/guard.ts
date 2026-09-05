@@ -25,6 +25,35 @@ export async function runBudgetPreflight(
   requestId: string,
   model: string
 ): Promise<GeminiBudgetPreflight> {
+  // Ollama-only runtime: local inference is free. Bypass USD guard but keep
+  // ledger observability with cost 0.
+  if (process.env.TIFA_LLM_PROVIDER?.trim().toLowerCase() === "ollama") {
+    try {
+      const policy = getGeminiBudgetPolicy();
+      await ensureLedgerFiles(policy);
+      const totals = await readMonthlyTotals(policy);
+      return {
+        allowed: true,
+        status: "ok",
+        reason: "OLLAMA_LOCAL_FREE",
+        monthlySpendUsd: totals.monthlySpendUsd,
+        monthlyRequests: totals.monthlyRequests,
+        projectedSpendUsd: totals.monthlySpendUsd,
+        estimatedCostUsd: 0,
+      };
+    } catch {
+      return {
+        allowed: true,
+        status: "ok",
+        reason: "OLLAMA_LOCAL_FREE",
+        monthlySpendUsd: 0,
+        monthlyRequests: 0,
+        projectedSpendUsd: 0,
+        estimatedCostUsd: 0,
+      };
+    }
+  }
+
   const policy = getGeminiBudgetPolicy();
   try {
     assertGeminiBudgetPolicy(policy);

@@ -142,7 +142,7 @@ export async function getGeminiProviderHealthSnapshot(): Promise<GeminiProviderP
       : "ok";
 
   return {
-    provider: "gemini",
+    provider: provider.provider,
     assistant_enabled: provider.enabled,
     configured: provider.configured,
     model: provider.model,

@@ -49,6 +49,21 @@ describe("gemini budget guard", () => {
     expect(preflight.reason).toBe("GEMINI_BUDGET_HARD_STOP");
   });
 
+  it("bypasses USD guard with ledger 0 for ollama local", async () => {
+    await setupBudgetEnv();
+    process.env.TIFA_LLM_PROVIDER = "ollama";
+    process.env.NEXUS_GEMINI_MONTHLY_CAP_USD = "1";
+    process.env.NEXUS_GEMINI_HARD_STOP_USD = "0.005";
+    process.env.NEXUS_GEMINI_DEGRADE_THRESHOLD_USD = "0.004";
+    process.env.NEXUS_GEMINI_EST_COST_PER_CHAT_USD = "0.01";
+
+    const preflight = await runBudgetPreflight("req_ollama", "gemma4:e4b-it-qat");
+    expect(preflight.allowed).toBe(true);
+    expect(preflight.status).toBe("ok");
+    expect(preflight.reason).toBe("OLLAMA_LOCAL_FREE");
+    expect(preflight.estimatedCostUsd).toBe(0);
+  });
+
   it("fails closed when guard policy is invalid", async () => {
     await setupBudgetEnv();
     process.env.NEXUS_GEMINI_MONTHLY_CAP_USD = "0";

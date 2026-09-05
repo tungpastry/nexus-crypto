@@ -5,6 +5,7 @@ import {
   runTifaChatStream,
 } from "../../../lib/tifa-core/chat";
 import { sanitizeProviderError } from "../../../lib/tifa-provider-gateway/redaction";
+import { getTifaRuntimeConfig } from "../../../lib/tifa-runtime/config";
 import { validateTifaChatInput } from "../../../lib/tifa-widget/validation";
 
 export const runtime = "nodejs";
@@ -84,7 +85,10 @@ export async function POST(req: NextRequest) {
           return;
         }
 
-        const provider = result.mode === "provider-stream" ? "gemini" : "tool-only";
+        const provider =
+          result.mode === "provider-stream"
+            ? getTifaRuntimeConfig().llmProvider
+            : "tool-only";
         controller.enqueue(
           encoder.encode(
             sseEvent("start", { provider, model: result.providerModel })
