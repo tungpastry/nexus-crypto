@@ -65,6 +65,16 @@ if [[ "$ALLOW_DIRTY" != "1" && -n "$(git status --short)" ]]; then
   exit 1
 fi
 
+section "SUDO PRE-AUTH"
+# npm ci + lint/test/build can outlast the sudo timestamp (15 min), which
+# would fail the RESTART stage much later. Pre-auth here to fail fast; the
+# RESTART stage re-validates right before restarting.
+if ! sudo -v; then
+  echo "SUDO_AUTH_REQUIRED=1"
+  echo "Run 'sudo -v' first (password), then re-run deploy."
+  exit 1
+fi
+
 section "FETCH"
 git fetch origin
 
@@ -115,6 +125,11 @@ section "AUDIT"
 npm audit || true
 
 section "RESTART"
+# Re-validate right before restart: long INSTALL/LINT/TEST/BUILD phases may
+# have expired the timestamp cached at SUDO PRE-AUTH. Non-interactive refresh
+# first (extends a still-valid timestamp without prompting), interactive
+# prompt as fallback for terminal runs.
+sudo -n -v 2>/dev/null || sudo -v
 sudo systemctl restart "$SERVICE"
 
 section "WAIT FOR PROVIDER HEALTH"
