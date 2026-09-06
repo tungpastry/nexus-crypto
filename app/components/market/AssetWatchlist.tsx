@@ -1,16 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { ArrowRight, LineChart, Shield } from "lucide-react";
-import { NEXUS_ASSETS } from "../../config/assets";
+import { ArrowDown, ArrowRight, ArrowUp, ChevronLeft, ChevronRight, LineChart, Search, Shield } from "lucide-react";
+import { NEXUS_ASSETS, NEXUS_ASSET_CATALOG, type NexusAssetCategory } from "../../config/assets";
+import {
+  buildWatchlistRows,
+  filterAndSortWatchlistRows,
+  paginateWatchlistRows,
+  type WatchlistMode,
+  type WatchlistSortDirection,
+  type WatchlistSortKey,
+} from "../../lib/assetWatchlist";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "./DataFreshnessBadge";
 import CoinIcon from "./CoinIcon";
 
 type SnapshotAsset = {
   id: string;
+  rank: number;
   price: number | null;
   change_24h: number | null;
   change_7d: number | null;
@@ -19,6 +28,8 @@ type SnapshotAsset = {
 };
 
 type Snapshot = {
+  catalog_generated_at?: string;
+  universe_size?: number;
   updated_at: string;
   assets: SnapshotAsset[];
 };
@@ -51,6 +62,12 @@ function Percent({ value }: { value?: number | null }) {
 export default function AssetWatchlist() {
   const router = useRouter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<"all" | NexusAssetCategory>("all");
+  const [mode, setMode] = useState<WatchlistMode>("all");
+  const [sortKey, setSortKey] = useState<WatchlistSortKey>("rank");
+  const [sortDirection, setSortDirection] = useState<WatchlistSortDirection>("asc");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -72,13 +89,88 @@ export default function AssetWatchlist() {
     };
   }, []);
 
-  const snapshotById = new Map(snapshot?.assets.map((asset) => [asset.id, asset]));
+  const selection = useMemo(() => {
+    const rows = buildWatchlistRows(NEXUS_ASSETS, snapshot?.assets);
+    const filtered = filterAndSortWatchlistRows(rows, {
+      query,
+      category,
+      mode,
+      sortKey,
+      sortDirection,
+    });
+    return { filtered, pagination: paginateWatchlistRows(filtered, page) };
+  }, [category, mode, page, query, snapshot?.assets, sortDirection, sortKey]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [category, mode, query, sortDirection, sortKey]);
+
+  useEffect(() => {
+    if (page !== selection.pagination.page) setPage(selection.pagination.page);
+  }, [page, selection.pagination.page]);
+
   const openWorkspace = (assetId: string) => {
     router.push(`/asset/${assetId}`);
   };
 
   return (
-    <RetroPanel title="Asset Watchlist" eyebrow="Top 10 Nexus universe">
+    <RetroPanel title="Asset Watchlist" eyebrow="Top 100 Nexus universe">
+      <div className="grid gap-3 border-b border-[var(--border-soft)] p-4 md:grid-cols-[minmax(220px,1fr)_repeat(3,minmax(140px,auto))_auto]">
+        <label className="relative">
+          <span className="sr-only">Search assets</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-soft)]" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search symbol or name"
+            className="nexus-control-surface h-10 w-full rounded-lg border border-[var(--border-soft)] pl-9 pr-3 text-sm text-[var(--text-main)] outline-none placeholder:text-[var(--text-soft)] focus:border-[var(--border-cyan)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+          />
+        </label>
+        <select
+          aria-label="Filter category"
+          value={category}
+          onChange={(event) => setCategory(event.target.value as "all" | NexusAssetCategory)}
+          className="nexus-control-surface h-10 rounded-lg border border-[var(--border-soft)] px-3 text-sm text-[var(--text-main)] outline-none focus:border-[var(--border-cyan)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+        >
+          <option value="all">All categories</option>
+          <option value="major">Major</option>
+          <option value="stablecoin">Stablecoin</option>
+          <option value="exchange">Exchange</option>
+          <option value="altcoin">Altcoin</option>
+          <option value="meme">Meme</option>
+        </select>
+        <select
+          aria-label="Filter analysis mode"
+          value={mode}
+          onChange={(event) => setMode(event.target.value as WatchlistMode)}
+          className="nexus-control-surface h-10 rounded-lg border border-[var(--border-soft)] px-3 text-sm text-[var(--text-main)] outline-none focus:border-[var(--border-cyan)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+        >
+          <option value="all">All modes</option>
+          <option value="nexus">Nexus</option>
+          <option value="market-only">Market only</option>
+        </select>
+        <select
+          aria-label="Sort assets"
+          value={sortKey}
+          onChange={(event) => setSortKey(event.target.value as WatchlistSortKey)}
+          className="nexus-control-surface h-10 rounded-lg border border-[var(--border-soft)] px-3 text-sm text-[var(--text-main)] outline-none focus:border-[var(--border-cyan)] focus:ring-2 focus:ring-[var(--focus-ring)]"
+        >
+          <option value="rank">Market rank</option>
+          <option value="price">Price</option>
+          <option value="change_24h">24h change</option>
+          <option value="change_7d">7d change</option>
+          <option value="volume_24h">24h volume</option>
+        </select>
+        <button
+          type="button"
+          title={`Sort ${sortDirection === "asc" ? "descending" : "ascending"}`}
+          aria-label={`Sort ${sortDirection === "asc" ? "descending" : "ascending"}`}
+          onClick={() => setSortDirection((value) => (value === "asc" ? "desc" : "asc"))}
+          className="nexus-control-surface inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-soft)] text-[var(--cyan-accent)] transition hover:border-[var(--border-cyan)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+        >
+          {sortDirection === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="nexus-table-head border-b border-[var(--border-soft)] text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">
@@ -93,8 +185,7 @@ export default function AssetWatchlist() {
             </tr>
           </thead>
           <tbody>
-            {NEXUS_ASSETS.map((asset) => {
-              const row = snapshotById.get(asset.id);
+            {selection.pagination.rows.map(({ asset, market: row }) => {
 
               return (
                 <tr
@@ -116,7 +207,7 @@ export default function AssetWatchlist() {
                       <CoinIcon src={asset.iconUrl} symbol={asset.symbol} name={asset.name} />
                       <div>
                         <p className="font-semibold text-[var(--text-main)]">{asset.symbol}</p>
-                        <p className="text-xs text-[var(--text-soft)]">{asset.name}</p>
+                        <p className="text-xs text-[var(--text-soft)]">#{row.rank} · {asset.name}</p>
                       </div>
                     </div>
                   </td>
@@ -159,8 +250,36 @@ export default function AssetWatchlist() {
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-[var(--border-soft)] px-4 py-3 text-xs text-[var(--text-muted)]">
-        <span>Prices are market data only; no trade execution or recommendations.</span>
-        <DataFreshnessBadge updatedAt={snapshot?.updated_at} />
+        <div>
+          <p>{selection.filtered.length} of {snapshot?.universe_size ?? NEXUS_ASSET_CATALOG.universeSize} assets</p>
+          <p className="mt-1 text-[10px] text-[var(--text-soft)]">
+            Catalog {new Date(snapshot?.catalog_generated_at ?? NEXUS_ASSET_CATALOG.generatedAt).toLocaleDateString("en-CA")}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            title="Previous page"
+            aria-label="Previous page"
+            disabled={selection.pagination.page === 1}
+            onClick={() => setPage((value) => Math.max(1, value - 1))}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-soft)] text-[var(--text-main)] hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="font-mono">Page {selection.pagination.page} / {selection.pagination.pageCount}</span>
+          <button
+            type="button"
+            title="Next page"
+            aria-label="Next page"
+            disabled={selection.pagination.page === selection.pagination.pageCount}
+            onClick={() => setPage((value) => Math.min(selection.pagination.pageCount, value + 1))}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-soft)] text-[var(--text-main)] hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+          <DataFreshnessBadge updatedAt={snapshot?.updated_at} />
+        </div>
       </div>
     </RetroPanel>
   );
