@@ -37,7 +37,7 @@ export default function TifaAvatar({ size = "md", className = "", alt = "Tifa as
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[rgba(255,255,255,0.24)] bg-[rgba(255,255,255,0.08)] shadow-[0_0_18px_rgba(255,95,162,0.2)] ${currentSize.outer} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--border-strong)] bg-[var(--bg-card)] shadow-[0_0_18px_rgba(255,95,162,0.2)] ${currentSize.outer} ${className}`}
       aria-label={alt}
       title="TifaWidget Assistant"
     >

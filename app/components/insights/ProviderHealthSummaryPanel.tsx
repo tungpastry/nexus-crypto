@@ -17,7 +17,7 @@ export default function ProviderHealthSummaryPanel({
   providerHealth,
 }: ProviderHealthSummaryPanelProps) {
   return (
-    <section className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.055)] p-4">
+    <section className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-4">
       <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-soft)]">
         Provider Health Summary
       </p>

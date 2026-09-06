@@ -312,7 +312,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[var(--border-soft)] bg-black shadow-[0_24px_58px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.12)]">
+    <div className="nexus-solid-surface flex h-full flex-col rounded-2xl border border-[var(--border-soft)] shadow-[var(--shadow-panel),var(--shadow-accent)]">
       <div className="flex items-center justify-between border-b border-[var(--border-soft)] px-4 py-3">
         <div className="flex items-center gap-3">
           <TifaAvatar size="sm" />
@@ -328,7 +328,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
             type="button"
             onClick={handleClear}
             disabled={pending}
-            className="rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.04)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Clear chat history"
             title="Xóa lịch sử chat trang này"
           >
@@ -337,7 +337,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.04)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-pink)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+            className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-pink)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
             aria-label="Close Tifa panel"
           >
             <X className="h-4 w-4" />
@@ -352,10 +352,10 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
           type="button"
           onClick={() => setAutoRead((value) => !value)}
           disabled={!speech.supported}
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50 ${
             autoRead
               ? "border-[var(--border-cyan)] bg-[rgba(125,211,252,0.08)] text-[var(--cyan-accent)]"
-              : "border-[var(--border-soft)] bg-black text-[var(--text-muted)]"
+              : "nexus-solid-surface border-[var(--border-soft)] text-[var(--text-muted)]"
           }`}
           title={
             !speech.supported
@@ -405,14 +405,14 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
               }
             }}
             placeholder="Ask Tifa about market, asset, risk, or budget..."
-            className="h-10 flex-1 rounded-xl border border-[var(--border-soft)] bg-black px-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+            className="nexus-input-surface h-10 flex-1 rounded-xl border border-[var(--border-soft)] px-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
             disabled={pending}
           />
           <button
             type="button"
             onClick={() => void handleSend(input)}
             disabled={pending || !input.trim()}
-            className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-pink)] bg-[linear-gradient(135deg,rgba(255,95,162,0.92),rgba(244,114,182,0.78))] px-3 text-[var(--text-main)] shadow-[0_0_20px_rgba(255,95,162,0.26)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="nexus-primary-action inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-pink)] px-3 shadow-[var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
           </button>

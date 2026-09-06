@@ -12,13 +12,13 @@ type CoinIconProps = {
 const SIZE_CLASS = {
   sm: {
     outer:
-      "h-7 w-7 border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)]",
+      "h-7 w-7 border-[var(--border-strong)] bg-[var(--bg-card)]",
     image: "h-5 w-5",
     text: "text-[9px]",
   },
   lg: {
     outer:
-      "h-14 w-14 sm:h-16 sm:w-16 border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.1)]",
+      "h-14 w-14 sm:h-16 sm:w-16 border-[var(--border-strong)] bg-[var(--bg-panel-strong)]",
     image: "h-10 w-10 sm:h-11 sm:w-11",
     text: "text-xs",
   },

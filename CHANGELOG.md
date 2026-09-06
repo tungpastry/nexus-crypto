@@ -43,6 +43,8 @@
   - richer `/ops` summary panels (executive summary, provider summary, deep summary, issues list)
   - extended smoke checks for Phase 2 orchestration and no-secret assertions
 - Gemini live provider deployment notes and Phase 2 smoke validation docs.
+- Trader theme switcher with persistent Black Pink and Wikipedia Glass modes across Home, Asset,
+  Ops, Login, TifaWidget, and TradingView.
 
 ### Changed
 

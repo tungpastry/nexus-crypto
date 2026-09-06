@@ -113,7 +113,7 @@ export default function MarketSnapshot() {
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`rounded-xl border bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4 shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition hover:bg-[rgba(255,255,255,0.09)] ${card.cardClass}`}
+            className={`rounded-xl border nexus-card-surface p-4 shadow-[0_14px_32px_rgba(0,0,0,0.24)] transition hover:bg-[var(--bg-card-hover)] ${card.cardClass}`}
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-soft)]">{card.label}</p>
@@ -123,7 +123,7 @@ export default function MarketSnapshot() {
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between border-t border-[rgba(255,255,255,0.1)] px-4 py-3 text-xs text-[var(--text-muted)]">
+      <div className="flex items-center justify-between border-t border-[var(--border-soft)] px-4 py-3 text-xs text-[var(--text-muted)]">
         <span>{statusText}</span>
         <DataFreshnessBadge updatedAt={data?.updated_at} />
       </div>

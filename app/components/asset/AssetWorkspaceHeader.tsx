@@ -46,7 +46,7 @@ export default function AssetWorkspaceHeader({ asset }: AssetWorkspaceHeaderProp
               />
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <h1 className="bg-[linear-gradient(90deg,#ffffff,#ff8fbd,#7dd3fc)] bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[0_0_20px_rgba(255,95,162,0.2)] sm:text-5xl">
+              <h1 className="nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[0_0_20px_rgba(255,95,162,0.2)] sm:text-5xl">
                 {asset.symbol}
               </h1>
               <p className="pb-1 text-lg font-semibold text-[var(--text-muted)]">{asset.name}</p>

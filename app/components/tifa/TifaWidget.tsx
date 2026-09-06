@@ -17,7 +17,7 @@ export default function TifaWidget({ page, context }: TifaWidgetProps) {
   const panelSizeClass = useMemo(() => "h-[72vh] w-[min(420px,calc(100vw-1.5rem))] sm:h-[620px] sm:w-[420px]", []);
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[70] flex items-end gap-3">
+    <div className="pointer-events-none fixed bottom-4 right-4 z-[70] flex flex-col items-end gap-3">
       <AnimatePresence>
         {open ? (
           <motion.div
@@ -36,7 +36,7 @@ export default function TifaWidget({ page, context }: TifaWidgetProps) {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-pink)] bg-[linear-gradient(135deg,rgba(255,95,162,0.95),rgba(244,114,182,0.8))] text-[var(--text-main)] shadow-[0_16px_34px_rgba(0,0,0,0.36),0_0_30px_rgba(255,95,162,0.34)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+        className="nexus-primary-action pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-pink)] shadow-[var(--shadow-panel),var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         aria-label={open ? "Close Tifa assistant" : "Open Tifa assistant"}
       >
         <TifaAvatar size="md" />

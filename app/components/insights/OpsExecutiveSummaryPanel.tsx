@@ -119,7 +119,7 @@ export default function OpsExecutiveSummaryPanel() {
             type="button"
             onClick={() => void loadSummary()}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-xs text-[var(--text-main)] transition hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] px-3 py-1.5 text-xs text-[var(--text-main)] transition hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Refreshing..." : "Refresh Ops Summary"}
@@ -134,7 +134,7 @@ export default function OpsExecutiveSummaryPanel() {
         ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3 sm:col-span-2">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3 sm:col-span-2">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Headline
             </p>
@@ -142,7 +142,7 @@ export default function OpsExecutiveSummaryPanel() {
               {summary?.executive.headline || "Loading ops summary..."}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Provider
             </p>
@@ -150,7 +150,7 @@ export default function OpsExecutiveSummaryPanel() {
               {summary?.executive.provider_status || "--"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Deep
             </p>
@@ -158,7 +158,7 @@ export default function OpsExecutiveSummaryPanel() {
               {summary?.executive.deep_health_status || "--"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Gemini/Budget
             </p>

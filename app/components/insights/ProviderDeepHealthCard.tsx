@@ -96,7 +96,7 @@ export default function ProviderDeepHealthCard() {
   return (
     <RetroPanel title="Provider Deep Health" eyebrow="Multi-asset Binance diagnostics">
       <div className="grid gap-4 p-5 lg:grid-cols-[260px_1fr]">
-        <div className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4">
+        <div className="rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-4">
           <div className="flex items-center gap-2">
             <StatusIcon status={topStatus} />
             <span
@@ -129,7 +129,7 @@ export default function ProviderDeepHealthCard() {
               void fetchDeepHealth();
             }}
             disabled={loading}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[rgba(125,211,252,0.35)] bg-[rgba(125,211,252,0.1)] px-3 py-2 text-xs font-semibold text-[var(--cyan-accent)] transition hover:bg-[rgba(125,211,252,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[rgba(125,211,252,0.35)] bg-[rgba(125,211,252,0.1)] px-3 py-2 text-xs font-semibold text-[var(--cyan-accent)] transition hover:bg-[rgba(125,211,252,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Checking..." : "Refresh Deep Check"}
@@ -171,7 +171,7 @@ export default function ProviderDeepHealthCard() {
               </div>
             ))
           ) : (
-            <div className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] p-4 text-sm text-[var(--text-muted)] sm:col-span-2 xl:col-span-4">
+            <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-4 text-sm text-[var(--text-muted)] sm:col-span-2 xl:col-span-4">
               <Activity className="mb-2 h-4 w-4 text-[var(--pink-soft)]" />
               {loading ? "Loading deep provider diagnostics..." : "No deep health data available."}
             </div>

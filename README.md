@@ -70,6 +70,7 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 - Deep provider health endpoint for all Binance-enabled Nexus symbols.
 - Release metadata endpoint (`/api/version`) and UI version badge.
 - LAN local authentication with proxy-based page protection.
+- Trader theme switcher with default Black Pink and persistent Wikipedia Glass modes.
 - TifaWidget Assistant with grounded market/asset context and Gemini budget guard.
   - Phase 1.1 hardening: contract tests, no-secret leakage tests, Gemini true-stream path, safe pre-stream fallback to tool-only pseudo stream, sanitized `STREAM_PROVIDER_ERROR`, and Gemini circuit breaker.
   - Phase 2 ops orchestration: provider/deep health explainers, ops summary endpoint, allowlisted orchestration endpoint, and richer `/ops` diagnostic summaries.

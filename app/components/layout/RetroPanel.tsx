@@ -15,12 +15,12 @@ export default function RetroPanel({
 }: RetroPanelProps) {
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.085),rgba(255,255,255,0.045))] shadow-[var(--shadow-panel),var(--shadow-pink)] backdrop-blur-xl ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] nexus-panel-surface shadow-[var(--shadow-panel),var(--shadow-pink)] backdrop-blur-xl ${className}`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:100%_4px] opacity-20" />
+      <div className="pointer-events-none absolute inset-0 nexus-scanlines bg-[length:100%_4px] opacity-20" />
       <div className="relative">
         {(title || eyebrow) && (
-          <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.025)] px-5 py-4">
+          <div className="border-b border-[var(--line-subtle)] bg-[var(--bg-panel)] px-5 py-4">
             {eyebrow && (
               <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text-soft)]">
                 {eyebrow}

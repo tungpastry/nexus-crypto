@@ -45,7 +45,7 @@ export default function DataFreshnessBadge({ updatedAt }: DataFreshnessBadgeProp
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border bg-[rgba(0,0,0,0.35)] px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${freshness.className}`}
+      className={`inline-flex items-center rounded-full border nexus-input-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] ${freshness.className}`}
       title={updatedAt || "No timestamp"}
     >
       {freshness.label}

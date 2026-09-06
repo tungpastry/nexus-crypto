@@ -43,12 +43,12 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035))] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
+      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-[var(--border-strong)] nexus-panel-surface p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
     >
       <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--text-soft)]">
         Username
         <input
-          className="rounded-lg border border-[rgba(255,255,255,0.16)] bg-[rgba(0,0,0,0.35)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[rgba(125,211,252,0.7)]"
+          className="nexus-input-surface rounded-lg border border-[var(--border-strong)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[var(--cyan-accent)]"
           autoComplete="username"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
@@ -58,7 +58,7 @@ export default function LoginForm() {
       <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--text-soft)]">
         Password
         <input
-          className="rounded-lg border border-[rgba(255,255,255,0.16)] bg-[rgba(0,0,0,0.35)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[rgba(125,211,252,0.7)]"
+          className="nexus-input-surface rounded-lg border border-[var(--border-strong)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--text-main)] outline-none transition focus:border-[var(--cyan-accent)]"
           type="password"
           autoComplete="current-password"
           value={password}
@@ -75,7 +75,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg border border-[rgba(255,95,162,0.35)] bg-[linear-gradient(135deg,#ff5fa2,#ff8fbd)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] text-[#120712] shadow-[0_0_24px_rgba(255,95,162,0.28)] transition hover:-translate-y-0.5 hover:shadow-[0_0_32px_rgba(255,95,162,0.42)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="nexus-primary-action rounded-lg border border-[var(--border-pink)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] shadow-[var(--shadow-accent)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Checking" : "Enter Nexus"}
       </button>

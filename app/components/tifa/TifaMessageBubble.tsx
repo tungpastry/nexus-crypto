@@ -25,14 +25,14 @@ export default function TifaMessageBubble({
       <div className="flex justify-start">
         <div className="flex max-w-[92%] items-end gap-2">
           <TifaAvatar size="sm" />
-          <div className="max-w-[85%] rounded-2xl border border-[var(--border-soft)] bg-black px-3 py-2 text-sm leading-6 text-[var(--text-main)]">
+          <div className="nexus-solid-surface max-w-[85%] rounded-2xl border border-[var(--border-soft)] px-3 py-2 text-sm leading-6 text-[var(--text-main)]">
             {text}
           </div>
           {speechSupported && text.trim() ? (
             <button
               type="button"
               onClick={onToggleSpeech}
-              className="shrink-0 rounded-lg border border-[var(--border-soft)] bg-black p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
+              className="nexus-solid-surface shrink-0 rounded-lg border border-[var(--border-soft)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-cyan)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
               aria-label={speaking ? "Stop reading aloud" : "Read aloud"}
               title={speaking ? "Dừng đọc" : "Đọc to tin này"}
             >
@@ -51,7 +51,7 @@ export default function TifaMessageBubble({
   return (
     <div className="flex justify-end">
       <div
-        className="max-w-[85%] rounded-2xl border border-[var(--border-pink)] bg-black px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
+        className="nexus-solid-surface max-w-[85%] rounded-2xl border border-[var(--border-pink)] px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
       >
         {text}
       </div>

@@ -5,7 +5,7 @@ import ClientErrorBoundary from "./ClientErrorBoundary";
 
 export default function NexusFooter() {
   return (
-    <footer className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04))] p-4 shadow-[var(--shadow-panel),var(--shadow-pink)]">
+    <footer className="rounded-2xl border border-[var(--border-soft)] nexus-panel-surface p-4 shadow-[var(--shadow-panel),var(--shadow-pink)]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-pink)] bg-[rgba(255,95,162,0.08)] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
@@ -23,8 +23,8 @@ export default function NexusFooter() {
         </div>
 
         <p className="text-sm leading-6 text-[var(--text-muted)]">
-          Retro black-pink crypto decision-support dashboard for watching the Top 10 Nexus
-          Universe, syncing price, chart, timeframe context, and structured checklist discipline.
+          Dual-theme crypto decision-support dashboard for watching the Top 10 Nexus Universe,
+          syncing price, chart, timeframe context, and structured checklist discipline.
         </p>
 
         <p className="text-xs leading-5 text-[var(--text-soft)]">

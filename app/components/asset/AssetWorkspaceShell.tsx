@@ -13,6 +13,8 @@ import ClientErrorBoundary from "../layout/ClientErrorBoundary";
 import NexusFooter from "../layout/NexusFooter";
 import RetroPanel from "../layout/RetroPanel";
 import TifaWidget from "../tifa/TifaWidget";
+import ThemeSwitcher from "../theme/ThemeSwitcher";
+import { useNexusTheme } from "../theme/ThemeProvider";
 import AssetWorkspaceHeader from "./AssetWorkspaceHeader";
 import TimeframeSelector from "./TimeframeSelector";
 
@@ -21,6 +23,7 @@ type AssetWorkspaceShellProps = {
 };
 
 export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps) {
+  const { theme } = useNexusTheme();
   const [selectedTimeframe, setSelectedTimeframe] = useState(NEXUS_TIMEFRAMES[2]);
   const [trend, setTrend] = useState<NexusSignal["trend"] | "SIDEWAY" | "DISABLED">("SIDEWAY");
 
@@ -30,19 +33,24 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
       : trend === "DOWNTREND"
         ? "ring-2 ring-[rgba(251,113,133,0.56)] shadow-[0_0_28px_rgba(251,113,133,0.24)]"
         : trend === "DISABLED"
-          ? "ring-1 ring-[rgba(255,255,255,0.2)] shadow-[0_0_16px_rgba(255,255,255,0.1)]"
-          : "ring-1 ring-[rgba(255,255,255,0.22)] shadow-[0_0_18px_rgba(255,255,255,0.1)]";
+          ? "ring-1 ring-[var(--neutral-ring)] shadow-[var(--neutral-glow)]"
+          : "ring-1 ring-[var(--neutral-ring)] shadow-[var(--neutral-glow)]";
+
+  const chartTheme = theme === "wikipedia-glass" ? "light" : "dark";
 
   return (
-    <main className="min-h-screen bg-[var(--bg-main)] px-4 py-6 text-[var(--text-main)] sm:px-6 lg:px-8">
+    <main className="nexus-page-background min-h-screen px-4 py-6 text-[var(--text-main)] sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <Link
-          href="/"
-          className="inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.075)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[0_10px_28px_rgba(0,0,0,0.22)] transition hover:border-[var(--border-pink)] hover:bg-[rgba(255,95,162,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Top 10 Nexus Universe
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-pink)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Top 10 Nexus Universe
+          </Link>
+          <ThemeSwitcher />
+        </div>
 
         <ClientErrorBoundary>
           <AssetWorkspaceHeader asset={asset} />
@@ -75,11 +83,11 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
             eyebrow={`${asset.symbol} ${selectedTimeframe.label}`}
           >
             <div className="p-4">
-              <div className="overflow-hidden rounded-xl border border-[rgba(125,211,252,0.16)] bg-[#05070b] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_18px_44px_rgba(0,0,0,0.28)]">
+              <div className="nexus-chart-frame overflow-hidden rounded-xl border border-[var(--border-soft)] shadow-[var(--shadow-panel)]">
                 <TradingViewChart
                   asset={asset}
                   timeframe={selectedTimeframe}
-                  theme="dark"
+                  theme={chartTheme}
                   height={680}
                 />
               </div>

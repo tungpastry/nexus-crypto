@@ -53,7 +53,7 @@ function statusClass(status: "ok" | "degraded" | "blocked" | "disabled") {
     return "border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.08)] text-[var(--amber-warning)]";
   }
   if (status === "disabled") {
-    return "border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)]";
+    return "border-[var(--border-strong)] bg-[var(--bg-card)] text-[var(--text-muted)]";
   }
   return "border-[rgba(251,113,133,0.35)] bg-[rgba(251,113,133,0.08)] text-[var(--red-negative)]";
 }
@@ -103,7 +103,7 @@ export default function GeminiAssistantStatusPanel() {
             type="button"
             onClick={() => void load()}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-xs text-[var(--text-main)] transition hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(125,211,252,0.55)] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] px-3 py-1.5 text-xs text-[var(--text-main)] transition hover:border-[var(--border-cyan)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             {loading ? "Checking..." : "Refresh Gemini Status"}
@@ -113,7 +113,7 @@ export default function GeminiAssistantStatusPanel() {
         {error ? <p className="text-xs text-[var(--red-negative)]">{error}</p> : null}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Provider
             </p>
@@ -121,7 +121,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.provider || "gemini"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Model
             </p>
@@ -129,7 +129,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.model || budget?.model || "gemini-3-flash-preview"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Month
             </p>
@@ -137,7 +137,7 @@ export default function GeminiAssistantStatusPanel() {
               {budget?.current_month || "--"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Requests
             </p>
@@ -145,7 +145,7 @@ export default function GeminiAssistantStatusPanel() {
               {budget?.monthly_requests ?? 0}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Stream
             </p>
@@ -153,7 +153,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.stream.enabled ? "enabled" : "disabled"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Circuit
             </p>
@@ -161,7 +161,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.circuit.state || "closed"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Failures
             </p>
@@ -169,7 +169,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider ? `${provider.circuit.failure_count}/${provider.circuit.threshold}` : "0/0"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Timeout
             </p>
@@ -177,7 +177,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.request.timeout_ms ?? 0}ms
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Retry
             </p>
@@ -185,7 +185,7 @@ export default function GeminiAssistantStatusPanel() {
               {provider?.request.retry_limit ?? 0}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border-soft)] bg-[rgba(255,255,255,0.06)] p-3">
+          <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-3">
             <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
               Cooldown
             </p>

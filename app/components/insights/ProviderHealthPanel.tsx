@@ -77,7 +77,7 @@ export default function ProviderHealthPanel() {
   return (
     <RetroPanel title="Provider Health" eyebrow="Zenora-compatible checks">
       <div className="grid gap-4 p-5 lg:grid-cols-[240px_1fr]">
-        <div className="rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-4">
+        <div className="rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-4">
           <div className="flex items-center gap-2">
             {degraded ? (
               <AlertTriangle className="h-5 w-5 text-[var(--amber-warning)]" />
@@ -139,7 +139,7 @@ export default function ProviderHealthPanel() {
                 );
               })
             : (
-              <div className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.045)] p-4 text-sm text-[var(--text-muted)] sm:col-span-3">
+              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-4 text-sm text-[var(--text-muted)] sm:col-span-3">
                 <Activity className="mb-2 h-4 w-4 text-[var(--pink-soft)]" />
                 Loading provider health...
               </div>

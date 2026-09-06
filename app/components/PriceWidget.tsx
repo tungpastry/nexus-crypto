@@ -78,7 +78,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
 
   return (
     <motion.div
-      className={`relative flex w-full items-center justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.045))] p-5 text-[var(--text-main)] ring-2 ${ringColor} shadow-[var(--shadow-panel)] transition-all duration-700`}
+      className={`relative flex w-full items-center justify-between overflow-hidden rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-5 text-[var(--text-main)] ring-2 ${ringColor} shadow-[var(--shadow-panel)] transition-all duration-700`}
       animate={{
         scale: pulse ? 1.04 : 1,
         opacity: pulse ? 1 : 0.98,
@@ -117,7 +117,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
               direction === "up"
                 ? "text-[var(--mint-positive)] drop-shadow-[0_0_6px_rgba(94,234,212,0.7)]"
                 : direction === "down"
-                ? "text-rose-300 drop-shadow-[0_0_6px_rgba(251,113,133,0.55)]"
+                ? "text-[var(--red-negative)] drop-shadow-[0_0_6px_rgba(251,113,133,0.55)]"
                 : "text-[var(--yellow-accent)]"
             }`}
           >
@@ -146,7 +146,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         {direction === "down" && (
           <TrendingDown
             size={38}
-            className="text-rose-300 drop-shadow-[0_0_8px_rgba(251,113,133,0.55)]"
+            className="text-[var(--red-negative)] drop-shadow-[0_0_8px_rgba(251,113,133,0.55)]"
           />
         )}
         {!direction && <Shield size={34} className="text-[var(--pink-soft)]" />}
