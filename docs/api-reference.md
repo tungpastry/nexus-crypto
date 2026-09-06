@@ -525,7 +525,7 @@ Example response:
   "commit": "1ba0b57e0c7e8ef9712095e816fc32f8e10bddb6",
   "short_commit": "1ba0b57",
   "build_time": "2026-05-16T00:00:00Z",
-  "next": "16.2.6",
+  "next": "16.3.4",
   "node": "v22.18.0",
   "env": "production",
   "updated_at": "2026-05-16T00:00:00.000Z"

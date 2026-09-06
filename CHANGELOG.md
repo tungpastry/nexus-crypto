@@ -48,6 +48,8 @@
 
 ### Changed
 
+- Upgraded Next.js and `eslint-config-next` to `16.3.4`, Axios to `1.20.x`, and refreshed patched transitive dependencies.
+- Scoped Gemini budget ledger filesystem tracing so Turbopack no longer includes the whole project in NFT output.
 - Next.js convention migration: root `middleware.ts` replaced by `proxy.ts`.
 - Ubuntu production deploy dependency install is deterministic via `npm ci`.
 - Documentation refreshed to align README, architecture, API reference, deployment, and Phase 2 Tifa docs with the current `fce6b64e` baseline.
@@ -88,8 +90,8 @@
 
 ### Security
 
+- Current dependency baseline passes `npm audit` with zero known advisories.
 - P7/P8: npm audit reviewed; critical Next advisory resolved.
-- Remaining: 2 moderate bundled Next/PostCSS advisories documented; no force downgrade.
 
 ### Ops
 

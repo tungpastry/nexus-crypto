@@ -57,11 +57,12 @@ sudo journalctl -u nexus-crypto.service -n 120 --no-pager
 
 Review `checks.market_snapshot`, `checks.market_snapshot_cache_status`, and `checks.market_snapshot_age_ms`.
 
-## 5) `npm audit` reports moderate vulnerabilities
+## 5) `npm audit` reports vulnerabilities
 
 Current project note:
 
-- Some moderate advisories may remain in bundled upstream toolchain paths.
+- The reviewed dependency baseline currently passes `npm audit` with zero known advisories.
+- A future advisory should be handled through a controlled dependency update and lockfile review.
 
 Action:
 

@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.2.6-000000?logo=nextdotjs&logoColor=white">
+  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.3.4-000000?logo=nextdotjs&logoColor=white">
   <img alt="React 19" src="https://img.shields.io/badge/React-19.2.0-149ECA?logo=react&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white">
   <img alt="License MIT" src="https://img.shields.io/badge/License-MIT-22c55e">
@@ -107,7 +107,7 @@ Nexus Crypto is organized into four practical layers:
 
 ## Tech Stack
 
-- Next.js `16.2.6`
+- Next.js `16.3.4`
 - React `19.2.0` + React DOM `19.2.0`
 - TypeScript + Tailwind CSS v4
 - Vitest + ESLint
@@ -289,7 +289,6 @@ nexus-crypto/
 - Add lightweight TTL cache for `/api/tifa-tools/ops-summary`.
 - Add richer orchestration warnings panel on `/ops`.
 - Add full chat intent-to-tool integration tests.
-- Fix old Turbopack NFT tracing warning from runtime config import chain.
 - Expand CI depth for Tifa smoke where safe.
 - Optional Cloudflare Tunnel HTTPS deployment profile.
 

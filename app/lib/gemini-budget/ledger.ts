@@ -10,7 +10,9 @@ const CSV_HEADER =
   "month_utc,timestamp_utc,request_id,status,reason,model,estimated_cost_usd,total_cost_usd,input_tokens,output_tokens,monthly_spend_before,monthly_spend_after";
 
 function resolvePath(filePath: string) {
-  return path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+  return path.isAbsolute(filePath)
+    ? filePath
+    : path.join(/*turbopackIgnore: true*/ process.cwd(), filePath);
 }
 
 function escapeCsv(value: string) {

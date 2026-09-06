@@ -20,7 +20,7 @@ describe("/api/version", () => {
     expect(payload.commit).toBe("565053c4ee67d50f897af063bc70a2cedd7878d4");
     expect(payload.short_commit).toBe("565053c");
     expect(payload.build_time).toBe("2026-05-15T00:00:00Z");
-    expect(payload.next).toBe("16.2.6");
+    expect(payload.next).toBe("16.3.4");
     expect(payload.node).toMatch(/^v/);
   });
 

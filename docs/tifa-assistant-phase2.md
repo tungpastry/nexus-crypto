@@ -207,4 +207,3 @@ TIFA_PHASE2_NO_SECRET_LEAK=PASS
 - Add TTL cache for `/api/tifa-tools/ops-summary`.
 - Add UI surface for orchestration warnings.
 - Add full chat intent-to-tool integration tests.
-- Fix old Turbopack NFT tracing warning from runtime config import chain.

@@ -7,9 +7,7 @@ function installBrowserStubs() {
   const documentElement = { dataset: {} as Record<string, string>, style: {} as Record<string, string> };
   let storageListener: ((event: StorageEvent) => void) | undefined;
 
-  // @ts-expect-error test-only document stub
-  globalThis.document = { documentElement };
-  // @ts-expect-error test-only window stub
+  globalThis.document = { documentElement } as unknown as Document;
   globalThis.window = {
     localStorage: {
       getItem: (key: string) => data.get(key) ?? null,
@@ -21,7 +19,7 @@ function installBrowserStubs() {
     removeEventListener: (type: string, listener: (event: StorageEvent) => void) => {
       if (type === "storage" && storageListener === listener) storageListener = undefined;
     },
-  };
+  } as unknown as Window & typeof globalThis;
 
   return {
     data,
@@ -33,10 +31,8 @@ function installBrowserStubs() {
 
 describe("theme store", () => {
   afterEach(() => {
-    // @ts-expect-error test-only browser cleanup
-    delete globalThis.document;
-    // @ts-expect-error test-only browser cleanup
-    delete globalThis.window;
+    Reflect.deleteProperty(globalThis, "document");
+    Reflect.deleteProperty(globalThis, "window");
   });
 
   it("applies and persists the selected theme", () => {
@@ -52,12 +48,14 @@ describe("theme store", () => {
 
   it("keeps working when browser storage rejects writes", () => {
     const { documentElement } = installBrowserStubs();
-    // @ts-expect-error test-only localStorage override
-    globalThis.window.localStorage = {
-      setItem: () => {
-        throw new Error("storage blocked");
-      },
-    };
+    Object.defineProperty(globalThis.window, "localStorage", {
+      configurable: true,
+      value: {
+        setItem: () => {
+          throw new Error("storage blocked");
+        },
+      } as unknown as Storage,
+    });
 
     expect(() => setNexusTheme("black-pink")).not.toThrow();
     expect(documentElement.dataset.theme).toBe("black-pink");

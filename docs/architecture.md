@@ -142,4 +142,3 @@ The orchestrator degrades safely: per-tool failures are captured as warnings whe
 - Deep diagnostics are exposed separately at `/api/provider-health/deep` across all Binance-enabled symbols to avoid heavy default readiness probes.
 - Ops summary is process-local and should receive a TTL cache before high-concurrency usage.
 - Gemini budget estimate is a local guardrail and should not be treated as exact cloud billing.
-- Turbopack NFT tracing warning from the runtime config import chain is known and non-blocking.
