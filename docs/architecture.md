@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nexus Crypto is a Next.js App Router SaaS dashboard focused on market-data observation and checklist workflow discipline for a fixed Top 10 crypto universe. The app is intentionally non-custodial and non-executional.
+Nexus Crypto is a Next.js App Router SaaS dashboard focused on market-data observation and checklist workflow discipline for a versioned Top 100 crypto universe. The app is intentionally non-custodial and non-executional.
 
 Current reviewed baseline:
 
@@ -10,14 +10,14 @@ Current reviewed baseline:
 - Runtime: Next.js 16 App Router
 - Main production port: `3200`
 - Production reference: Ubuntu Server + `systemd`
-- Latest reviewed commit: `05a7953cab919705d3db2e30e80f2215a7a7c27b`
+- Catalog membership is generated and committed; it does not drift automatically at runtime.
 
 ## Layered Architecture
 
 Nexus Crypto now has four operational layers:
 
 1. **Market Layer**
-   - fixed Top 10 Nexus Universe
+   - versioned Top 100 Nexus Universe
    - Binance price and kline providers
    - CoinGecko-style market snapshot
    - server cache and stale fallback
@@ -66,11 +66,12 @@ Nexus Crypto now has four operational layers:
 
 ## Config-Driven Market Universe
 
-- Asset universe is defined in `app/config/assets.ts`.
+- Catalog data is committed in `app/config/assets.generated.json` and exposed through `app/config/assets.ts`.
+- `npm run assets:refresh` builds a reviewed Top 100 snapshot from CoinGecko markets and Binance Spot exchange info; `npm run assets:check` validates it offline.
 - Timeframe mapping is defined in `app/config/timeframes.ts`.
 - UI and API symbol/timeframe controls follow these configs rather than per-component hardcoding.
-- Stablecoins (`USDT`, `USDC`) run market-only mode: no chart, no MA, no checklist automation.
-- Binance-enabled symbols drive deep provider health fanout.
+- Stablecoins and assets without a verified Binance Spot/USDT market run market-only mode: CoinGecko snapshot price, no chart, no MA, no checklist automation.
+- Binance-enabled symbols drive the price/kline allowlist; eight explicitly marked core symbols drive deep provider health.
 
 ## Auth And Routing Guard
 
@@ -114,7 +115,7 @@ The orchestrator degrades safely: per-tool failures are captured as warnings whe
 ## Provider Health Architecture
 
 - `/api/provider-health` is the lightweight readiness route.
-- `/api/provider-health/deep` is the wider multi-symbol diagnostics route.
+- `/api/provider-health/deep` is the eight-symbol core-canary diagnostics route.
 - `/api/provider-health/gemini` exposes client-safe Gemini provider, stream, circuit, and budget status.
 - `/api/tifa-tools/provider-health-explainer` normalizes provider health into assistant/UI-friendly diagnostics.
 - `/api/tifa-tools/deep-health-explainer` normalizes multi-symbol diagnostics.
@@ -139,6 +140,6 @@ The orchestrator degrades safely: per-tool failures are captured as warnings whe
 
 - No trade execution and no custody/account integration.
 - Default `/api/provider-health` remains lightweight and should be preferred for frequent readiness checks.
-- Deep diagnostics are exposed separately at `/api/provider-health/deep` across all Binance-enabled symbols to avoid heavy default readiness probes.
+- Deep diagnostics are exposed separately at `/api/provider-health/deep` and deliberately remain scoped to eight core canaries as the Binance-enabled catalog grows.
 - Ops summary is process-local and should receive a TTL cache before high-concurrency usage.
 - Gemini budget estimate is a local guardrail and should not be treated as exact cloud billing.

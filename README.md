@@ -12,7 +12,7 @@
   <img alt="Status Active" src="https://img.shields.io/badge/Status-Active-2563eb">
 </p>
 
-Retro black-pink crypto decision-support dashboard for the Top 10 Nexus Universe. Built with Next.js 16 + React 19, TradingView widget charts, Binance price/klines routes, CoinGecko-style market snapshot APIs, LAN-local auth, TifaWidget Assistant, and `/ops` diagnostics.
+Retro black-pink crypto decision-support dashboard for the versioned Nexus Top 100 Universe. Built with Next.js 16 + React 19, TradingView widget charts, Binance price/klines routes, CoinGecko market snapshots, LAN-local auth, TifaWidget Assistant, and `/ops` diagnostics.
 
 Nexus Crypto is market-data-first tooling for observation and workflow discipline. It does not execute trades, does not custody funds, and does not provide financial or trading advice.
 
@@ -32,9 +32,9 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 
 ## Current Verified Baseline
 
-- Latest reviewed commit: `05a7953cab919705d3db2e30e80f2215a7a7c27b`
-- Commit theme: README web app screenshots
-- Previous Phase 2 completion commit: `eb816232596ccf02216d4b08366ba7c99e6f97f3`
+- Asset catalog: 100 committed CoinGecko members, generated `2026-09-06`
+- Current capabilities: 52 verified Binance Spot/USDT workflows and 48 market-only workspaces
+- Deep health scope: 8 core Binance canaries
 - Production reference: Ubuntu Server, `nexus-crypto.service`, port `3200`
 - Runtime status after live validation: Phase 2 + Gemini live provider smoke passed
 
@@ -59,15 +59,15 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 
 ## Features
 
-- Top 10 Nexus Universe market overview at `/`.
+- Versioned Top 100 Nexus Universe market overview at `/` with 25-row pagination, search, filters, and sorting.
 - Dedicated asset workspace at `/asset/[id]`.
 - TradingView chart with unique container per asset/timeframe.
 - Binance-backed `PriceWidget` and kline context.
-- CoinGecko-style market snapshot route with cache/stale fallback.
+- CoinGecko market snapshot route with 100-member catalog metadata, retry, cache, and stale fallback.
 - Nexus Decision Matrix: multi-factor workflow scoring that combines MA20/MA50/MA200 structure, trend/bias state, ATR volatility regime, volume confirmation, support/resistance location, and optional higher-timeframe agreement into a clear decision-support state (`No Trade`, `Watch`, `Ready`, `Confirmed`).
-- Stablecoin market-only mode (USDT/USDC: no chart/MA/checklist automation).
+- Market-only mode for stablecoins and assets without a verified Binance Spot/USDT pair.
 - Provider health endpoint with cache freshness insight.
-- Deep provider health endpoint for all Binance-enabled Nexus symbols.
+- Deep provider health endpoint scoped to eight core canaries, separate from the full Binance allowlist.
 - Release metadata endpoint (`/api/version`) and UI version badge.
 - LAN local authentication with proxy-based page protection.
 - Trader theme switcher with default Black Pink and persistent Wikipedia Glass modes.
@@ -80,10 +80,10 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 Nexus Crypto is organized into four practical layers:
 
 1. **Market Layer**
-   - Top 10 universe config
+   - versioned Top 100 catalog generated from CoinGecko + Binance exchange info
    - Binance price/klines APIs
    - market snapshot
-   - stablecoin market-only behavior
+   - stablecoin and Binance-unavailable market-only behavior
 
 2. **Dashboard Layer**
    - Home market overview
@@ -149,7 +149,16 @@ Note: local development uses `npm install`. Production deploy uses `npm ci` for 
 npm run lint
 npm run test
 npm run build
+npm run assets:check
 ```
+
+Refresh the committed catalog only when intentionally updating universe membership:
+
+```bash
+npm run assets:refresh
+```
+
+The refresh command aborts on incomplete/ambiguous provider data and writes only after validation.
 
 Tifa smoke:
 
@@ -268,6 +277,8 @@ nexus-crypto/
 │   │   └── tifa-tools/
 │   ├── components/
 │   ├── config/
+│   │   ├── assets.generated.json
+│   │   └── assets.ts
 │   ├── lib/
 │   │   ├── gemini-budget/
 │   │   ├── tifa-core/
@@ -280,6 +291,9 @@ nexus-crypto/
 ├── docs/
 ├── public/
 ├── scripts/
+│   ├── asset-overrides.json
+│   ├── check_nexus_assets.mjs
+│   └── generate_nexus_assets.mjs
 ├── proxy.ts
 └── package.json
 ```
@@ -290,6 +304,7 @@ nexus-crypto/
 - Add richer orchestration warnings panel on `/ops`.
 - Add full chat intent-to-tool integration tests.
 - Expand CI depth for Tifa smoke where safe.
+- Add a reviewed cadence for refreshing the committed Nexus Top 100 catalog.
 - Optional Cloudflare Tunnel HTTPS deployment profile.
 
 ## Contributing

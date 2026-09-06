@@ -94,7 +94,7 @@ Errors:
 
 ## GET /api/market-snapshot
 
-Purpose: Return CoinGecko-style global snapshot and Top 10 asset rows.
+Purpose: Return CoinGecko global metrics and live market rows for the committed Nexus Top 100 catalog.
 
 Auth:
 
@@ -105,6 +105,9 @@ Example response:
 ```json
 {
   "provider": "coingecko",
+  "catalog_version": "2026-09-06-b96c88167cd4",
+  "catalog_generated_at": "2026-09-06T13:04:19.372Z",
+  "universe_size": 100,
   "updated_at": "2026-05-16T00:00:00.000Z",
   "global": {
     "market_cap_usd": 123,
@@ -121,6 +124,8 @@ Degraded cases:
 
 - If provider fails and RAM/file cache exists: `status: "degraded"` with stale cached payload and `MARKET_SNAPSHOT_STALE`.
 - If no cache exists: degraded fallback structure with null market values.
+- Persistent cache is accepted only when its catalog version and universe size match the committed catalog.
+- CoinGecko `429` and `5xx` responses receive one bounded retry before stale/fallback behavior.
 
 ---
 
@@ -159,7 +164,7 @@ Notes:
 
 ## GET /api/provider-health/deep
 
-Purpose: Deep multi-asset provider check across all Binance-enabled Nexus symbols.
+Purpose: Deep provider check across eight core Binance canary symbols without fanning out across the full Binance-enabled catalog.
 
 Auth:
 
@@ -176,6 +181,8 @@ Example response:
 {
   "provider": "nexus_crypto",
   "mode": "deep",
+  "scope": "core-canary",
+  "available_symbols_total": 52,
   "status": "ok",
   "updated_at": "2026-05-16T00:00:00.000Z",
   "summary": {
@@ -198,7 +205,8 @@ Example response:
 Notes:
 
 - Use this endpoint for manual diagnostics/monitoring depth.
-- Avoid high-frequency polling; it performs a wider provider fanout than `/api/provider-health`.
+- `available_symbols_total` reports the current full Binance allowlist; it can change when the versioned catalog is refreshed.
+- Avoid high-frequency polling; the route intentionally remains an eight-symbol canary rather than checking every available symbol.
 
 ---
 

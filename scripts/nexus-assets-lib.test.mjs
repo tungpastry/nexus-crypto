@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { buildNexusCatalog } from "./nexus-assets-lib.mjs";
+import { describe, expect, it, vi } from "vitest";
+import { buildNexusCatalog, fetchJsonWithRetry } from "./nexus-assets-lib.mjs";
 
 function fixtures() {
   const coins = Array.from({ length: 100 }, (_, index) => ({
@@ -53,5 +53,32 @@ describe("Nexus asset catalog generator", () => {
     expect(() =>
       buildNexusCatalog({ ...input, generatedAt: "2026-09-06T00:00:00.000Z" })
     ).toThrow(/Ambiguous symbol requires override/);
+  });
+
+  it("applies an explicit route alias", () => {
+    const input = fixtures();
+    input.overrides.routeIds.bitcoin = "btc-route";
+    const catalog = buildNexusCatalog({
+      ...input,
+      generatedAt: "2026-09-06T00:00:00.000Z",
+    });
+    expect(catalog.assets[0].id).toBe("btc-route");
+    expect(catalog.assets[0].coingeckoId).toBe("bitcoin");
+  });
+
+  it("retries a provider failure once and then aborts", async () => {
+    const response = {
+      ok: false,
+      status: 503,
+      headers: { get: () => "0" },
+    };
+    const fetchImpl = vi.fn().mockResolvedValue(response);
+    const sleepImpl = vi.fn().mockResolvedValue(undefined);
+
+    await expect(
+      fetchJsonWithRetry("https://provider.example", { fetchImpl, sleepImpl })
+    ).rejects.toThrow("HTTP 503");
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(sleepImpl).toHaveBeenCalledTimes(1);
   });
 });

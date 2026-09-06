@@ -66,6 +66,41 @@ print(f"CRYPTO_KLINES_{symbol}=PASS")
 PY
 done
 
+snapshot_file="$TMP_DIR/market-snapshot.json"
+curl_with_auth "${BASE_URL}/api/market-snapshot" -o "$snapshot_file"
+python3 - "$snapshot_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assets = payload.get("assets")
+assert payload.get("provider") == "coingecko"
+assert payload.get("universe_size") == 100
+assert isinstance(payload.get("catalog_version"), str) and payload["catalog_version"]
+assert isinstance(payload.get("catalog_generated_at"), str) and payload["catalog_generated_at"]
+assert isinstance(assets, list) and len(assets) == 100
+assert len({asset.get("id") for asset in assets}) == 100
+print("MARKET_SNAPSHOT_NEXUS_100=PASS")
+PY
+
+deep_health_file="$TMP_DIR/provider-health-deep.json"
+curl -sS "${BASE_URL}/api/provider-health/deep" -o "$deep_health_file"
+python3 - "$deep_health_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("provider") == "nexus_crypto"
+assert payload.get("mode") == "deep"
+assert payload.get("scope") == "core-canary"
+assert payload.get("summary", {}).get("symbols_total") == 8
+assert len(payload.get("checks", {})) == 8
+assert payload.get("available_symbols_total", 0) >= 8
+print("PROVIDER_DEEP_HEALTH_CORE_CANARY=PASS")
+PY
+
 negative_symbol_file="$TMP_DIR/negative-unsupported-symbol.json"
 negative_symbol_code="$(
   curl_with_auth \

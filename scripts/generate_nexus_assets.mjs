@@ -3,7 +3,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildNexusCatalog } from "./nexus-assets-lib.mjs";
+import { buildNexusCatalog, fetchJsonWithRetry } from "./nexus-assets-lib.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_DIR = path.dirname(SCRIPT_DIR);
@@ -14,31 +14,12 @@ const COINGECKO_URL =
 const BINANCE_URL =
   "https://api.binance.com/api/v3/exchangeInfo?permissions=SPOT&symbolStatus=TRADING&showPermissionSets=false";
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function fetchJson(url) {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const response = await fetch(url, { headers: { Accept: "application/json" } });
-    if (response.ok) return response.json();
-
-    if ((response.status === 429 || response.status >= 500) && attempt === 0) {
-      const retryAfter = Number.parseInt(response.headers.get("retry-after") || "1", 10);
-      await sleep(Math.min(Number.isFinite(retryAfter) ? retryAfter * 1000 : 1000, 5000));
-      continue;
-    }
-    throw new Error(`Provider request failed with HTTP ${response.status}`);
-  }
-  throw new Error("Provider request retry exhausted");
-}
-
 async function main() {
   const shouldWrite = process.argv.includes("--write");
   const overrides = JSON.parse(await readFile(OVERRIDES_FILE, "utf8"));
   const [coins, exchangeInfo] = await Promise.all([
-    fetchJson(COINGECKO_URL),
-    fetchJson(BINANCE_URL),
+    fetchJsonWithRetry(COINGECKO_URL),
+    fetchJsonWithRetry(BINANCE_URL),
   ]);
   const catalog = buildNexusCatalog({
     coins,

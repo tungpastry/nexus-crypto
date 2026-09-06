@@ -11,6 +11,7 @@ describe("Nexus 100 asset catalog", () => {
   it("contains 100 unique assets in stable catalog order", () => {
     expect(NEXUS_ASSETS).toHaveLength(100);
     expect(new Set(NEXUS_ASSETS.map((asset) => asset.id)).size).toBe(100);
+    expect(new Set(NEXUS_ASSETS.map((asset) => asset.coingeckoId)).size).toBe(100);
     expect(NEXUS_ASSETS.map((asset) => asset.catalogOrder)).toEqual(
       Array.from({ length: 100 }, (_, index) => index + 1)
     );

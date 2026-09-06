@@ -30,7 +30,7 @@ export function explainOpsSummary(params: {
   const recommendations: string[] = [];
   if (deepHealth.status !== "ok") {
     recommendations.push(
-      "Review deep health symbol errors before relying on full-universe diagnostics."
+      "Review core-canary deep health errors before relying on Binance-backed workspace diagnostics."
     );
   }
   if (providerHealth.status !== "ok") {
@@ -77,4 +77,3 @@ export function explainOpsSummary(params: {
       "Operations summary is for diagnostics and workflow coordination only. Market data only; no trade execution.",
   };
 }
-

@@ -25,7 +25,10 @@ from pathlib import Path
 payload = json.loads(Path(sys.argv[1]).read_text())
 assert payload.get("ok") is True
 assert payload.get("context_type") == "market_snapshot"
-assert "top_assets" in payload
+assert payload.get("universe_size") == 100
+assert isinstance(payload.get("top_assets"), list) and len(payload["top_assets"]) <= 20
+assert isinstance(payload.get("leaders_24h"), list) and payload["leaders_24h"]
+assert isinstance(payload.get("laggards_24h"), list) and payload["laggards_24h"]
 print("TIFA_MARKET_CONTEXT=PASS")
 PY
 
@@ -71,6 +74,21 @@ assert payload.get("asset", {}).get("symbol") == symbol
 print(f"TIFA_STABLECOIN_{symbol}=PASS")
 PY
 done
+
+market_only_file="$TMP_DIR/asset-hyperliquid.json"
+curl_with_auth "${BASE_URL}/api/tifa-tools/asset-analysis?assetId=hyperliquid&tf=1h" -o "$market_only_file"
+python3 - "$market_only_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+payload = json.loads(Path(sys.argv[1]).read_text())
+assert payload.get("ok") is True
+assert payload.get("analysis_enabled") is False
+assert payload.get("mode") == "market-only"
+assert "verified Binance Spot/USDT" in payload.get("reason", "")
+print("TIFA_MARKET_ONLY_BINANCE_UNAVAILABLE=PASS")
+PY
 
 budget_file="$TMP_DIR/budget-status.json"
 curl_with_auth "${BASE_URL}/api/tifa-tools/budget-status" -o "$budget_file"
@@ -203,7 +221,7 @@ from pathlib import Path
 payload = json.loads(Path(sys.argv[1]).read_text())
 assert payload.get("ok") is True
 assert isinstance(payload.get("answer"), str) and payload["answer"]
-assert payload.get("provider") == "ollama", payload.get("provider")
+assert payload.get("provider") in ("ollama", "tool-only"), payload.get("provider")
 serialized = json.dumps(payload)
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:

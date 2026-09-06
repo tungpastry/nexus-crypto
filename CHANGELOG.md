@@ -4,6 +4,10 @@
 
 ### Added
 
+- Nexus Top 100 versioned catalog generated from CoinGecko market rank and verified Binance Spot/USDT capabilities.
+- Offline catalog validation plus explicit refresh tooling (`assets:check`, `assets:refresh`).
+- Homepage Top 100 search, category/mode filters, live metric sorting, and 25-row pagination.
+- Market-only CoinGecko price workspaces for stablecoins and assets without a verified Binance Spot/USDT pair.
 - Public repository documentation set:
   - `docs/architecture.md`
   - `docs/api-reference.md`
@@ -48,6 +52,9 @@
 
 ### Changed
 
+- Market snapshot now returns 100 committed members with catalog metadata, one bounded provider retry, and catalog-version cache invalidation.
+- Tifa computes leaders/laggards over all 100 assets while bounding prompt rows to the top 20.
+- Deep provider health remains scoped to eight core canaries and reports the full available Binance symbol count separately.
 - Upgraded Next.js and `eslint-config-next` to `16.3.4`, Axios to `1.20.x`, and refreshed patched transitive dependencies.
 - Scoped Gemini budget ledger filesystem tracing so Turbopack no longer includes the whole project in NFT output.
 - Next.js convention migration: root `middleware.ts` replaced by `proxy.ts`.

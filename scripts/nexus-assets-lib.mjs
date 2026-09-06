@@ -12,6 +12,28 @@ const VALID_CATEGORIES = new Set([
   "meme",
 ]);
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function fetchJsonWithRetry(
+  url,
+  { fetchImpl = fetch, sleepImpl = sleep } = {}
+) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetchImpl(url, { headers: { Accept: "application/json" } });
+    if (response.ok) return response.json();
+
+    if ((response.status === 429 || response.status >= 500) && attempt === 0) {
+      const retryAfter = Number.parseInt(response.headers.get("retry-after") || "1", 10);
+      await sleepImpl(Math.min(Number.isFinite(retryAfter) ? retryAfter * 1000 : 1000, 5000));
+      continue;
+    }
+    throw new Error(`Provider request failed with HTTP ${response.status}`);
+  }
+  throw new Error("Provider request retry exhausted");
+}
+
 function hasOwn(value, key) {
   return Object.prototype.hasOwnProperty.call(value, key);
 }
