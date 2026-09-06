@@ -1,0 +1,62 @@
+{
+  "routeIds": {
+    "binancecoin": "bnb",
+    "ripple": "xrp"
+  },
+  "stablecoinIds": [
+    "tether",
+    "usd-coin",
+    "usds",
+    "dai",
+    "ethena-usde",
+    "usd1-wlfi",
+    "global-dollar",
+    "paypal-usd",
+    "ripple-usd",
+    "usdd",
+    "usdgo",
+    "falcon-finance",
+    "bfusd",
+    "united-stables",
+    "gho",
+    "stable-2"
+  ],
+  "forceMarketOnlyIds": [
+    "blackrock-usd-institutional-digital-liquidity-fund",
+    "hashnote-usyc",
+    "ondo-us-dollar-yield",
+    "spiko-amundi-overnight-swap-fund-eur",
+    "eutbl",
+    "janus-henderson-anemoy-treasury-fund",
+    "superstate-short-duration-us-government-securities-fund-ustb",
+    "janus-henderson-anemoy-aaa-clo-fund"
+  ],
+  "categories": {
+    "bitcoin": "major",
+    "ethereum": "major",
+    "binancecoin": "exchange",
+    "crypto-com-chain": "exchange",
+    "whitebit": "exchange",
+    "leo-token": "exchange",
+    "okb": "exchange",
+    "bitget-token": "exchange",
+    "gatechain-token": "exchange",
+    "kucoin-shares": "exchange",
+    "dogecoin": "meme",
+    "shiba-inu": "meme",
+    "pepe": "meme",
+    "official-trump": "meme",
+    "pump-fun": "meme"
+  },
+  "binanceSymbols": {},
+  "deepHealthCanaryIds": [
+    "bitcoin",
+    "ethereum",
+    "binancecoin",
+    "ripple",
+    "solana",
+    "tron",
+    "shiba-inu",
+    "dogecoin"
+  ]
+}

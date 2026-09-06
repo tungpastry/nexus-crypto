@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "assets:refresh": "node scripts/generate_nexus_assets.mjs --write",
+    "assets:check": "node scripts/check_nexus_assets.mjs",
     "auth:hash": "node scripts/generate_auth_password_hash.mjs",
     "smoke:tifa": "bash scripts/smoke_tifa_assistant.sh"
   },
