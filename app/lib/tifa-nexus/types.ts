@@ -3,6 +3,9 @@ import type { NexusSignal } from "../nexusAlgorithm";
 export type MarketContextPayload = {
   ok: boolean;
   context_type: "market_snapshot";
+  universe_size: number;
+  catalog_version?: string;
+  catalog_generated_at?: string;
   updated_at: string;
   cache?: {
     status?: "hit" | "miss" | "stale";
@@ -24,6 +27,16 @@ export type MarketContextPayload = {
     change_24h: number | null;
     change_7d: number | null;
     mode: "nexus" | "market-only";
+  }>;
+  leaders_24h: Array<{
+    id: string;
+    symbol: string;
+    change_24h: number;
+  }>;
+  laggards_24h: Array<{
+    id: string;
+    symbol: string;
+    change_24h: number;
   }>;
   disclaimer: string;
 };

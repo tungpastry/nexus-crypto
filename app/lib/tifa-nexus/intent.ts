@@ -24,6 +24,7 @@ const MARKET_KEYWORDS = [
   "snapshot",
   "dominance",
   "top 10",
+  "top 100",
   "watchlist",
   "volume",
   "market cap",

@@ -5,6 +5,7 @@ import {
   findTimeframeByLabel,
 } from "../../config/timeframes";
 import { getCryptoKlines, getCryptoPrice } from "../binance";
+import { getMarketOnlyReason } from "../assetCapabilities";
 import { buildNexusSignal } from "../nexusAlgorithm";
 import { getCachedOrFetch } from "../serverCache";
 import type { AssetAnalysisPayload } from "./types";
@@ -46,7 +47,7 @@ export async function getAssetAnalysisContext(
         label: timeframe.label,
         binance: timeframe.binance,
       },
-      reason: `${asset.symbol} is configured as a stablecoin market-only asset. Nexus MA/checklist analysis is disabled.`,
+      reason: `${getMarketOnlyReason(asset)} Nexus MA/checklist analysis is disabled.`,
     };
   }
 

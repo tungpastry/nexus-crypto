@@ -98,17 +98,20 @@ function buildToolOnlyAnswer(message: string, toolContext: TifaToolContext) {
   if (toolContext.market_context && typeof toolContext.market_context === "object") {
     const market = toolContext.market_context as {
       global?: Record<string, unknown>;
+      universe_size?: number;
       top_assets?: Array<{
         symbol: string;
         change_24h: number | null;
         mode: "nexus" | "market-only";
       }>;
+      leaders_24h?: Array<{ symbol: string; change_24h: number }>;
+      laggards_24h?: Array<{ symbol: string; change_24h: number }>;
     };
     const topAssets = market.top_assets || [];
-    const strongest = [...topAssets]
+    const strongest = market.leaders_24h?.[0] ?? [...topAssets]
       .filter((item) => typeof item.change_24h === "number")
       .sort((a, b) => (b.change_24h || 0) - (a.change_24h || 0))[0];
-    const weakest = [...topAssets]
+    const weakest = market.laggards_24h?.[0] ?? [...topAssets]
       .filter((item) => typeof item.change_24h === "number")
       .sort((a, b) => (a.change_24h || 0) - (b.change_24h || 0))[0];
 
@@ -120,10 +123,10 @@ function buildToolOnlyAnswer(message: string, toolContext: TifaToolContext) {
         `  - BTC Dominance: ${formatPercent(market.global?.btc_dominance)}`,
         `  - ETH Dominance: ${formatPercent(market.global?.eth_dominance)}`,
         strongest
-          ? `  - 24H strongest in Top 10: ${strongest.symbol} (${formatPercent(strongest.change_24h)})`
+          ? `  - 24H strongest in Top ${market.universe_size ?? 100}: ${strongest.symbol} (${formatPercent(strongest.change_24h)})`
           : undefined,
         weakest
-          ? `  - 24H weakest in Top 10: ${weakest.symbol} (${formatPercent(weakest.change_24h)})`
+          ? `  - 24H weakest in Top ${market.universe_size ?? 100}: ${weakest.symbol} (${formatPercent(weakest.change_24h)})`
           : undefined,
       ]
         .filter(Boolean)

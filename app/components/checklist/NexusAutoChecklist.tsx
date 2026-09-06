@@ -10,6 +10,7 @@ import {
   type NexusChecklistRule,
   type NexusSignal,
 } from "../../lib/nexusAlgorithm";
+import { getMarketOnlyReason } from "../../lib/assetCapabilities";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "../market/DataFreshnessBadge";
 
@@ -215,8 +216,8 @@ export default function NexusAutoChecklist({
     return (
       <RetroPanel title="Nexus Decision Matrix" eyebrow={`${asset.symbol} market mode`}>
         <div className="p-5 text-sm text-[var(--text-muted)]">
-          Stablecoin assets use market data only. MA rules, Nexus Score, and decision matrix
-          automation are disabled for {asset.symbol}.
+          {getMarketOnlyReason(asset)} MA rules, Nexus Score, and decision matrix automation are
+          disabled.
         </div>
       </RetroPanel>
     );

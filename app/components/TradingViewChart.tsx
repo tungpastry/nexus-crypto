@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { NexusAsset } from "../config/assets";
 import type { NexusTimeframe } from "../config/timeframes";
+import { getMarketOnlyReason } from "../lib/assetCapabilities";
 
 interface TradingViewChartProps {
   asset: NexusAsset;
@@ -128,7 +129,7 @@ export default function TradingViewChart({
   if (!asset.enableChart) {
     return (
       <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-card)] p-6 text-center text-[var(--text-muted)]">
-        {asset.symbol} is configured as market data only, so TradingView charting is disabled.
+        {getMarketOnlyReason(asset)} TradingView charting is disabled for market-only assets.
       </div>
     );
   }

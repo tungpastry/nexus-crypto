@@ -17,7 +17,7 @@ export default function Home() {
               Retro Market Command Center
             </p>
             <h1 className="mt-2 nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[0_0_22px_rgba(255,95,162,0.18)] sm:text-5xl">
-              Top 10 Nexus Universe
+              Top 100 Nexus Universe
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-muted)]">
               Scan BTC, ETH, stablecoins, majors, altcoins, and meme assets from one clean market

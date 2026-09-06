@@ -40,7 +40,7 @@ const HOME_ACTIONS = [
   {
     id: "top-weak",
     label: "Top mạnh/yếu",
-    prompt: "Top 10 asset nào mạnh nhất và yếu nhất trong 24h?",
+    prompt: "Trong Top 100, asset nào mạnh nhất và yếu nhất trong 24h?",
   },
   {
     id: "btc-dom",
@@ -86,7 +86,7 @@ const OPS_ACTIONS = [
   {
     id: "deep-health",
     label: "Deep Health",
-    prompt: "Tóm tắt deep health cho toàn bộ Binance-enabled symbols.",
+    prompt: "Tóm tắt deep health cho 8 Binance core canary symbols.",
   },
   {
     id: "budget-status",

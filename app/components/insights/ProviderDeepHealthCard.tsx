@@ -30,6 +30,8 @@ type DeepSymbolCheck = {
 type ProviderDeepHealth = {
   provider: string;
   mode: "deep";
+  scope?: "core-canary";
+  available_symbols_total?: number;
   status: "ok" | "degraded" | "error";
   updated_at: string;
   summary: {
@@ -94,7 +96,7 @@ export default function ProviderDeepHealthCard() {
   const symbols = Object.entries(health?.checks ?? {});
 
   return (
-    <RetroPanel title="Provider Deep Health" eyebrow="Multi-asset Binance diagnostics">
+    <RetroPanel title="Provider Deep Health" eyebrow="Core Binance canary diagnostics">
       <div className="grid gap-4 p-5 lg:grid-cols-[260px_1fr]">
         <div className="rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-4">
           <div className="flex items-center gap-2">
@@ -113,7 +115,8 @@ export default function ProviderDeepHealthCard() {
             </p>
             <p>Errors: {health?.summary.symbols_error ?? 0}</p>
             <p>Latency: {typeof health?.summary.latency_ms === "number" ? `${health.summary.latency_ms}ms` : "--"}</p>
-            <p>Mode: {health?.mode ?? "deep"}</p>
+            <p>Scope: {health?.scope ?? "core-canary"}</p>
+            <p>Available Nexus symbols: {health?.available_symbols_total ?? "--"}</p>
           </div>
           <div className="mt-3">
             <DataFreshnessBadge updatedAt={health?.updated_at} />

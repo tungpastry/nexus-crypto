@@ -69,12 +69,14 @@ export default function AssetWorkspaceHeader({ asset }: AssetWorkspaceHeaderProp
           </div>
           <div className={`rounded-xl border p-3 ${getCardToneClass("binance")}`}>
             <p className="font-mono uppercase tracking-[0.16em] text-[var(--text-soft)]">Binance</p>
-            <p className="mt-1 font-mono text-[var(--text-main)]">{asset.binanceSymbol || "Disabled"}</p>
+            <p className="mt-1 font-mono text-[var(--text-main)]">
+              {asset.binanceSymbol || "Unavailable"}
+            </p>
           </div>
           <div className={`rounded-xl border p-3 ${getCardToneClass("tv")}`}>
             <p className="font-mono uppercase tracking-[0.16em] text-[var(--text-soft)]">TradingView</p>
             <p className="mt-1 font-mono text-[var(--text-main)]">
-              {asset.tradingViewSymbol || "Disabled"}
+              {asset.tradingViewSymbol || "Unavailable"}
             </p>
           </div>
           <div className="sm:col-span-2">

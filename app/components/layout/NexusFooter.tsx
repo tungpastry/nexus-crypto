@@ -23,7 +23,7 @@ export default function NexusFooter() {
         </div>
 
         <p className="text-sm leading-6 text-[var(--text-muted)]">
-          Dual-theme crypto decision-support dashboard for watching the Top 10 Nexus Universe,
+          Dual-theme crypto decision-support dashboard for watching the Top 100 Nexus Universe,
           syncing price, chart, timeframe context, and structured checklist discipline.
         </p>
 

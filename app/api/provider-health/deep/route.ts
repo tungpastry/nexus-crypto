@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BINANCE_SYMBOLS } from "../../../config/assets";
+import { BINANCE_SYMBOLS, DEEP_HEALTH_SYMBOLS } from "../../../config/assets";
 import { getCryptoKlines, getCryptoPrice } from "../../../lib/binance";
 
 type DeepCheckStatus = "ok" | "warn" | "error";
@@ -69,11 +69,11 @@ async function checkSymbol(symbol: string): Promise<[string, SymbolCheck]> {
 export async function GET() {
   const started = Date.now();
   const checksEntries = await Promise.all(
-    BINANCE_SYMBOLS.map((symbol) => checkSymbol(symbol))
+    DEEP_HEALTH_SYMBOLS.map((symbol) => checkSymbol(symbol))
   );
   const checks = Object.fromEntries(checksEntries);
   const symbolChecks = Object.values(checks) as SymbolCheck[];
-  const symbolsTotal = BINANCE_SYMBOLS.length;
+  const symbolsTotal = DEEP_HEALTH_SYMBOLS.length;
   const symbolsOk = symbolChecks.filter((item) => item.status === "ok").length;
   const symbolsError = symbolChecks.filter(
     (item) => item.status === "error"
@@ -90,6 +90,8 @@ export async function GET() {
   return NextResponse.json({
     provider: "nexus_crypto",
     mode: "deep",
+    scope: "core-canary",
+    available_symbols_total: BINANCE_SYMBOLS.length,
     status,
     updated_at: new Date().toISOString(),
     summary: {

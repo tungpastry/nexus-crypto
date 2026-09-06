@@ -19,7 +19,7 @@ export default function OpsPage() {
             className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-pink)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Top 10 Nexus Universe
+            Back to Top 100 Nexus Universe
           </Link>
           <ThemeSwitcher />
         </div>

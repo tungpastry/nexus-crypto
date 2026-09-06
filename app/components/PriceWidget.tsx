@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { TrendingUp, TrendingDown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { NexusAsset } from "../config/assets";
+import { getMarketOnlyReason } from "../lib/assetCapabilities";
 import DataFreshnessBadge from "./market/DataFreshnessBadge";
 
 type PriceWidgetProps = {
@@ -18,13 +19,30 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
   const [trail, setTrail] = useState<{ value: number; color: string } | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const priceRef = useRef<number | null>(null);
 
   const fetchPrice = useCallback(async () => {
     if (!asset.binanceSymbol) {
-      setPrice(null);
-      setDirection(null);
-      setUpdatedAt(null);
-      setError("Market snapshot only");
+      try {
+        const res = await axios.get("/api/market-snapshot");
+        const market = res.data.assets?.find((item: { id?: string }) => item.id === asset.id);
+        const newPrice = typeof market?.price === "number" ? market.price : null;
+        const previousPrice = priceRef.current;
+        setDirection(
+          previousPrice !== null && newPrice !== null && newPrice !== previousPrice
+            ? newPrice > previousPrice
+              ? "up"
+              : "down"
+            : null
+        );
+        priceRef.current = newPrice;
+        setPrice(newPrice);
+        setUpdatedAt(res.data.updated_at ?? null);
+        setError(newPrice === null ? "CoinGecko price unavailable" : null);
+      } catch (err) {
+        console.error(`Error fetching ${asset.symbol} market snapshot:`, err);
+        setError("Market snapshot unavailable");
+      }
       return;
     }
 
@@ -34,14 +52,15 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
       });
       const newPrice = parseFloat(res.data.price);
 
-      if (price !== null && newPrice !== price) {
-        const newDirection = newPrice > price ? "up" : "down";
+      const previousPrice = priceRef.current;
+      if (previousPrice !== null && newPrice !== previousPrice) {
+        const newDirection = newPrice > previousPrice ? "up" : "down";
         setDirection(newDirection);
         setPulse(true);
 
         // Tạo hiệu ứng đuôi mờ theo hướng giá
         setTrail({
-          value: price,
+          value: previousPrice,
           color: newDirection === "up" ? "rgba(16,185,129,0.5)" : "rgba(248,113,113,0.5)",
         });
 
@@ -51,6 +70,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         }, 1000);
       }
 
+      priceRef.current = newPrice;
       setPrice(newPrice);
       setUpdatedAt(res.data.updated_at);
       setError(null);
@@ -58,13 +78,13 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
       console.error(`Error fetching ${asset.symbol} price:`, err);
       setError("Price feed unavailable");
     }
-  }, [asset.binanceSymbol, asset.symbol, price]);
+  }, [asset.binanceSymbol, asset.id, asset.symbol]);
 
   useEffect(() => {
     fetchPrice();
-    const interval = setInterval(fetchPrice, 5000);
+    const interval = setInterval(fetchPrice, asset.binanceSymbol ? 5_000 : 60_000);
     return () => clearInterval(interval);
-  }, [fetchPrice]);
+  }, [asset.binanceSymbol, fetchPrice]);
 
   const formatPrice = (p: number | null) =>
     p ? `$${p.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "Loading...";
@@ -121,12 +141,20 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
                 : "text-[var(--yellow-accent)]"
             }`}
           >
-            {asset.binanceSymbol ? formatPrice(price) : "Market data only"}
+            {formatPrice(price)}
           </motion.p>
         </AnimatePresence>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          {error || "Live crypto-price feed"}
+          {error ||
+            (asset.binanceSymbol
+              ? "Live Binance crypto-price feed"
+              : "CoinGecko snapshot · refreshes every 60 seconds")}
         </p>
+        {!asset.binanceSymbol && (
+          <p className="mt-1 max-w-sm text-[10px] leading-4 text-[var(--text-soft)]">
+            {getMarketOnlyReason(asset)}
+          </p>
+        )}
       </div>
 
       <motion.div
