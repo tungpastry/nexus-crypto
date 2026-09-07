@@ -2,144 +2,143 @@
 
 ## Overview
 
-Nexus Crypto is a Next.js App Router SaaS dashboard focused on market-data observation and checklist workflow discipline for a versioned Top 100 crypto universe. The app is intentionally non-custodial and non-executional.
+Nexus Crypto is a Next.js 16 App Router dashboard for market observation, asset workflows, provider diagnostics, and grounded assistant explanations. It is non-custodial, does not execute orders, and does not provide financial recommendations.
 
-Current reviewed baseline:
+Current baseline:
 
-- Product direction: Nexus Crypto SaaS 2026
-- Runtime: Next.js 16 App Router
-- Main production port: `3200`
-- Production reference: Ubuntu Server + `systemd`
-- Catalog membership is generated and committed; it does not drift automatically at runtime.
+- Next.js `16.3.4`, React `19.2.0`, Node 22 LTS.
+- Versioned 100-member CoinGecko catalog.
+- 52 Binance Spot/USDT workspaces and 48 market-only workspaces.
+- Eight core deep-health canaries.
+- Ubuntu `systemd` service on port `3200`.
 
-## Layered Architecture
+## Runtime Layers
 
-Nexus Crypto now has four operational layers:
+### Market layer
 
-1. **Market Layer**
-   - versioned Top 100 Nexus Universe
-   - Binance price and kline providers
-   - CoinGecko-style market snapshot
-   - server cache and stale fallback
-   - stablecoin market-only mode
+- `app/config/assets.generated.json`: committed membership and capabilities.
+- `app/lib/binance.ts`: Binance ticker and candle provider.
+- `app/lib/marketSnapshot.ts`: CoinGecko response normalization.
+- `app/lib/serverCache.ts`: short-lived in-memory cache and stale fallback.
+- `app/api/market-snapshot/persistentCache.ts`: latest compatible snapshot on disk.
 
-2. **Dashboard Layer**
-   - Home (`/`) market overview
-   - Asset Workspace (`/asset/[id]`)
-   - TradingView chart workspace
-   - PriceWidget
-   - Nexus checklist / MA20-MA50-MA200 scoring
-   - data freshness and version badges
+The market snapshot requests all 100 committed CoinGecko IDs. Binance routes only accept symbols exported from the generated catalog.
 
-3. **Ops Layer**
-   - `/ops` diagnostics page
-   - `/api/provider-health`
-   - `/api/provider-health/deep`
-   - `/api/provider-health/gemini`
-   - version endpoint and deploy metadata
+### Dashboard layer
 
-4. **Tifa Assistant Layer**
-   - `/api/tifa`
-   - `/api/tifa/stream`
-   - `/api/tifa-tools/*`
-   - Gemini provider gateway
-   - budget guard
-   - circuit breaker
-   - Phase 2 tool orchestration
+- Home `/`: product header, global market metrics, Top 100 watchlist, and TifaWidget.
+- Asset `/asset/[id]`: asset identity, live price, timeframe, TradingView, Nexus Decision Matrix, and TifaWidget.
+- Ops `/ops`: provider readiness, deep canary diagnostics, active LLM status, executive summaries, issue lists, and TifaWidget.
+- Login `/login`: LAN-local credential flow.
 
-## Runtime Architecture
+Home deliberately excludes provider diagnostics so opening the market dashboard does not invoke deep health.
 
-- Browser UI renders Home (`/`), Asset Workspace (`/asset/[id]`), and Ops (`/ops`).
-- UI calls internal Next.js API routes under `/api/*`.
-- API routes call upstream provider surfaces such as Binance and market snapshot providers.
-- Server cache/stale fallback keeps UI resilient during transient provider issues.
-- Freshness and provider-health states are surfaced back to UI badges/panels.
-- Tifa Assistant builds grounded tool context before answering.
-- Gemini provider calls are guarded by budget preflight/postflight and circuit breaker state.
+### Decision layer
 
-## Pages And Core UI Modules
+`app/lib/nexusAlgorithm.ts` computes MA structure, ATR14, volatility, volume confirmation, support/resistance context, optional higher-timeframe agreement, risk, score, and workflow state.
 
-- Home `/`: market overview, asset watchlist, provider health, TifaWidget, footer/version surfaces.
-- Asset Workspace `/asset/[id]`: `PriceWidget`, `TradingViewChart`, Nexus auto checklist, timeframe controls, TifaWidget, footer.
-- Ops `/ops`: provider health, provider deep health, Gemini assistant status, Ops Executive Summary, Provider Health Summary, Deep Health Summary, Ops Issues & Recommendations.
-- Shared resilience: `ClientErrorBoundary`, data freshness surfaces, version metadata surfaces.
+The Decision Matrix uses Binance candle close, not the 5-second ticker. Catalog `binancePriceTickSize` metadata formats ticker, close, MA, and ATR values consistently with Binance `PRICE_FILTER.tickSize`.
 
-## Config-Driven Market Universe
+### Assistant layer
 
-- Catalog data is committed in `app/config/assets.generated.json` and exposed through `app/config/assets.ts`.
-- `npm run assets:refresh` builds a reviewed Top 100 snapshot from CoinGecko markets and Binance Spot exchange info; `npm run assets:check` validates it offline.
-- Timeframe mapping is defined in `app/config/timeframes.ts`.
-- UI and API symbol/timeframe controls follow these configs rather than per-component hardcoding.
-- Stablecoins and assets without a verified Binance Spot/USDT market run market-only mode: CoinGecko snapshot price, no chart, no MA, no checklist automation.
-- Binance-enabled symbols drive the price/kline allowlist; eight explicitly marked core symbols drive deep provider health.
+- `app/lib/tifa-core`: chat preparation, fallback answers, and stream lifecycle.
+- `app/lib/tifa-nexus`: intent, market/asset context, and prompt building.
+- `app/lib/tifa-tools`: allowlisted registry, orchestration, explainers, and formatters.
+- `app/lib/tifa-provider-gateway`: Ollama/Gemini adapters, retries, redaction, and circuit breakers.
+- `app/lib/gemini-budget`: Gemini-only cost guard, ledger, and state.
+- `app/lib/tifa-runtime`: config and server chat-session persistence.
 
-## Auth And Routing Guard
+Current production selects Ollama. Gemini remains optional. Provider failure produces a grounded tool-only answer; the gateway does not automatically call the other provider.
 
-- Next.js 16 proxy convention is implemented in `proxy.ts` (replaces `middleware.ts`).
-- Protected pages when auth is enabled: `/` and `/asset/*`.
-- Protected APIs may accept either a valid session cookie or `Authorization: Bearer <NEXUS_SMOKE_AUTH_TOKEN>` when configured.
-- Public operational routes include `/api/version`, `/api/provider-health`, `/api/provider-health/deep`, and auth routes.
-- Session validation is handled through local auth helpers; no OAuth/NextAuth/database layer.
+## Data Flows
 
-## TifaWidget Assistant Architecture
-
-Tifa runtime flow:
+### Market dashboard
 
 ```text
-user message
-→ resolveTifaIntent()
-→ orchestrateTifaTools()
-→ mapOrchestrationToToolContext()
-→ runBudgetPreflight()
-→ Gemini provider or tool-only fallback
-→ writeBudgetPostflight()
-→ append chat session
+Browser
+  -> /api/market-snapshot
+  -> CoinGecko global + 100 committed market IDs
+  -> cache validation by catalog version/universe size
+  -> Market Snapshot and Asset Watchlist
 ```
 
-Phase 2 tools are allowlisted in `app/lib/tifa-tools/registry.ts`:
+One bounded retry is used for CoinGecko 429/5xx responses. Compatible stale data is preferred over an empty failure.
+
+### Binance asset workspace
 
 ```text
-market_context
-asset_analysis
-budget_status
-gemini_provider_health
-provider_health
-deep_provider_health
-provider_health_explainer
-deep_health_explainer
-ops_summary
+Asset registry
+  -> /api/crypto-price (5-second cache/poll cadence)
+  -> /api/crypto-klines (60-second cache/poll cadence)
+  -> TradingView + Nexus Algorithm
+  -> tick-size-aware UI
 ```
 
-The orchestrator degrades safely: per-tool failures are captured as warnings when partial context is still safe.
+Market-only assets use the CoinGecko snapshot path and do not make unsupported Binance/chart/algorithm calls.
 
-## Provider Health Architecture
+### Tifa
 
-- `/api/provider-health` is the lightweight readiness route.
-- `/api/provider-health/deep` is the eight-symbol core-canary diagnostics route.
-- `/api/provider-health/gemini` exposes client-safe Gemini provider, stream, circuit, and budget status.
-- `/api/tifa-tools/provider-health-explainer` normalizes provider health into assistant/UI-friendly diagnostics.
-- `/api/tifa-tools/deep-health-explainer` normalizes multi-symbol diagnostics.
-- `/api/tifa-tools/ops-summary` combines provider, deep, Gemini, and budget context.
+```text
+validated message and page context
+  -> resolveTifaIntent
+  -> orchestrateTifaTools (strict allowlist)
+  -> grounded tool context
+  -> budget preflight
+  -> configured Ollama or Gemini adapter
+  -> provider output or tool-only fallback
+```
 
-## Release Metadata And Version Surface
+The SSE route preserves `start`, `tool`, `budget`, `delta`, `done`, and `error` events. A provider error before deltas can fall back to pseudo-streamed tool text; a failure after partial provider output emits sanitized `STREAM_PROVIDER_ERROR` and closes.
 
-- Deploy script writes a managed release metadata block into `.env.production.local`.
-- `/api/version` exposes runtime metadata (`commit`, `short_commit`, `build_time`, `next`, `node`, `env`).
-- `VersionBadge` surfaces this metadata in the UI footer.
+## Authentication Boundaries
 
-## Nexus Algorithm v1.1
+Root `proxy.ts` protects these pages when `NEXUS_AUTH_ENABLED=1`:
 
-- Adds ATR14 and volatility regime (`Low`, `Normal`, `High`, `Unknown`).
-- Adds volume confirmation scoring and ratio context.
-- Adds support/resistance location context from recent candle window.
-- Adds optional higher-timeframe agreement hook (non-breaking optional input).
-- Adds workflow state output: `No Trade`, `Watch`, `Ready`, `Confirmed`.
-- Output remains workflow decision-support only (no trade execution and no financial advice).
+- `/`
+- `/asset/*`
+- `/ops`
 
-## Current Limitations
+The proxy leaves `/api/*` routing alone. Protected route handlers call `requireApiAuth` and accept either a valid session cookie or the configured smoke bearer token. Auth-disabled mode preserves open local behavior.
 
-- No trade execution and no custody/account integration.
-- Default `/api/provider-health` remains lightweight and should be preferred for frequent readiness checks.
-- Deep diagnostics are exposed separately at `/api/provider-health/deep` and deliberately remain scoped to eight core canaries as the Binance-enabled catalog grows.
-- Ops summary is process-local and should receive a TTL cache before high-concurrency usage.
-- Gemini budget estimate is a local guardrail and should not be treated as exact cloud billing.
+Public routes include:
+
+- auth login/logout/status.
+- `/api/version`.
+- `/api/provider-health`, `/deep`, `/llm`, `/ollama`, and `/gemini`.
+
+## Provider Health
+
+- `/api/provider-health`: lightweight readiness for BTC ticker/candles and market snapshot.
+- `/api/provider-health/deep`: manual eight-canary Binance diagnostic; never all 52 symbols.
+- `/api/provider-health/llm`: canonical sanitized status for the active assistant provider.
+- `/api/provider-health/ollama` and `/gemini`: compatibility surfaces reflecting the active-provider snapshot.
+
+The Home page does not mount these diagnostic panels. The Ops page mounts deep health once and refreshes it only on operator action.
+
+## Themes And Client State
+
+`ThemeProvider` applies `black-pink` or `wikipedia-glass` via `data-theme` and local storage. A pre-hydration script prevents a noticeable theme flash. TradingView is recreated with its matching dark/light setting.
+
+Tifa browser history is stored per page context. Web Speech text-to-speech runs entirely through browser APIs when available.
+
+## Release Metadata
+
+The deploy script writes only its managed release block in ignored `.env.production.local`. `/api/version` exposes commit, short commit, build time, Next.js version, Node version, environment, and response time. `VersionBadge` reads it at runtime.
+
+## Storage Model
+
+- No database or Redis.
+- Price/candle cache: process memory and lost on restart.
+- Market snapshot fallback: ignored `.runtime/` file.
+- Gemini budget and server chat history: ignored `runtime/` files.
+- Theme and widget history: browser local storage.
+
+## Limitations
+
+- Catalog membership changes only through reviewed regeneration.
+- Market-only workspaces do not have Binance candles or Nexus analysis.
+- Default provider health is representative, not an all-symbol guarantee.
+- Deep health covers eight core canaries only.
+- Circuit breaker state is process-local.
+- Gemini budget values are application estimates, not provider billing.
+- Tifa output remains constrained by available tool context and upstream freshness.

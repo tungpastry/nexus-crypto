@@ -1,5 +1,7 @@
 # TifaWidget Assistant Phase 2
 
+> Historical rollout notes. For the current provider-neutral runtime and Ollama-first production baseline, see [TifaWidget Assistant](tifa-assistant.md).
+
 ## Overview
 
 Phase 2 adds deep tool orchestration for ops diagnostics while preserving Phase 1.1 safety controls:
@@ -14,7 +16,7 @@ Current validated state:
 
 ```text
 PHASE 2 OPS ORCHESTRATION: GREEN
-GEMINI LIVE PROVIDER: GREEN
+PROVIDER GATEWAY: GREEN
 NO-SECRET SMOKE: PASS
 ```
 

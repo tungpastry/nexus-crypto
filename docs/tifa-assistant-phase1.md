@@ -1,5 +1,7 @@
 # TifaWidget Assistant Phase 1
 
+> Historical rollout notes. For the current provider-neutral runtime, Ollama production setup, tool-only behavior, chat history, and Web Speech support, see [TifaWidget Assistant](tifa-assistant.md).
+
 ## Overview
 
 TifaWidget is a floating assistant layer for Nexus Crypto. Phase 1 ships:
@@ -10,7 +12,7 @@ TifaWidget is a floating assistant layer for Nexus Crypto. Phase 1 ships:
   - `GET /api/tifa-tools/market-context`
   - `GET /api/tifa-tools/asset-analysis?assetId=bitcoin&tf=1h`
   - `GET /api/tifa-tools/budget-status`
-- Gemini provider gateway and budget guard with fail-closed mode
+- Initial Gemini provider gateway and budget guard with fail-closed mode
 
 ## Environment
 

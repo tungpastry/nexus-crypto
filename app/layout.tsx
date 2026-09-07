@@ -18,12 +18,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3200"),
   title: "Nexus Crypto SaaS 2026",
   description:
-    "Retro black-pink crypto SaaS dashboard for 10-asset market monitoring and Nexus checklist workflow.",
+    "Dual-theme crypto decision-support dashboard for the versioned Nexus Top 100 market universe.",
   openGraph: {
     title: "Nexus Crypto SaaS 2026",
     description:
-      "Retro black-pink crypto SaaS dashboard for 10-asset market monitoring and Nexus checklist workflow.",
-    url: "https://nexus-crypto.vercel.app",
+      "Dual-theme crypto decision-support dashboard for the versioned Nexus Top 100 market universe.",
     siteName: "Nexus Crypto SaaS 2026",
     images: [
       {

@@ -81,6 +81,7 @@ Auth protects UI pages:
 
 - `/`
 - `/asset/*`
+- `/ops`
 
 UI protection is enforced by root [`proxy.ts`](../proxy.ts) (Next.js proxy convention), not the deprecated `middleware.ts` file convention.
 
@@ -88,6 +89,10 @@ These routes remain public for deploy, readiness, and login workflows:
 
 - `/api/version`
 - `/api/provider-health`
+- `/api/provider-health/deep`
+- `/api/provider-health/llm`
+- `/api/provider-health/ollama`
+- `/api/provider-health/gemini`
 - `/api/auth/login`
 - `/api/auth/logout`
 - `/api/auth/me`
@@ -107,8 +112,19 @@ Protected APIs:
 - `/api/market-snapshot`
 - `/api/btc-price`
 - `/api/btc-klines`
+- `/api/tifa`
+- `/api/tifa/stream`
+- `/api/tifa-tools/market-context`
+- `/api/tifa-tools/asset-analysis`
+- `/api/tifa-tools/budget-status`
+- `/api/tifa-tools/provider-health-explainer`
+- `/api/tifa-tools/deep-health-explainer`
+- `/api/tifa-tools/ops-summary`
+- `/api/tifa-tools/orchestrate`
 
 Auth disabled mode keeps these APIs public for local development.
+
+The root proxy treats all `/api/*` paths as public at the routing layer. Protection for the list above is enforced inside each route handler with `requireApiAuth`. This keeps health/version/auth endpoints public while preserving session/bearer checks on data and assistant surfaces.
 
 Smoke with auth enabled:
 
@@ -134,4 +150,4 @@ The response after lock is HTTP `429` with `RATE_LIMITED`. A successful login cl
 
 `/api/auth/me` refreshes the HTTP-only session cookie when the session has less than half of its TTL remaining. This keeps active LAN sessions alive without changing the logout behavior.
 
-HTTPS secure cookie mode for public Cloudflare Tunnel deployment is intentionally deferred to a later phase.
+Set `NEXUS_AUTH_COOKIE_SECURE=1` only when the application is served over HTTPS. The current reference deployment is LAN HTTP; public tunnel configuration is outside this repository's current deployment baseline.

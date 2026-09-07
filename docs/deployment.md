@@ -1,24 +1,30 @@
-# Deployment (Ubuntu Server)
+# Ubuntu Server Deployment
 
-This project is deployed on Ubuntu Server with `systemd` and a deterministic install flow.
+## Reference Target
 
-## Reference Production Target
+| Item | Value |
+| --- | --- |
+| Repository | `/home/nexus/projects/nexus-crypto` |
+| Branch | `main` |
+| Service | `nexus-crypto.service` |
+| Port | `3200` |
+| Node | 22 LTS (current reference `v22.18.0`) |
+| Install | `npm ci` |
 
-- Repo path: `/home/nexus/projects/nexus-crypto`
-- Service: `nexus-crypto.service`
-- Port: `3200`
-- Health endpoint: `http://127.0.0.1:3200/api/provider-health`
-- Deep health endpoint: `http://127.0.0.1:3200/api/provider-health/deep`
-- Gemini health endpoint: `http://127.0.0.1:3200/api/provider-health/gemini`
-- Version endpoint: `http://127.0.0.1:3200/api/version`
-- Tifa smoke command: `npm run smoke:tifa`
+Operational endpoints:
 
-## Preferred Deploy Flow
+- `http://127.0.0.1:3200/api/provider-health`
+- `http://127.0.0.1:3200/api/provider-health/deep`
+- `http://127.0.0.1:3200/api/provider-health/llm`
+- `http://127.0.0.1:3200/api/version`
 
-Use the deploy script in this repository:
+## Preferred Deploy
+
+Only deploy from a clean Ubuntu working tree:
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
+git status --short
 
 NEXUS_CRYPTO_REPO_DIR="/home/nexus/projects/nexus-crypto" \
 NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
@@ -27,175 +33,149 @@ NEXUS_CRYPTO_BRANCH="main" \
 ./scripts/deploy_ubuntu_server.sh
 ```
 
-The script runs:
+The script performs:
 
-1. Dirty-tree guard.
-2. `git fetch` + fast-forward pull.
-3. Release metadata injection to `.env.production.local` (managed block only).
-4. `npm ci` for deterministic dependency install.
-5. `npm run lint`, `npm run test`, `npm run build`.
-6. `npm audit` (informational, non-blocking in script).
+1. Branch and dirty-tree guard.
+2. Fetch and fast-forward-only pull.
+3. Managed release metadata update in ignored `.env.production.local`.
+4. Deterministic `npm ci`.
+5. Dependency audit output.
+6. Lint, tests, and production build.
 7. `systemd` restart.
-8. Wait-loop on `/api/provider-health`.
-9. `/api/version` metadata verification.
-10. Smoke test gate.
+8. Readiness wait loop.
+9. Version/commit verification.
+10. Top 100 crypto smoke.
 11. Final clean-tree check.
 
-## Manual Pull/Build/Restart Flow
-
-Use this when intentionally bypassing the deploy script for a controlled debug deploy:
-
-```bash
-cd /home/nexus/projects/nexus-crypto
-
-git fetch origin
-git checkout main
-git pull origin main
-
-npm ci
-
-git diff --check
-npm run lint
-npm test
-npm run build
-
-sudo systemctl restart nexus-crypto.service
-sleep 3
-sudo systemctl status nexus-crypto.service --no-pager -l
-```
-
-Then run smoke:
-
-```bash
-cd /home/nexus/projects/nexus-crypto
-
-export NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200"
-export NEXUS_SMOKE_AUTH_TOKEN="$(grep '^NEXUS_SMOKE_AUTH_TOKEN=' .env.production.local | cut -d= -f2-)"
-
-npm run smoke:tifa
-```
-
-## Why `npm ci` (not `npm install`) in Production
-
-`npm ci` installs exactly from `package-lock.json` and avoids lockfile drift during deploy. This keeps deploys reproducible and prevents post-deploy dirty working trees.
-
-Use `npm install` only for local development or intentional dependency updates.
-
-## Auth-Aware Smoke Behavior
-
-When LAN auth is enabled (`NEXUS_AUTH_ENABLED=1`), provide `NEXUS_SMOKE_AUTH_TOKEN` so protected market-data and Tifa tool APIs can be checked by smoke:
-
-```bash
-export NEXUS_SMOKE_AUTH_TOKEN="<token>"
-```
-
-Public deploy/readiness routes remain available:
-
-- `/api/version`
-- `/api/provider-health`
-- `/api/provider-health/deep`
-- `/api/provider-health/gemini`
-
-## Gemini Live Provider Setup
-
-Tifa can run in tool-only mode when no Gemini key is configured. To enable the live Gemini provider, add `GEMINI_API_KEY` to `.env.production.local` without printing the value.
-
-Secure input example:
-
-```bash
-cd /home/nexus/projects/nexus-crypto
-
-read -s -p "Paste GEMINI_API_KEY: " GEMINI_API_KEY_VALUE
-echo
-export GEMINI_API_KEY_VALUE
-```
-
-Then update `.env.production.local` using a redaction-safe script or editor. Recommended live settings:
+Successful output includes:
 
 ```text
-GEMINI_API_KEY=<redacted>
+APP_READY=PASS
+VERSION_METADATA=PASS
+NEXUS_ASSET_COUNT=100
+NEXUS_DEEP_HEALTH_CANARIES=8
+DEPLOY_PASS=1
+```
+
+The Tifa smoke is run separately because it requires the service environment and, when auth is enabled, the smoke token.
+
+## Production Environment
+
+Do not commit or print `.env.production.local`. The deploy script preserves application/auth/provider values and replaces only its managed release metadata block.
+
+### LAN auth
+
+See [LAN Local Authentication](auth-lan-local.md). Auth-disabled mode is supported, but the production reference can enable it with a signed session and smoke bearer token.
+
+### Ollama primary
+
+Current production provider:
+
+```text
+TIFA_ASSISTANT_ENABLED=1
+TIFA_LLM_PROVIDER=ollama
+TIFA_LLM_FALLBACK_ORDER=ollama
+OLLAMA_HOST=http://<ollama-host>:11434
+OLLAMA_MODEL=gemma4:e4b-it-qat
+OLLAMA_TIMEOUT_MS=20000
+OLLAMA_RETRY_LIMIT=1
+OLLAMA_STREAM_TIMEOUT_MS=25000
+OLLAMA_STREAM_RETRY_LIMIT=1
+OLLAMA_THINK=0
+OLLAMA_KEEP_ALIVE=30m
+OLLAMA_CIRCUIT_BREAKER_ENABLED=1
+OLLAMA_CIRCUIT_FAILURE_THRESHOLD=3
+OLLAMA_CIRCUIT_COOLDOWN_MS=60000
+```
+
+The Ubuntu host must be able to reach the Ollama host. Do not expose Ollama directly to the browser.
+
+### Optional Gemini API
+
+To select Gemini:
+
+```text
+TIFA_LLM_PROVIDER=gemini
+TIFA_LLM_FALLBACK_ORDER=gemini
+GEMINI_API_KEY=<server-side secret>
 GEMINI_MODEL=gemini-3-flash-preview
 GEMINI_STREAM_ENABLED=1
-GEMINI_TIMEOUT_MS=20000
-GEMINI_RETRY_LIMIT=1
-GEMINI_STREAM_TIMEOUT_MS=25000
-GEMINI_STREAM_RETRY_LIMIT=1
-GEMINI_CIRCUIT_BREAKER_ENABLED=1
-GEMINI_CIRCUIT_FAILURE_THRESHOLD=3
-GEMINI_CIRCUIT_COOLDOWN_MS=60000
-GEMINI_MAX_OUTPUT_TOKENS=1600
 ```
 
-Restart and check Gemini health:
+The budget guard and circuit breaker remain required on this path. Store the key only in ignored/server-managed environment. The application does not use Gemini CLI.
+
+Provider failure degrades to a grounded tool-only response. There is no automatic Ollama-to-Gemini or Gemini-to-Ollama failover.
+
+## Manual Validation
 
 ```bash
-sudo systemctl restart nexus-crypto.service
-sleep 3
-curl -sS http://127.0.0.1:3200/api/provider-health/gemini | python3 -m json.tool
-```
-
-Expected live indicators:
-
-```json
-{
-  "configured": true,
-  "status": "ok",
-  "circuit": { "state": "closed" },
-  "budget": { "status": "ok" }
-}
-```
-
-## Manual Validation Commands
-
-```bash
+sudo systemctl is-active nexus-crypto.service
 sudo systemctl status nexus-crypto.service --no-pager -l
+ss -ltnp | grep ':3200' || true
+
 curl -sS http://127.0.0.1:3200/api/provider-health | python3 -m json.tool
 curl -sS http://127.0.0.1:3200/api/provider-health/deep | python3 -m json.tool
-curl -sS http://127.0.0.1:3200/api/provider-health/gemini | python3 -m json.tool
+curl -sS http://127.0.0.1:3200/api/provider-health/llm | python3 -m json.tool
 curl -sS http://127.0.0.1:3200/api/version | python3 -m json.tool
 ```
 
-Smoke with auth token:
+Expected checks:
+
+- lightweight provider status is `ok` or an understood temporary `degraded`.
+- deep scope is `core-canary`, total checks are 8, and available symbols are 52 for the current catalog.
+- LLM endpoint names the active provider/model without exposing credentials.
+- version commit matches `git rev-parse HEAD`.
+
+## Runtime Smoke
+
+With auth disabled, scripts need no bearer token. With auth enabled, load the existing token into the process without echoing it.
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
-
 export NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200"
-export NEXUS_SMOKE_AUTH_TOKEN="$(grep '^NEXUS_SMOKE_AUTH_TOKEN=' .env.production.local | cut -d= -f2-)"
 
+./scripts/smoke_crypto_assets_contract.sh
 npm run smoke:tifa
 ```
 
-Expected Phase 2 PASS lines:
+Crypto smoke validates Top 100 membership, representative Binance and market-only workspaces, invalid symbols/timeframes, public health/version, and deep-canary scope.
 
-```text
-TIFA_PROVIDER_HEALTH_EXPLAINER=PASS
-TIFA_DEEP_HEALTH_EXPLAINER=PASS
-TIFA_OPS_SUMMARY=PASS
-TIFA_TOOL_ORCHESTRATOR=PASS
-TIFA_PHASE2_NO_SECRET_LEAK=PASS
+Tifa smoke validates market/asset context, stablecoin behavior, budget/provider health, Phase 2 explainers/orchestration, SSE events, and no-secret leakage.
+
+## Manual Build (Debug Only)
+
+Prefer the deploy script. For controlled diagnosis:
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+npm ci
+npm run assets:check
+git diff --check
+npm run lint
+npm run test
+npm run build
+npm audit
 ```
 
-Use `/api/provider-health` for frequent readiness checks. Use `/api/provider-health/deep` for manual multi-asset diagnostics.
+Then restart and run all health/smoke checks. Manual builds do not automatically guarantee correct release metadata; verify `/api/version`.
 
-## Rollback Notes
+## Rollback
 
-Rollback should be explicit and controlled:
+1. Identify a reviewed stable commit.
+2. Obtain explicit approval before changing the production checkout.
+3. Move to the approved revision without discarding unknown work.
+4. Run `npm ci`, catalog check, lint, test, build, and audit.
+5. Restart service and run all health/version/smoke checks.
 
-1. Identify previous stable commit.
-2. Checkout/reset only with explicit approval.
-3. Run `npm ci`.
-4. Run `npm run lint`, `npm test`, and `npm run build`.
-5. Restart service.
-6. Re-check health + smoke.
+Do not use `git reset --hard` as routine recovery.
 
-Avoid `git reset --hard` unless explicitly approved for a rollback operation.
+## Security And Hygiene
 
-## Security Notes
-
-- Do **not** run `npm audit fix --force` in production.
-- Do not commit `.env.production.local` or any secret.
-- Keep auth secrets/token values out of logs.
-- Do not print `GEMINI_API_KEY` or `NEXUS_SMOKE_AUTH_TOKEN`.
-- Keep `npm run smoke:tifa` no-secret checks passing after every Tifa/Gemini change.
-- Do not bypass Gemini budget guard, circuit breaker, or API auth protections.
+- Never run `npm audit fix --force`.
+- Never commit or print credentials, provider URLs containing keys, session secrets, or smoke tokens.
+- Keep `package-lock.json` committed and unchanged by deploy.
+- Do not run `npm install` in the production repository.
+- Keep generated `runtime/` and `.runtime/` files ignored.
+- Stop on a failed validation/deploy gate; preserve diagnostics instead of masking the failure.

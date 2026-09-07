@@ -1,16 +1,15 @@
 # API Reference
 
-## Auth Behavior Summary
+All examples are illustrative. Market values, latency, timestamps, catalog version, provider, model, and release metadata vary at runtime.
 
-- If `NEXUS_AUTH_ENABLED != "1"`: all routes behave as open market-data APIs.
-- If auth is enabled:
-  - Protected market-data routes require either:
-    - valid session cookie, or
-    - `Authorization: Bearer <NEXUS_SMOKE_AUTH_TOKEN>` when configured.
-  - Public operational routes remain public: `/api/version`, `/api/provider-health`, `/api/provider-health/deep`, and auth routes.
-  - Tifa tool routes use the existing API auth protection where required.
+## Authentication
 
-Unauthorized protected calls return:
+When `NEXUS_AUTH_ENABLED != "1"`, protected APIs retain open local behavior. When enabled, protected routes require either:
+
+- a valid signed session cookie; or
+- `Authorization: Bearer <NEXUS_SMOKE_AUTH_TOKEN>` when the smoke token is configured.
+
+Unauthorized response:
 
 ```json
 {
@@ -21,63 +20,69 @@ Unauthorized protected calls return:
 }
 ```
 
----
+Public routes are the auth family, `/api/version`, and every route under `/api/provider-health`. Market-data and Tifa routes described below are protected unless marked public.
 
-## GET /api/crypto-price?symbol=BTCUSDT
+## Market Data
 
-Purpose: Get validated Binance price payload for allowed symbols.
+### GET /api/crypto-price
 
-Query params:
+Returns Binance ticker price for a catalog-enabled Binance symbol.
 
-- `symbol` required (`BTCUSDT`, `ETHUSDT`, `BNBUSDT`, `XRPUSDT`, `SOLUSDT`, `TRXUSDT`, `SHIBUSDT`, `DOGEUSDT`)
+```text
+/api/crypto-price?symbol=BTCUSDT
+```
 
-Auth:
-
-- Protected when auth is enabled.
-
-Example response:
+- `symbol`: required; validated against the generated `BINANCE_SYMBOLS` allowlist (52 symbols in the current catalog).
+- Auth: protected.
+- Cache TTL: 5 seconds, with stale fallback.
 
 ```json
 {
   "provider": "binance",
   "symbol": "BTCUSDT",
-  "price": "80457.17000000",
-  "updated_at": "2026-05-16T00:00:00.000Z",
-  "cache": { "status": "hit", "age_ms": 1300, "ttl_ms": 5000 }
+  "price": "80274.43000000",
+  "updated_at": "2026-09-07T00:00:00.000Z",
+  "cache": { "status": "hit", "age_ms": 1200, "ttl_ms": 5000 }
 }
 ```
+
+The API preserves Binance's string price. UI precision comes from the catalog's `binancePriceTickSize`.
 
 Errors:
 
 - `400 UNSUPPORTED_SYMBOL`
-- `502 PRICE_PROVIDER_ERROR` when upstream fails and no stale cache is available
-- `200` degraded stale response with `status: "degraded"` + `PRICE_PROVIDER_STALE` when stale cache is available
+- `502 PRICE_PROVIDER_ERROR` when no stale value exists
+- degraded `200` with `PRICE_PROVIDER_STALE` when stale cache is usable
 
----
+### GET /api/crypto-klines
 
-## GET /api/crypto-klines?symbol=BTCUSDT&tf=1h
+Returns Binance OHLCV candles for a catalog-enabled symbol/timeframe.
 
-Purpose: Get validated Binance OHLCV candles.
+```text
+/api/crypto-klines?symbol=BTCUSDT&tf=1h
+```
 
-Query params:
-
-- `symbol` required (same allowlist as above)
-- `tf` required (`15m`, `30m`, `1h`, `4h`, `1d`, `1w`)
-
-Auth:
-
-- Protected when auth is enabled.
-
-Example response:
+- `symbol`: required; same generated allowlist as price.
+- `tf`: required; `15m`, `30m`, `1h`, `4h`, `1d`, or `1w`.
+- Auth: protected.
+- Cache TTL: 60 seconds.
+- Fetch limit: 400 candles, or 500 for `1w`.
 
 ```json
 {
   "provider": "binance",
   "symbol": "BTCUSDT",
   "tf": "1h",
-  "updated_at": "2026-05-16T00:00:00.000Z",
+  "updated_at": "2026-09-07T00:00:00.000Z",
   "candles": [
-    { "time": 1710000000000, "open": 68000, "high": 69000, "low": 67500, "close": 68500, "volume": 1234.56 }
+    {
+      "time": 1788739200000,
+      "open": 80000,
+      "high": 81000,
+      "low": 79500,
+      "close": 80274.43,
+      "volume": 1234.56
+    }
   ],
   "cache": { "status": "miss", "age_ms": 0, "ttl_ms": 60000 }
 }
@@ -87,66 +92,72 @@ Errors:
 
 - `400 UNSUPPORTED_SYMBOL`
 - `400 UNSUPPORTED_TIMEFRAME`
-- `502 KLINES_PROVIDER_ERROR` when upstream fails and no stale cache is available
-- `200` degraded stale response with `status: "degraded"` + `KLINES_PROVIDER_STALE` when stale cache is available
+- `502 KLINES_PROVIDER_ERROR`
+- degraded `200` with `KLINES_PROVIDER_STALE` when stale cache is usable
 
----
+### GET /api/market-snapshot
 
-## GET /api/market-snapshot
+Returns global CoinGecko metrics and rows for all members of the committed Top 100 catalog.
 
-Purpose: Return CoinGecko global metrics and live market rows for the committed Nexus Top 100 catalog.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Example response:
+- Auth: protected.
+- Runtime membership: fixed by the committed catalog.
+- Market rank/metrics: live from CoinGecko when available.
 
 ```json
 {
   "provider": "coingecko",
-  "catalog_version": "2026-09-06-b96c88167cd4",
+  "catalog_version": "2026-09-06-01628185553c",
   "catalog_generated_at": "2026-09-06T13:04:19.372Z",
   "universe_size": 100,
-  "updated_at": "2026-05-16T00:00:00.000Z",
+  "updated_at": "2026-09-07T00:00:00.000Z",
   "global": {
-    "market_cap_usd": 123,
-    "volume_24h_usd": 45,
-    "btc_dominance": 50.1,
-    "eth_dominance": 16.2
+    "market_cap_usd": 0,
+    "volume_24h_usd": 0,
+    "btc_dominance": 0,
+    "eth_dominance": 0
   },
-  "assets": [],
+  "assets": [
+    {
+      "id": "bitcoin",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "rank": 1,
+      "category": "major",
+      "price": 0,
+      "change_1h": 0,
+      "change_24h": 0,
+      "change_7d": 0,
+      "volume_24h": 0,
+      "market_cap": 0
+    }
+  ],
   "cache": { "status": "hit", "age_ms": 4200 }
 }
 ```
 
-Degraded cases:
+CoinGecko 429/5xx errors receive one bounded retry. A RAM or persistent snapshot is accepted only when catalog version and universe size match. Otherwise the route returns a degraded structure with null values.
 
-- If provider fails and RAM/file cache exists: `status: "degraded"` with stale cached payload and `MARKET_SNAPSHOT_STALE`.
-- If no cache exists: degraded fallback structure with null market values.
-- Persistent cache is accepted only when its catalog version and universe size match the committed catalog.
-- CoinGecko `429` and `5xx` responses receive one bounded retry before stale/fallback behavior.
+### Legacy BTC routes
 
----
+- `GET /api/btc-price`
+- `GET /api/btc-klines?tf=1h`
 
-## GET /api/provider-health
+These protected compatibility routes delegate to the same Binance/cache behavior. New callers should use the generic crypto routes.
 
-Purpose: Operational health view for Binance + market snapshot route behavior.
+## Operational Health (Public)
 
-Auth:
+### GET /api/provider-health
 
-- Public.
-
-Example response:
+Lightweight readiness check for representative BTC price/candles plus the market snapshot.
 
 ```json
 {
   "provider": "nexus_crypto",
   "status": "ok",
-  "updated_at": "2026-05-16T00:00:00.000Z",
+  "updated_at": "2026-09-07T00:00:00.000Z",
   "checks": {
-    "binance_price": { "status": "ok", "latency_ms": 122 },
-    "binance_klines": { "status": "ok", "latency_ms": 177 },
+    "binance_price": { "status": "ok", "latency_ms": 100 },
+    "binance_klines": { "status": "ok", "latency_ms": 120 },
     "market_snapshot": { "status": "ok", "latency_ms": 240 },
     "market_snapshot_cache_status": { "status": "ok", "value": "hit" },
     "market_snapshot_age_ms": { "status": "ok", "value": 980 }
@@ -154,28 +165,16 @@ Example response:
 }
 ```
 
-Notes:
+Status is `ok` or `degraded`. Prefer this endpoint for readiness polling.
 
-- Route status can be `ok` or `degraded`.
-- When auth is enabled and smoke token exists, provider-health includes bearer auth for internal market-snapshot checks.
-- This is the lightweight readiness check and should be preferred for frequent probes.
+### GET /api/provider-health/deep
 
----
+Checks price and five `1h` candles for eight core canaries:
 
-## GET /api/provider-health/deep
-
-Purpose: Deep provider check across eight core Binance canary symbols without fanning out across the full Binance-enabled catalog.
-
-Auth:
-
-- Public.
-
-Coverage:
-
-- `BTCUSDT`, `ETHUSDT`, `BNBUSDT`, `XRPUSDT`, `SOLUSDT`, `TRXUSDT`, `SHIBUSDT`, `DOGEUSDT`
-- For each symbol, checks both price and `1h` klines (`limit=5`).
-
-Example response:
+```text
+BTCUSDT ETHUSDT BNBUSDT XRPUSDT
+SOLUSDT TRXUSDT DOGEUSDT SHIBUSDT
+```
 
 ```json
 {
@@ -184,48 +183,37 @@ Example response:
   "scope": "core-canary",
   "available_symbols_total": 52,
   "status": "ok",
-  "updated_at": "2026-05-16T00:00:00.000Z",
+  "updated_at": "2026-09-07T00:00:00.000Z",
   "summary": {
     "symbols_total": 8,
     "symbols_ok": 8,
     "symbols_warn": 0,
     "symbols_error": 0,
-    "latency_ms": 956
+    "latency_ms": 500
   },
   "checks": {
     "BTCUSDT": {
       "status": "ok",
       "price": { "status": "ok", "latency_ms": 80 },
-      "klines": { "status": "ok", "latency_ms": 101, "candles": 5 }
+      "klines": { "status": "ok", "latency_ms": 100, "candles": 5 }
     }
   }
 }
 ```
 
-Notes:
+Status is `ok`, `degraded`, or `error`. This is a manual diagnostic, not a high-frequency probe.
 
-- Use this endpoint for manual diagnostics/monitoring depth.
-- `available_symbols_total` reports the current full Binance allowlist; it can change when the versioned catalog is refreshed.
-- Avoid high-frequency polling; the route intentionally remains an eight-symbol canary rather than checking every available symbol.
+### GET /api/provider-health/llm
 
----
-
-## GET /api/provider-health/gemini
-
-Purpose: Client-safe Gemini provider, stream, circuit breaker, and budget health surface.
-
-Auth:
-
-- Public operational health endpoint.
-
-Example response:
+Canonical sanitized health for the active Tifa provider.
 
 ```json
 {
-  "provider": "gemini",
+  "provider": "ollama",
+  "active_provider": "ollama",
   "assistant_enabled": true,
   "configured": true,
-  "model": "gemini-3-flash-preview",
+  "model": "gemma4:e4b-it-qat",
   "status": "ok",
   "stream": { "enabled": true, "timeout_ms": 25000, "retry_limit": 1 },
   "request": { "timeout_ms": 20000, "retry_limit": 1 },
@@ -239,217 +227,150 @@ Example response:
   },
   "budget": {
     "provider": "gemini",
-    "model": "gemini-3-flash-preview",
-    "current_month": "2026-05",
     "monthly_cap_usd": 5,
     "hard_stop_usd": 4.5,
     "degrade_threshold_usd": 4,
-    "monthly_spend_usd": 0.01,
-    "monthly_requests": 1,
-    "remaining_hard_stop_usd": 4.49,
+    "monthly_spend_usd": 0,
+    "monthly_requests": 0,
+    "remaining_hard_stop_usd": 4.5,
     "status": "ok",
     "failure_mode": "fail_closed"
   },
-  "updated_at": "2026-05-16T00:00:00.000Z"
+  "updated_at": "2026-09-07T00:00:00.000Z"
 }
 ```
 
-Notes:
+The budget block remains Gemini-specific even when Ollama is active.
 
-- `configured=false` means Tifa can still run in tool-only fallback mode.
-- Secrets are never returned.
+### GET /api/provider-health/ollama
 
----
+Compatibility health surface. It adds `host` when Ollama is active. The payload reflects the configured active-provider snapshot; use `/llm` for provider-neutral monitoring.
 
-## POST /api/tifa
+### GET /api/provider-health/gemini
 
-Purpose: Non-streaming TifaWidget Assistant response using orchestrated tool context and Gemini/tool-only fallback.
+Compatibility health surface retained for Phase 1 clients and tests. It currently reflects the active-provider snapshot plus Gemini budget status; the suffix does not force Gemini execution.
 
-Auth:
+No health response contains provider keys or smoke tokens.
 
-- Protected when auth is enabled.
+## Tifa Chat
 
-Example request:
+### POST /api/tifa
+
+Non-streaming grounded assistant response.
 
 ```json
 {
-  "message": "Tóm tắt ops summary hiện tại thật ngắn trong 5 bullet.",
-  "context": { "page": "/ops" }
+  "message": "Summarize provider health.",
+  "context": {
+    "page": "/ops",
+    "assetId": "bitcoin",
+    "timeframe": "1h"
+  }
 }
 ```
 
-Example response shape:
+- `message`: required non-empty string.
+- Context fields are optional and validated.
+- Auth: protected.
 
 ```json
 {
   "ok": true,
   "answer": "...",
-  "provider": "gemini",
-  "model": "gemini-3-flash-preview",
+  "provider": "ollama",
+  "model": "gemma4:e4b-it-qat",
   "tool_context": {
-    "intent": "ops_summary",
-    "ops_summary_context": { "status": "ok" },
+    "intent": "provider_health",
     "tool_orchestration": {
-      "tools_requested": ["ops_summary"],
-      "tools_used": ["ops_summary"],
+      "tools_requested": ["provider_health_explainer"],
+      "tools_used": ["provider_health_explainer"],
       "warnings": []
     }
   },
-  "budget": { "status": "ok", "reason": "GEMINI_BUDGET_OK" }
+  "budget": { "status": "ok" }
 }
 ```
 
-Provider can be `gemini` or `tool-only` depending on config, budget, circuit, and provider availability.
+`provider` can be `ollama`, `gemini`, or `tool-only`. Provider/tool errors are sanitized.
 
----
+### POST /api/tifa/stream
 
-## POST /api/tifa/stream
-
-Purpose: SSE streaming TifaWidget Assistant response.
-
-Auth:
-
-- Protected when auth is enabled.
-
-SSE event contract:
+SSE equivalent of the chat route. Headers include:
 
 ```text
-event: start
-event: tool
-event: budget
-event: delta
-event: done
-event: error
+Content-Type: text/event-stream; charset=utf-8
+Cache-Control: no-cache, no-transform
+Connection: keep-alive
+X-Accel-Buffering: no
 ```
 
-Notes:
-
-- The event contract must remain stable.
-- Provider errors are sanitized.
-- Stream responses must not leak secrets.
-
----
-
-## GET /api/tifa-tools/market-context
-
-Purpose: Return grounded market snapshot context for Tifa.
-
-Auth:
-
-- Protected when auth is enabled.
-
----
-
-## GET /api/tifa-tools/asset-analysis
-
-Purpose: Return grounded asset analysis context for Tifa.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Notes:
-
-- Stablecoins return market-only context.
-- Nexus MA/checklist automation is disabled for USDT/USDC.
-
----
-
-## GET /api/tifa-tools/budget-status
-
-Purpose: Return Gemini budget guard status.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Key fields:
+Stable event names:
 
 ```text
-monthly_cap_usd
-hard_stop_usd
-degrade_threshold_usd
-monthly_spend_usd
-monthly_requests
-remaining_hard_stop_usd
-status
-failure_mode
+start
+tool
+budget
+delta
+done
+error
 ```
 
----
+A provider failure before a delta can fall back to pseudo-streamed tool-only text. A failure after partial provider output emits sanitized `STREAM_PROVIDER_ERROR` and closes without a second answer.
 
-## GET /api/tifa-tools/provider-health-explainer
+Invalid input returns an SSE `error` event. Unauthorized requests return HTTP 401 with an SSE `error` frame.
 
-Purpose: Normalize `/api/provider-health` into assistant/UI-friendly readiness explanation.
+## Tifa Tools
 
-Auth:
+All routes in this section are protected when auth is enabled.
 
-- Protected when auth is enabled.
+### GET /api/tifa-tools/market-context
 
-Example response shape:
+Returns compact Top 100 context:
+
+- global market cap/volume and BTC/ETH dominance.
+- first 20 ranked assets for bounded prompting.
+- five strongest and weakest 24-hour assets computed from the full universe.
+- catalog/freshness metadata and disclaimer.
+
+### GET /api/tifa-tools/asset-analysis
+
+```text
+/api/tifa-tools/asset-analysis?assetId=bitcoin&tf=1h
+```
+
+Binance-enabled assets return latest ticker price, timeframe, Nexus signal, and rules summary.
+
+Market-only response:
 
 ```json
 {
   "ok": true,
-  "context_type": "provider_health_explainer",
-  "status": "ok",
-  "summary": {
-    "total_checks": 5,
-    "ok_checks": 5,
-    "warn_checks": 0,
-    "error_checks": 0,
-    "slowest_check": "Market snapshot",
-    "slowest_latency_ms": 708
-  },
-  "issues": [],
-  "explanation": "Provider readiness checks are healthy. Binance price/klines and market snapshot are responding normally.",
-  "disclaimer": "Market data only. No trade execution or financial recommendations."
+  "context_type": "asset_analysis",
+  "mode": "market-only",
+  "analysis_enabled": false,
+  "asset": { "id": "tether", "symbol": "USDT" },
+  "timeframe": { "label": "1H", "binance": "1h" },
+  "reason": "USDT is configured as a stablecoin market-only asset. Nexus MA/checklist analysis is disabled."
 }
 ```
 
----
+Non-Binance assets use a distinct Binance-unavailable reason.
 
-## GET /api/tifa-tools/deep-health-explainer
+### GET /api/tifa-tools/budget-status
 
-Purpose: Normalize `/api/provider-health/deep` into assistant/UI-friendly multi-symbol diagnostics.
+Returns Gemini monthly cap, hard stop, degrade threshold, estimated spend/request count, remaining amount, status, and failure mode.
 
-Auth:
+### GET /api/tifa-tools/provider-health-explainer
 
-- Protected when auth is enabled.
+Normalizes lightweight health into check counts, slowest check, issues, explanation, and disclaimer.
 
-Example response shape:
+### GET /api/tifa-tools/deep-health-explainer
 
-```json
-{
-  "ok": true,
-  "context_type": "deep_health_explainer",
-  "status": "ok",
-  "summary": {
-    "symbols_total": 8,
-    "symbols_ok": 8,
-    "symbols_warn": 0,
-    "symbols_error": 0,
-    "latency_ms": 504,
-    "slow_symbols": [
-      { "symbol": "DOGEUSDT", "latency_ms": 492 }
-    ]
-  },
-  "issues": [],
-  "explanation": "Deep provider diagnostics are healthy across Binance-enabled assets."
-}
-```
+Normalizes eight-canary health into per-symbol price/kline status, slow symbols, issues, explanation, and disclaimer.
 
----
+### GET /api/tifa-tools/ops-summary
 
-## GET /api/tifa-tools/ops-summary
-
-Purpose: Return executive ops summary combining provider health, deep health, Gemini health, and budget status.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Example response shape:
+Combines provider, deep, active LLM, and budget context:
 
 ```json
 {
@@ -465,140 +386,69 @@ Example response shape:
     "budget_status": "ok"
   },
   "issues": [],
-  "recommendations": ["All monitored ops diagnostics are healthy at this time."]
+  "recommendations": []
 }
 ```
 
----
+`gemini_status` is a legacy field name in the current contract and represents the active provider health summary.
 
-## GET|POST /api/tifa-tools/orchestrate
+### GET|POST /api/tifa-tools/orchestrate
 
-Purpose: Test or invoke the Phase 2 Tifa tool orchestration layer directly.
+Directly invokes intent mapping and allowlisted tools.
 
-Auth:
-
-- Protected when auth is enabled.
-
-GET example:
+GET:
 
 ```text
 /api/tifa-tools/orchestrate?message=ops+summary&page=/ops
 ```
 
-POST example:
+POST:
 
 ```json
 {
-  "message": "provider health explain",
+  "message": "Explain provider health",
   "context": { "page": "/ops" },
   "tools": ["provider_health_explainer"]
 }
 ```
 
-Example response shape:
+Unknown tools cannot execute. User input cannot choose an arbitrary external URL.
 
-```json
-{
-  "ok": true,
-  "intent": "provider_health",
-  "tools_requested": ["provider_health_explainer"],
-  "tools_used": ["provider_health_explainer"],
-  "outputs": {},
-  "warnings": []
-}
-```
+## Auth Routes (Public)
 
-Security notes:
+### POST /api/auth/login
 
-- Requested tools are filtered through the strict allowlist.
-- Unsupported tools are ignored or reported as warnings.
-- No dynamic external URL execution is allowed from user input.
+Accepts `username` and `password` when auth is enabled. Success sets the signed HTTP-only session cookie.
 
----
+Errors include:
 
-## GET /api/version
+- `400 AUTH_DISABLED`
+- `401 INVALID_CREDENTIALS`
+- `429 RATE_LIMITED` with `Retry-After`
+- `500 AUTH_CONFIG_ERROR`
 
-Purpose: Expose release/runtime metadata for deploy verification and footer badge.
+### POST /api/auth/logout
 
-Auth:
+Clears the session cookie.
 
-- Public.
+### GET /api/auth/me
 
-Example response:
+Returns authentication status and user name. Auth-disabled mode reports the local user as authenticated. A valid near-expiry session can be rotated.
+
+## GET /api/version (Public)
 
 ```json
 {
   "app": "nexus-crypto",
   "version": "0.1.0",
-  "commit": "1ba0b57e0c7e8ef9712095e816fc32f8e10bddb6",
-  "short_commit": "1ba0b57",
-  "build_time": "2026-05-16T00:00:00Z",
+  "commit": "full-commit-sha",
+  "short_commit": "abcdef0",
+  "build_time": "2026-09-07T00:00:00Z",
   "next": "16.3.4",
   "node": "v22.18.0",
   "env": "production",
-  "updated_at": "2026-05-16T00:00:00.000Z"
+  "updated_at": "2026-09-07T00:00:00.000Z"
 }
 ```
 
----
-
-## GET /api/btc-price (legacy)
-
-Purpose: Legacy compatibility route for BTC price contract.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Response shape:
-
-```json
-{
-  "price": "80169.73000000",
-  "updated_at": "2026-05-16T00:00:00.000Z"
-}
-```
-
----
-
-## GET /api/btc-klines?tf=4h (legacy)
-
-Purpose: Legacy compatibility route returning candle array for BTC.
-
-Auth:
-
-- Protected when auth is enabled.
-
-Query params:
-
-- `tf` required (`15m`, `30m`, `1h`, `4h`, `1d`, `1w`)
-
-Response shape:
-
-- Legacy candle array (not wrapped with provider metadata).
-
----
-
-## Auth Endpoints
-
-### POST /api/auth/login
-
-- Public.
-- Input JSON: `username`, `password`.
-- Returns `200` with session cookie on success.
-- Error cases:
-  - `400 AUTH_DISABLED`
-  - `500 AUTH_CONFIG_ERROR`
-  - `401 INVALID_CREDENTIALS`
-  - `429 RATE_LIMITED`
-
-### POST /api/auth/logout
-
-- Public.
-- Clears session cookie, returns `{ "ok": true }`.
-
-### GET /api/auth/me
-
-- Public.
-- Returns auth status payload.
-- Rotates session cookie when near expiry if rotation is enabled.
+The deploy script injects commit/build metadata into its managed production env block. Values may be `unknown` outside that flow.

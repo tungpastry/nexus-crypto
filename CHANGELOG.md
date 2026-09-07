@@ -4,6 +4,8 @@
 
 ### Added
 
+- Canonical current-state documentation for the asset catalog, Nexus Algorithm v1.1, Tifa providers/orchestration, and operator/contributor navigation.
+
 - Nexus Top 100 versioned catalog generated from CoinGecko market rank and verified Binance Spot/USDT capabilities.
 - Offline catalog validation plus explicit refresh tooling (`assets:check`, `assets:refresh`).
 - Homepage Top 100 search, category/mode filters, live metric sorting, and 25-row pagination.
@@ -20,7 +22,7 @@
 - P11: LAN local credential authentication.
 - P11: HTTP-only signed session cookie.
 - P11: Login, logout, and auth status routes.
-- P11: Middleware UI page protection for `/` and `/asset/*`.
+- P11: Proxy UI page protection for `/` and `/asset/*` (later extended to `/ops`).
 - P11: Password hash generator for local auth setup.
 - P12: Protected selected market-data API routes when LAN auth is enabled.
 - P12: Smoke/deploy bearer token support for protected API checks.
@@ -52,6 +54,10 @@
 
 ### Changed
 
+- Binance-backed workspace prices now use committed `PRICE_FILTER.tickSize` precision; the Decision Matrix labels candle price as `Kline Close`.
+- Public documentation now reflects the Top 100 catalog (52 Binance-enabled, 48 market-only), eight-canary deep health, dual themes, Ollama production primary, optional Gemini, tool-only fallback, Tifa history/TTS, and provider-neutral LLM health.
+- Public metadata now describes the versioned Top 100 dashboard and no longer claims a Vercel deployment URL for the LAN production reference.
+
 - Market snapshot now returns 100 committed members with catalog metadata, one bounded provider retry, and catalog-version cache invalidation.
 - Tifa computes leaders/laggards over all 100 assets while bounding prompt rows to the top 20.
 - Deep provider health remains scoped to eight core canaries and reports the full available Binance symbol count separately.
@@ -59,7 +65,7 @@
 - Scoped Gemini budget ledger filesystem tracing so Turbopack no longer includes the whole project in NFT output.
 - Next.js convention migration: root `middleware.ts` replaced by `proxy.ts`.
 - Ubuntu production deploy dependency install is deterministic via `npm ci`.
-- Documentation refreshed to align README, architecture, API reference, deployment, and Phase 2 Tifa docs with the current `fce6b64e` baseline.
+- Documentation refreshed to align README, architecture, API reference, deployment, catalog, algorithm, and Tifa guides with the current production model.
 - Removed the unsupported local Gemini CLI DevOps layer (`bin/nxgcli.sh`, bootstrap context files, and CLI-specific docs). The Tifa Gemini API provider, budget guard, and circuit breaker remain in place.
 - Branding/UI polish landed:
   - logo banner in README

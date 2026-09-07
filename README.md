@@ -12,43 +12,53 @@
   <img alt="Status Active" src="https://img.shields.io/badge/Status-Active-2563eb">
 </p>
 
-Retro black-pink crypto decision-support dashboard for the versioned Nexus Top 100 Universe. Built with Next.js 16 + React 19, TradingView widget charts, Binance price/klines routes, CoinGecko market snapshots, LAN-local auth, TifaWidget Assistant, and `/ops` diagnostics.
+Nexus Crypto is a retro financial dashboard for observing a versioned Top 100 crypto universe. It combines CoinGecko market snapshots, Binance Spot price and candle data, TradingView charts, the Nexus Decision Matrix, LAN authentication, operational diagnostics, and the grounded TifaWidget assistant.
 
-Nexus Crypto is market-data-first tooling for observation and workflow discipline. It does not execute trades, does not custody funds, and does not provide financial or trading advice.
+Nexus Crypto is market-data-first decision-support software. It does not execute trades, custody funds, or provide financial or trading recommendations.
 
 ## Web App Screenshots
 
+Screenshots show point-in-time market values and do not represent current prices.
+
 ### Home Dashboard
+
 ![Home Dashboard](public/screenshots/home-dashboard.png)
 
 ### Asset Workspace (BTC)
+
 ![Asset Workspace BTC](public/screenshots/asset-workspace-btc.png)
 
 ### Ops Dashboard
+
 ![Ops Dashboard](public/screenshots/ops-dashboard.png)
 
 ### Tifa Widget
+
 ![Tifa Widget](public/screenshots/tifa-widget.png)
 
 ## Current Verified Baseline
 
-- Asset catalog: 100 committed CoinGecko members, generated `2026-09-06`
-- Current capabilities: 52 verified Binance Spot/USDT workflows and 48 market-only workspaces
-- Deep health scope: 8 core Binance canaries
-- Production reference: Ubuntu Server, `nexus-crypto.service`, port `3200`
-- Runtime status after live validation: Phase 2 + Gemini live provider smoke passed
+- Catalog: 100 committed CoinGecko members, version `2026-09-06-01628185553c`.
+- Capabilities: 52 Binance Spot/USDT workspaces and 48 market-only workspaces.
+- Deep health: 8 core Binance canaries, separate from the full 52-symbol allowlist.
+- Price display: Binance `PRICE_FILTER.tickSize` precision for live prices and candle-derived matrix metrics.
+- UI: persistent Black Pink and Wikipedia Glass themes.
+- Assistant: Tifa Phase 2 orchestration with Ollama `gemma4:e4b-it-qat` as the current production provider, optional Gemini API support, and grounded tool-only fallback.
+- Production reference: Ubuntu Server, Node `v22.18.0`, `nexus-crypto.service`, port `3200`.
+- Framework: Next.js `16.3.4`, React `19.2.0`; current dependency baseline passes `npm audit` with zero known advisories.
 
 ## Table of Contents
 
 - [Web App Screenshots](#web-app-screenshots)
+- [Current Verified Baseline](#current-verified-baseline)
 - [Features](#features)
-- [Architecture Layers](#architecture-layers)
+- [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Validation](#validation)
 - [Production Deployment On Ubuntu](#production-deployment-on-ubuntu)
-- [Gemini Live Provider](#gemini-live-provider)
+- [Tifa LLM Providers](#tifa-llm-providers)
 - [API Overview](#api-overview)
 - [Documentation](#documentation)
 - [Project Structure](#project-structure)
@@ -59,134 +69,92 @@ Nexus Crypto is market-data-first tooling for observation and workflow disciplin
 
 ## Features
 
-- Versioned Top 100 Nexus Universe market overview at `/` with 25-row pagination, search, filters, and sorting.
-- Dedicated asset workspace at `/asset/[id]`.
-- TradingView chart with unique container per asset/timeframe.
-- Binance-backed `PriceWidget` and kline context.
-- CoinGecko market snapshot route with 100-member catalog metadata, retry, cache, and stale fallback.
-- Nexus Decision Matrix: multi-factor workflow scoring that combines MA20/MA50/MA200 structure, trend/bias state, ATR volatility regime, volume confirmation, support/resistance location, and optional higher-timeframe agreement into a clear decision-support state (`No Trade`, `Watch`, `Ready`, `Confirmed`).
-- Market-only mode for stablecoins and assets without a verified Binance Spot/USDT pair.
-- Provider health endpoint with cache freshness insight.
-- Deep provider health endpoint scoped to eight core canaries, separate from the full Binance allowlist.
-- Release metadata endpoint (`/api/version`) and UI version badge.
-- LAN local authentication with proxy-based page protection.
-- Trader theme switcher with default Black Pink and persistent Wikipedia Glass modes.
-- TifaWidget Assistant with grounded market/asset context and Gemini budget guard.
-  - Phase 1.1 hardening: contract tests, no-secret leakage tests, Gemini true-stream path, safe pre-stream fallback to tool-only pseudo stream, sanitized `STREAM_PROVIDER_ERROR`, and Gemini circuit breaker.
-  - Phase 2 ops orchestration: provider/deep health explainers, ops summary endpoint, allowlisted orchestration endpoint, and richer `/ops` diagnostic summaries.
+- Versioned Top 100 market overview with search, category/mode filters, live metric sorting, and 25-row pagination.
+- Per-asset workspace at `/asset/[id]` with responsive chart, price, timeframe, and decision-support surfaces.
+- 52 catalog assets verified against active Binance Spot/USDT markets; 48 assets use explicit market-only behavior.
+- Binance prices rendered with committed exchange `tickSize` precision; no runtime `exchangeInfo` request is needed.
+- CoinGecko snapshot with catalog metadata, bounded retry, in-memory cache, persistent fallback, and stale status.
+- Nexus Algorithm v1.1 with MA20/MA50/MA200 structure, ATR14, volume confirmation, support/resistance context, optional higher-timeframe agreement, risk, score, and workflow state.
+- Stablecoin and Binance-unavailable modes that avoid unsupported chart, candle, and decision-matrix calls.
+- Lightweight provider readiness plus manual eight-canary deep health diagnostics on `/ops`.
+- LAN-local auth with signed HTTP-only sessions, login rate limiting, rotation, and smoke bearer auth.
+- Persistent Black Pink and Wikipedia Glass themes across Home, Asset, Ops, Login, TifaWidget, and TradingView.
+- TifaWidget on Home, Asset, and Ops with SSE streaming, allowlisted tool orchestration, per-page browser history, and optional Web Speech text-to-speech.
+- Ollama and Gemini provider adapters with retry, timeout, circuit breaker, redaction, and tool-only degradation.
+- Release metadata via `/api/version`, an Ubuntu `systemd` deploy script, smoke gates, and GitHub Actions CI.
 
-## Architecture Layers
+## Architecture
 
-Nexus Crypto is organized into four practical layers:
+```text
+Browser UI
+  -> Next.js App Router pages and route handlers
+  -> catalog-gated Binance / CoinGecko provider clients
+  -> in-memory cache and persistent market-snapshot fallback
+  -> dashboard, asset workspace, ops diagnostics, and Tifa contexts
+```
 
-1. **Market Layer**
-   - versioned Top 100 catalog generated from CoinGecko + Binance exchange info
-   - Binance price/klines APIs
-   - market snapshot
-   - stablecoin and Binance-unavailable market-only behavior
+The committed catalog is the capability boundary. Binance-enabled assets receive live ticker/candle workflows; stablecoins and assets without a verified Binance Spot/USDT pair remain market-only. The default health route is lightweight, while the deep route deliberately checks only eight core canaries.
 
-2. **Dashboard Layer**
-   - Home market overview
-   - per-asset workspace
-   - TradingView charts
-   - Nexus checklist and MA scoring
+Tifa resolves an intent, selects tools from a strict allowlist, builds grounded context, and calls the configured provider. A provider error falls back to a local tool-only answer; the gateway does not automatically switch from Ollama to Gemini or vice versa.
 
-3. **Ops Layer**
-   - provider health
-   - deep provider health
-   - version metadata
-   - `/ops` diagnostics panels
-
-4. **Tifa Assistant Layer**
-   - `/api/tifa`
-   - `/api/tifa/stream`
-   - Tifa tools
-   - Gemini provider gateway
-   - budget guard + circuit breaker
-   - Phase 2 tool orchestration
+See [Architecture](docs/architecture.md), [Asset Catalog](docs/asset-catalog.md), [Nexus Algorithm](docs/nexus-algorithm.md), and [Tifa Assistant](docs/tifa-assistant.md).
 
 ## Tech Stack
 
-- Next.js `16.3.4`
-- React `19.2.0` + React DOM `19.2.0`
-- TypeScript + Tailwind CSS v4
-- Vitest + ESLint
-- Axios
-- Framer Motion
-- Lucide React
+- Next.js `16.3.4` App Router and React `19.2.0`
+- TypeScript 5 and Tailwind CSS v4
+- Axios `1.20.x`
+- Framer Motion and Lucide React
+- Vitest `4.1.6` and ESLint 9
+- TradingView Widget
+- Binance Spot REST and CoinGecko markets/global APIs
+- Optional Ollama or Gemini LLM provider
+- Ubuntu Server, Node 22 LTS, npm, and `systemd`
 
 ## Prerequisites
 
-- Node.js 22 LTS recommended (production reference uses Node `v22.18.0`).
-- npm
-- Optional for production: Ubuntu Server + `systemd`.
+- Node.js 22 LTS recommended (production reference uses `v22.18.0`).
+- npm with the committed `package-lock.json`.
+- Optional production host: Ubuntu Server with `systemd`.
+- Optional assistant provider: reachable Ollama host or a server-side Gemini API key.
 
 ## Quick Start
 
-Local development install:
+Local development uses `npm install`:
 
 ```bash
+git clone https://github.com/tungpastry/nexus-crypto.git
+cd nexus-crypto
 npm install
-```
-
-Run local app:
-
-```bash
 npm run dev
 ```
 
-Default local URL:
-
-```text
-http://localhost:3200
-```
-
-Note: local development uses `npm install`. Production deploy uses `npm ci` for deterministic installs.
+Open `http://localhost:3200`. Copy required non-secret keys from `.env.example` into an ignored local env file. Production and release validation use `npm ci`, not `npm install`.
 
 ## Validation
 
 ```bash
+git diff --check
+npm run assets:check
 npm run lint
 npm run test
 npm run build
-npm run assets:check
+npm audit
 ```
 
-Refresh the committed catalog only when intentionally updating universe membership:
+Runtime smoke tests require a running app. When auth is enabled, pass the smoke token through the environment without printing it:
 
 ```bash
-npm run assets:refresh
-```
+NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
+./scripts/smoke_crypto_assets_contract.sh
 
-The refresh command aborts on incomplete/ambiguous provider data and writes only after validation.
-
-Tifa smoke:
-
-```bash
-export NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200"
-export NEXUS_SMOKE_AUTH_TOKEN="$(grep '^NEXUS_SMOKE_AUTH_TOKEN=' .env.production.local | cut -d= -f2-)"
+NEXUS_CRYPTO_BASE_URL="http://127.0.0.1:3200" \
 npm run smoke:tifa
-```
-
-Expected Phase 2 smoke lines include:
-
-```text
-TIFA_PROVIDER_HEALTH_EXPLAINER=PASS
-TIFA_DEEP_HEALTH_EXPLAINER=PASS
-TIFA_OPS_SUMMARY=PASS
-TIFA_TOOL_ORCHESTRATOR=PASS
-TIFA_PHASE2_NO_SECRET_LEAK=PASS
 ```
 
 ## Production Deployment On Ubuntu
 
-Preferred production deploy uses [`scripts/deploy_ubuntu_server.sh`](scripts/deploy_ubuntu_server.sh), which runs:
-
-```text
-dirty guard -> fetch/pull --ff-only -> release metadata injection -> npm ci -> lint/test/build -> systemd restart -> provider-health wait loop -> version check -> smoke -> final clean-tree check
-```
-
-Copy/paste deploy command:
+The preferred deploy path is [`scripts/deploy_ubuntu_server.sh`](scripts/deploy_ubuntu_server.sh). It performs a dirty-tree guard, fast-forward pull, release metadata injection, `npm ci`, audit, lint/test/build, service restart, readiness/version checks, crypto smoke, and a final clean-tree check.
 
 ```bash
 cd /home/nexus/projects/nexus-crypto
@@ -198,118 +166,107 @@ NEXUS_CRYPTO_BRANCH="main" \
 ./scripts/deploy_ubuntu_server.sh
 ```
 
-## Gemini Live Provider
+Run the Tifa smoke separately with production environment variables available to the command. Never print `.env.production.local`, `NEXUS_SMOKE_AUTH_TOKEN`, or provider credentials.
 
-Tifa can run in either tool-only fallback mode or live Gemini mode.
+Full instructions: [Deployment](docs/deployment.md) and [Release Checklist](docs/release-checklist.md).
 
-Required live provider env:
+## Tifa LLM Providers
 
-```text
-GEMINI_API_KEY=<redacted>
-GEMINI_MODEL=gemini-3-flash-preview
-GEMINI_STREAM_ENABLED=1
-GEMINI_CIRCUIT_BREAKER_ENABLED=1
-```
+The provider is selected server-side with `TIFA_LLM_PROVIDER=ollama|gemini`.
 
-Do not print or commit `.env.production.local`.
+- **Ollama** is the current production primary. The documented model is `gemma4:e4b-it-qat`; inference is local and bypasses the Gemini cost ledger.
+- **Gemini API** remains optional. Its server-side API key, monthly budget guard, streaming controls, retry limits, and circuit breaker remain supported.
+- **Tool-only** is the grounded fallback when the selected provider is unavailable, unconfigured, blocked, or fails before producing a usable response.
+- There is no automatic cross-provider failover. Change the configured provider and restart the service to switch providers.
 
-Health check:
+Use the canonical active-provider health endpoint:
 
 ```bash
-curl -sS http://127.0.0.1:3200/api/provider-health/gemini | python3 -m json.tool
+curl -sS http://127.0.0.1:3200/api/provider-health/llm | python3 -m json.tool
 ```
 
-Expected live provider indicators:
-
-```json
-{
-  "configured": true,
-  "status": "ok",
-  "circuit": { "state": "closed" },
-  "budget": { "status": "ok" }
-}
-```
+The `/api/provider-health/ollama` and `/api/provider-health/gemini` routes remain compatibility health surfaces. Their payload reflects the currently active provider snapshot; use `/llm` for provider-neutral operations.
 
 ## API Overview
 
-Primary endpoints:
+Public operational endpoints:
 
-- `/api/crypto-price`
-- `/api/crypto-klines`
-- `/api/market-snapshot`
-- `/api/provider-health`
-- `/api/provider-health/deep`
-- `/api/provider-health/gemini`
-- `/api/version`
-- `/api/tifa`
-- `/api/tifa/stream`
-- `/api/tifa-tools/market-context`
-- `/api/tifa-tools/asset-analysis`
-- `/api/tifa-tools/budget-status`
-- `/api/tifa-tools/provider-health-explainer`
-- `/api/tifa-tools/deep-health-explainer`
-- `/api/tifa-tools/ops-summary`
-- `/api/tifa-tools/orchestrate`
-- legacy `/api/btc-price`
-- legacy `/api/btc-klines`
+- `GET /api/version`
+- `GET /api/provider-health`
+- `GET /api/provider-health/deep`
+- `GET /api/provider-health/llm`
+- `GET /api/provider-health/ollama`
+- `GET /api/provider-health/gemini`
+- `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`
 
-Full contracts and examples are documented in [docs/api-reference.md](docs/api-reference.md).
+Protected by session or smoke bearer token when auth is enabled:
+
+- `GET /api/crypto-price`
+- `GET /api/crypto-klines`
+- `GET /api/market-snapshot`
+- legacy `GET /api/btc-price` and `GET /api/btc-klines`
+- `POST /api/tifa` and `POST /api/tifa/stream`
+- Tifa context, explainer, summary, budget, and orchestration routes under `/api/tifa-tools/*`
+
+See [API Reference](docs/api-reference.md) for contracts and failure behavior.
 
 ## Documentation
 
-- [docs/architecture.md](docs/architecture.md)
-- [docs/api-reference.md](docs/api-reference.md)
-- [docs/deployment.md](docs/deployment.md)
-- [docs/troubleshooting.md](docs/troubleshooting.md)
-- [docs/auth-lan-local.md](docs/auth-lan-local.md)
-- [docs/release-checklist.md](docs/release-checklist.md)
-- [docs/tifa-assistant-phase1.md](docs/tifa-assistant-phase1.md)
-- [docs/tifa-assistant-phase2.md](docs/tifa-assistant-phase2.md)
+- [Documentation Index](docs/index.md)
+- [Architecture](docs/architecture.md)
+- [Asset Catalog](docs/asset-catalog.md)
+- [Nexus Algorithm](docs/nexus-algorithm.md)
+- [Tifa Assistant](docs/tifa-assistant.md)
+- [API Reference](docs/api-reference.md)
+- [Deployment](docs/deployment.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [LAN Local Authentication](docs/auth-lan-local.md)
+- [Release Checklist](docs/release-checklist.md)
+- [Tifa Phase 1 History](docs/tifa-assistant-phase1.md)
+- [Tifa Phase 2 History](docs/tifa-assistant-phase2.md)
 
 ## Project Structure
 
 ```text
 nexus-crypto/
-├── app/
-│   ├── api/
-│   │   ├── provider-health/
-│   │   ├── tifa/
-│   │   └── tifa-tools/
-│   ├── components/
-│   ├── config/
-│   │   ├── assets.generated.json
-│   │   └── assets.ts
-│   ├── lib/
-│   │   ├── gemini-budget/
-│   │   ├── tifa-core/
-│   │   ├── tifa-nexus/
-│   │   ├── tifa-provider-gateway/
-│   │   ├── tifa-runtime/
-│   │   └── tifa-tools/
-│   ├── asset/[id]/page.tsx
-│   └── page.tsx
-├── docs/
-├── public/
-├── scripts/
-│   ├── asset-overrides.json
-│   ├── check_nexus_assets.mjs
-│   └── generate_nexus_assets.mjs
-├── proxy.ts
-└── package.json
+|-- .github/workflows/ci.yml
+|-- app/
+|   |-- api/
+|   |-- asset/[id]/page.tsx
+|   |-- components/
+|   |-- config/assets.generated.json
+|   |-- config/assets.ts
+|   |-- lib/nexusAlgorithm.ts
+|   |-- lib/priceFormat.ts
+|   |-- lib/tifa-core/
+|   |-- lib/tifa-provider-gateway/
+|   |-- lib/tifa-tools/
+|   |-- ops/page.tsx
+|   `-- page.tsx
+|-- docs/
+|-- prompts/TIFA_NEXUS_CRYPTO_RUNTIME.md
+|-- public/screenshots/
+|-- scripts/
+|-- proxy.ts
+|-- CONTRIBUTING.md
+|-- LICENSE
+`-- package.json
 ```
+
+Generated runtime files under `runtime/` and `.runtime/` are ignored and must not be committed.
 
 ## Roadmap
 
-- Add lightweight TTL cache for `/api/tifa-tools/ops-summary`.
-- Add richer orchestration warnings panel on `/ops`.
-- Add full chat intent-to-tool integration tests.
-- Expand CI depth for Tifa smoke where safe.
-- Add a reviewed cadence for refreshing the committed Nexus Top 100 catalog.
+- Add bounded TTL caching for expensive ops-summary orchestration.
+- Surface orchestration warnings more explicitly in `/ops`.
+- Add broader chat intent-to-tool integration coverage.
+- Establish a reviewed cadence for refreshing the committed Top 100 catalog.
+- Add provider-neutral health naming internally while preserving compatibility routes.
 - Optional Cloudflare Tunnel HTTPS deployment profile.
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md).
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
