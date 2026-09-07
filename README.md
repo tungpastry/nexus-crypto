@@ -18,23 +18,31 @@ Nexus Crypto is market-data-first decision-support software. It does not execute
 
 ## Web App Screenshots
 
-Screenshots show point-in-time market values and do not represent current prices.
+These screenshots were captured from the verified Ubuntu runtime in Wikipedia Glass mode. Market values are point-in-time and do not represent current prices.
 
 ### Home Dashboard
 
 ![Home Dashboard](public/screenshots/home-dashboard.png)
 
+*Top 100 market snapshot, filters, sorting, and 25-row watchlist pagination.*
+
 ### Asset Workspace (BTC)
 
 ![Asset Workspace BTC](public/screenshots/asset-workspace-btc.png)
+
+*BTC workspace with Binance tick-size price display, TradingView, and the Nexus Decision Matrix.*
 
 ### Ops Dashboard
 
 ![Ops Dashboard](public/screenshots/ops-dashboard.png)
 
+*Lightweight readiness, eight-canary deep health, and active Ollama provider status.*
+
 ### Tifa Widget
 
 ![Tifa Widget](public/screenshots/tifa-widget.png)
+
+*Grounded TifaWidget analysis embedded in the BTC asset workspace.*
 
 ## Current Verified Baseline
 
