@@ -4,6 +4,7 @@
 
 ### Added
 
+- Refreshed blue-cyan Nexus logo, monogram favicon set, and Open Graph social preview assets.
 - Canonical current-state documentation for the asset catalog, Nexus Algorithm v1.1, Tifa providers/orchestration, and operator/contributor navigation.
 
 - Nexus Top 100 versioned catalog generated from CoinGecko market rank and verified Binance Spot/USDT capabilities.
