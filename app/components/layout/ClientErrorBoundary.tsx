@@ -30,7 +30,7 @@ export default class ClientErrorBoundary extends Component<
     const showMessage = process.env.NODE_ENV === "development";
 
     return (
-      <section className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] nexus-panel-surface p-5 text-[var(--text-main)] shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.12)]">
+      <section className="relative overflow-hidden rounded-2xl border border-[var(--border-strong)] nexus-panel-surface p-5 text-[var(--text-main)] shadow-[var(--error-shadow)]">
         <div className="pointer-events-none absolute inset-0 nexus-scanlines bg-[length:100%_4px] opacity-20" />
         <div className="relative">
           <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--text-soft)]">
@@ -47,7 +47,7 @@ export default class ClientErrorBoundary extends Component<
             onClick={() => {
               if (typeof window !== "undefined") window.location.reload();
             }}
-            className="mt-4 rounded-lg border border-[rgba(255,95,162,0.38)] bg-[rgba(255,95,162,0.16)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] transition hover:bg-[rgba(255,95,162,0.22)]"
+            className="mt-4 rounded-lg border border-[var(--brand-border-hover)] bg-[var(--error-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] transition hover:bg-[var(--error-surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           >
             Reload dashboard
           </button>

@@ -36,7 +36,7 @@ export default function TifaWidget({ page, context }: TifaWidgetProps) {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="nexus-primary-action pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-pink)] shadow-[var(--shadow-panel),var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+        className="nexus-primary-action pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[var(--border-brand)] shadow-[var(--shadow-panel),var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
         aria-label={open ? "Close Tifa assistant" : "Open Tifa assistant"}
       >
         <TifaAvatar size="md" />

@@ -44,7 +44,7 @@ export default function AssetWorkspaceShell({ asset }: AssetWorkspaceShellProps)
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-pink)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+            className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-brand)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Top 100 Nexus Universe

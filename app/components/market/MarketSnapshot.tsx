@@ -62,9 +62,9 @@ export default function MarketSnapshot() {
         label: "Market Cap",
         value: compactUsd(data?.global.market_cap_usd),
         icon: BarChart3,
-        iconClass: "text-[var(--pink-soft)]",
+        iconClass: "text-[var(--brand-soft)]",
         cardClass:
-          "border-[rgba(255,95,162,0.24)] hover:border-[rgba(255,95,162,0.38)]",
+          "border-[var(--brand-market-border)] hover:border-[var(--brand-border-hover)]",
       },
       {
         label: "24h Volume",

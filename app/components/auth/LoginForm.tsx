@@ -43,7 +43,7 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-[var(--border-strong)] nexus-panel-surface p-5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_0_35px_rgba(255,95,162,0.08)]"
+      className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-[var(--border-strong)] nexus-panel-surface p-5 shadow-[var(--login-shadow)]"
     >
       <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.22em] text-[var(--text-soft)]">
         Username
@@ -75,7 +75,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="nexus-primary-action rounded-lg border border-[var(--border-pink)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] shadow-[var(--shadow-accent)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        className="nexus-primary-action rounded-lg border border-[var(--border-brand)] px-4 py-3 text-sm font-semibold uppercase tracking-[0.22em] shadow-[var(--shadow-accent)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Checking" : "Enter Nexus"}
       </button>

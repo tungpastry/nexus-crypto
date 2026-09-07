@@ -15,7 +15,7 @@ export default function RetroPanel({
 }: RetroPanelProps) {
   return (
     <section
-      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] nexus-panel-surface shadow-[var(--shadow-panel),var(--shadow-pink)] backdrop-blur-xl ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-[var(--border-soft)] nexus-panel-surface shadow-[var(--shadow-panel),var(--shadow-brand)] backdrop-blur-xl ${className}`}
     >
       <div className="pointer-events-none absolute inset-0 nexus-scanlines bg-[length:100%_4px] opacity-20" />
       <div className="relative">

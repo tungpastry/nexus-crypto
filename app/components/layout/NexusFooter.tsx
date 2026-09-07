@@ -5,11 +5,11 @@ import ClientErrorBoundary from "./ClientErrorBoundary";
 
 export default function NexusFooter() {
   return (
-    <footer className="rounded-2xl border border-[var(--border-soft)] nexus-panel-surface p-4 shadow-[var(--shadow-panel),var(--shadow-pink)]">
+    <footer className="rounded-2xl border border-[var(--border-soft)] nexus-panel-surface p-4 shadow-[var(--shadow-panel),var(--shadow-brand)]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-pink)] bg-[rgba(255,95,162,0.08)] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
-            <Sparkles className="h-3.5 w-3.5 text-[var(--pink-soft)]" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-brand)] bg-[var(--brand-surface)] px-3 py-1 text-xs font-semibold text-[var(--text-main)]">
+            <Sparkles className="h-3.5 w-3.5 text-[var(--brand-soft)]" />
             Nexus Crypto SaaS 2026
           </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-cyan)] bg-[rgba(125,211,252,0.08)] px-3 py-1 text-xs text-[var(--text-main)]">

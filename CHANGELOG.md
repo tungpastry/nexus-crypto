@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced the default Black Pink theme with Crypto Universal 2026: midnight surfaces, electric-blue actions, and semantic brand tokens across the dashboard, workspaces, Ops, Login, and TifaWidget.
+- Migrated legacy theme preferences before hydration and across tabs while preserving Wikipedia Glass, trading metric colors, and TradingView dark/light selection.
+
 ### Added
 
 - Refreshed blue-cyan Nexus logo, monogram favicon set, and Open Graph social preview assets.

@@ -187,7 +187,7 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
             className="text-[var(--red-negative)] drop-shadow-[0_0_8px_rgba(251,113,133,0.55)]"
           />
         )}
-        {!direction && <Shield size={34} className="text-[var(--pink-soft)]" />}
+        {!direction && <Shield size={34} className="text-[var(--brand-soft)]" />}
       </motion.div>
     </motion.div>
   );

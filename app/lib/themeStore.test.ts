@@ -24,8 +24,8 @@ function installBrowserStubs() {
   return {
     data,
     documentElement,
-    dispatchStorage: (newValue: string | null) =>
-      storageListener?.({ key: NEXUS_THEME_STORAGE_KEY, newValue } as StorageEvent),
+    dispatchStorage: (newValue: string | null, key: string | null = NEXUS_THEME_STORAGE_KEY) =>
+      storageListener?.({ key, newValue } as StorageEvent),
   };
 }
 
@@ -57,8 +57,8 @@ describe("theme store", () => {
       } as unknown as Storage,
     });
 
-    expect(() => setNexusTheme("black-pink")).not.toThrow();
-    expect(documentElement.dataset.theme).toBe("black-pink");
+    expect(() => setNexusTheme("crypto-universal")).not.toThrow();
+    expect(documentElement.dataset.theme).toBe("crypto-universal");
   });
 
   it("synchronizes theme changes received from another tab", () => {
@@ -73,5 +73,41 @@ describe("theme store", () => {
     expect(documentElement.dataset.theme).toBe("wikipedia-glass");
     expect(notifications).toBe(1);
     unsubscribe();
+    dispatchStorage("crypto-universal");
+    expect(documentElement.dataset.theme).toBe("wikipedia-glass");
+    expect(notifications).toBe(1);
+  });
+
+  it("migrates legacy cross-tab preferences and handles clear/invalid events", () => {
+    const { dispatchStorage, documentElement, data } = installBrowserStubs();
+    const unsubscribe = subscribeToTheme(() => {});
+    try {
+      dispatchStorage("black-pink");
+      expect(documentElement.dataset.theme).toBe("crypto-universal");
+      expect(data.get(NEXUS_THEME_STORAGE_KEY)).toBe("crypto-universal");
+      dispatchStorage("wikipedia-glass");
+      dispatchStorage("crypto-universal", "unrelated-key");
+      expect(documentElement.dataset.theme).toBe("wikipedia-glass");
+      dispatchStorage(null, null);
+      expect(documentElement.dataset.theme).toBe("crypto-universal");
+      dispatchStorage("toString");
+      expect(documentElement.style.colorScheme).toBe("dark");
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it("applies cross-tab migration even when persistence is blocked", () => {
+    const { dispatchStorage, documentElement } = installBrowserStubs();
+    Object.defineProperty(window, "localStorage", {
+      get: () => { throw new Error("storage blocked"); },
+    });
+    const unsubscribe = subscribeToTheme(() => {});
+    try {
+      expect(() => dispatchStorage("black-pink")).not.toThrow();
+      expect(documentElement.dataset.theme).toBe("crypto-universal");
+    } finally {
+      unsubscribe();
+    }
   });
 });

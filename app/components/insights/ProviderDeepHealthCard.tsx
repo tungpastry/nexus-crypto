@@ -175,7 +175,7 @@ export default function ProviderDeepHealthCard() {
             ))
           ) : (
             <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-card)] p-4 text-sm text-[var(--text-muted)] sm:col-span-2 xl:col-span-4">
-              <Activity className="mb-2 h-4 w-4 text-[var(--pink-soft)]" />
+              <Activity className="mb-2 h-4 w-4 text-[var(--brand-soft)]" />
               {loading ? "Loading deep provider diagnostics..." : "No deep health data available."}
             </div>
           )}

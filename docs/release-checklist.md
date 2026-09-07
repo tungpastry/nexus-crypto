@@ -42,7 +42,8 @@
 - [ ] Confirm asset workspace loads.
 - [ ] Confirm `/ops` loads and deep health refresh remains manual.
 - [ ] Confirm `/login` loads.
-- [ ] Confirm both Black Pink and Wikipedia Glass themes persist after reload.
+- [ ] Confirm Crypto Universal 2026 and Wikipedia Glass themes persist after reload and synchronize across tabs.
+- [ ] Confirm legacy Black Pink preferences migrate to Universal; missing/blocked storage still renders the default theme without hydration errors.
 - [ ] Confirm one Binance workspace uses tick-size precision in Live Feed and Kline Close.
 - [ ] Confirm one stablecoin and one Binance-unavailable asset remain market-only.
 - [ ] Confirm invalid login fails when auth is enabled.

@@ -51,7 +51,7 @@ export default function TifaMessageBubble({
   return (
     <div className="flex justify-end">
       <div
-        className="nexus-solid-surface max-w-[85%] rounded-2xl border border-[var(--border-pink)] px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
+        className="nexus-solid-surface max-w-[85%] rounded-2xl border border-[var(--border-brand)] px-3 py-2 text-sm leading-6 text-[var(--text-main)]"
       >
         {text}
       </div>

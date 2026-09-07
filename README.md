@@ -15,7 +15,7 @@
   <img alt="Status Active" src="https://img.shields.io/badge/Status-Active-2563eb">
 </p>
 
-Nexus Crypto is a retro financial dashboard for observing a versioned Top 100 crypto universe. It combines CoinGecko market snapshots, Binance Spot price and candle data, TradingView charts, the Nexus Decision Matrix, LAN authentication, operational diagnostics, and the grounded TifaWidget assistant.
+Nexus Crypto is a financial dashboard for observing a versioned Top 100 crypto universe. It combines CoinGecko market snapshots, Binance Spot price and candle data, TradingView charts, the Nexus Decision Matrix, LAN authentication, operational diagnostics, and the grounded TifaWidget assistant.
 
 Nexus Crypto is market-data-first decision-support software. It does not execute trades, custody funds, or provide financial or trading recommendations.
 
@@ -53,7 +53,7 @@ These screenshots were captured from the verified Ubuntu runtime in Wikipedia Gl
 - Capabilities: 52 Binance Spot/USDT workspaces and 48 market-only workspaces.
 - Deep health: 8 core Binance canaries, separate from the full 52-symbol allowlist.
 - Price display: Binance `PRICE_FILTER.tickSize` precision for live prices and candle-derived matrix metrics.
-- UI: persistent Black Pink and Wikipedia Glass themes.
+- UI: persistent Crypto Universal 2026 (default) and Wikipedia Glass themes.
 - Assistant: Tifa Phase 2 orchestration with Ollama `gemma4:e4b-it-qat` as the current production provider, optional Gemini API support, and grounded tool-only fallback.
 - Production reference: Ubuntu Server, Node `v22.18.0`, `nexus-crypto.service`, port `3200`.
 - Framework: Next.js `16.3.4`, React `19.2.0`; current dependency baseline passes `npm audit` with zero known advisories.
@@ -89,7 +89,7 @@ These screenshots were captured from the verified Ubuntu runtime in Wikipedia Gl
 - Stablecoin and Binance-unavailable modes that avoid unsupported chart, candle, and decision-matrix calls.
 - Lightweight provider readiness plus manual eight-canary deep health diagnostics on `/ops`.
 - LAN-local auth with signed HTTP-only sessions, login rate limiting, rotation, and smoke bearer auth.
-- Persistent Black Pink and Wikipedia Glass themes across Home, Asset, Ops, Login, TifaWidget, and TradingView.
+- Persistent Crypto Universal 2026 and Wikipedia Glass themes across Home, Asset, Ops, Login, TifaWidget, and TradingView. Legacy Black Pink preferences migrate automatically to Universal; saved Wiki Glass preferences are unchanged.
 - TifaWidget on Home, Asset, and Ops with SSE streaming, allowlisted tool orchestration, per-page browser history, and optional Web Speech text-to-speech.
 - Ollama and Gemini provider adapters with retry, timeout, circuit breaker, redaction, and tool-only degradation.
 - Release metadata via `/api/version`, an Ubuntu `systemd` deploy script, smoke gates, and GitHub Actions CI.

@@ -337,7 +337,7 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-pink)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+            className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-card)] p-1.5 text-[var(--text-muted)] transition hover:border-[var(--border-brand)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
             aria-label="Close Tifa panel"
           >
             <X className="h-4 w-4" />
@@ -412,7 +412,9 @@ export default function TifaChatPanel({ page, context, onClose }: TifaChatPanelP
             type="button"
             onClick={() => void handleSend(input)}
             disabled={pending || !input.trim()}
-            className="nexus-primary-action inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-pink)] px-3 shadow-[var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Send message"
+            title="Send message"
+            className="nexus-primary-action inline-flex h-10 items-center justify-center rounded-xl border border-[var(--border-brand)] px-3 shadow-[var(--shadow-accent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
           </button>

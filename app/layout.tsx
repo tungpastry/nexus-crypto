@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ThemeProvider from "./components/theme/ThemeProvider";
-import { DEFAULT_NEXUS_THEME, NEXUS_THEME_STORAGE_KEY } from "./config/theme";
+import { DEFAULT_NEXUS_THEME } from "./config/theme";
+import { getThemeBootstrapScript } from "./lib/themeBootstrap";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -47,13 +48,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const themeBootstrap = `(()=>{try{const key=${JSON.stringify(
-    NEXUS_THEME_STORAGE_KEY
-  )};const saved=localStorage.getItem(key);const theme=saved==="wikipedia-glass"||saved==="black-pink"?saved:${JSON.stringify(
-    DEFAULT_NEXUS_THEME
-  )};document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme==="wikipedia-glass"?"light":"dark"}catch{document.documentElement.dataset.theme=${JSON.stringify(
-    DEFAULT_NEXUS_THEME
-  )}}})();`;
+  const themeBootstrap = getThemeBootstrapScript();
 
   return (
     <html lang="en" data-theme={DEFAULT_NEXUS_THEME} suppressHydrationWarning>

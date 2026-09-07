@@ -16,7 +16,7 @@ export default function OpsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
-            className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-pink)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+            className="nexus-control-surface inline-flex w-fit items-center gap-2 rounded-xl border border-[var(--border-soft)] px-3 py-2 text-sm font-semibold text-[var(--text-main)] shadow-[var(--shadow-soft)] transition hover:border-[var(--border-brand)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Top 100 Nexus Universe
@@ -29,7 +29,7 @@ export default function OpsPage() {
             <p className="font-mono text-xs uppercase tracking-[0.36em] text-[var(--text-soft)]">
               Nexus Ops Center
             </p>
-            <h1 className="mt-2 nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[0_0_22px_rgba(255,95,162,0.18)] sm:text-5xl">
+            <h1 className="mt-2 nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[var(--title-shadow-home)] sm:text-5xl">
               Provider Diagnostics
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-muted)]">
@@ -43,7 +43,7 @@ export default function OpsPage() {
               <Activity className="mb-2 h-4 w-4 text-[var(--cyan-accent)]" />
               Lightweight checks refresh every 60 seconds
             </div>
-            <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-panel-strong)] p-3 shadow-[var(--shadow-pink)]">
+            <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-panel-strong)] p-3 shadow-[var(--shadow-brand)]">
               <Radar className="mb-2 h-4 w-4 text-[var(--mint-positive)]" />
               Deep checks run on mount and manual refresh only
             </div>

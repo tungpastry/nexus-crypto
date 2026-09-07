@@ -238,7 +238,7 @@ export default function AssetWatchlist() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="nexus-primary-action inline-flex items-center gap-2 rounded-lg border border-[var(--border-pink)] px-3 py-2 text-xs font-semibold shadow-[var(--shadow-accent)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
+                    <span className="nexus-primary-action inline-flex items-center gap-2 rounded-lg border border-[var(--border-brand)] px-3 py-2 text-xs font-semibold shadow-[var(--shadow-accent)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]">
                       Open Workspace
                       <ArrowRight className="h-3.5 w-3.5" />
                     </span>

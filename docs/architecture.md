@@ -117,7 +117,9 @@ The Home page does not mount these diagnostic panels. The Ops page mounts deep h
 
 ## Themes And Client State
 
-`ThemeProvider` applies `black-pink` or `wikipedia-glass` via `data-theme` and local storage. A pre-hydration script prevents a noticeable theme flash. TradingView is recreated with its matching dark/light setting.
+`ThemeProvider` applies `crypto-universal` (default, Crypto Universal 2026) or `wikipedia-glass` via `data-theme` and the existing `nexus-ui-theme` local storage key. Universal uses midnight surfaces and electric-blue actions; Wiki Glass retains its light palette. Semantic brand tokens are separate from the Decision Matrix metric colors.
+
+The pre-hydration bootstrap and cross-tab storage handler share theme normalization: legacy `black-pink` becomes `crypto-universal`, Wiki Glass is preserved, and missing/invalid values fall back to Universal. Legacy preferences are rewritten best-effort; blocked storage does not prevent rendering. The bootstrap applies colors before hydration. TradingView is recreated with matching dark/light settings and a midnight dark toolbar. This changes presentation only, not polling or market analysis.
 
 Tifa browser history is stored per page context. Web Speech text-to-speech runs entirely through browser APIs when available.
 

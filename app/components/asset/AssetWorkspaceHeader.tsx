@@ -13,7 +13,7 @@ function formatCategory(category: NexusAsset["category"]) {
 
 function getCardToneClass(tone: "rank" | "category" | "binance" | "tv") {
   if (tone === "rank") {
-    return "border-[rgba(255,95,162,0.28)] bg-[rgba(255,95,162,0.08)]";
+    return "border-[var(--brand-border-subtle)] bg-[var(--brand-surface)]";
   }
   if (tone === "category") {
     return "border-[rgba(196,181,253,0.3)] bg-[rgba(196,181,253,0.08)]";
@@ -37,7 +37,7 @@ export default function AssetWorkspaceHeader({ asset }: AssetWorkspaceHeaderProp
       <div className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-start">
         <div>
           <div className="flex flex-wrap items-center gap-4">
-            <div className="rounded-full shadow-[var(--shadow-pink),var(--shadow-cyan)]">
+            <div className="rounded-full shadow-[var(--shadow-brand),var(--shadow-cyan)]">
               <CoinIcon
                 src={asset.iconUrl}
                 symbol={asset.symbol}
@@ -46,7 +46,7 @@ export default function AssetWorkspaceHeader({ asset }: AssetWorkspaceHeaderProp
               />
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <h1 className="nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[0_0_20px_rgba(255,95,162,0.2)] sm:text-5xl">
+              <h1 className="nexus-title-gradient bg-clip-text text-4xl font-black tracking-normal text-transparent drop-shadow-[var(--title-shadow-asset)] sm:text-5xl">
                 {asset.symbol}
               </h1>
               <p className="pb-1 text-lg font-semibold text-[var(--text-muted)]">{asset.name}</p>

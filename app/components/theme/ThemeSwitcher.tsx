@@ -5,7 +5,7 @@ import { NEXUS_THEMES, type NexusTheme } from "../../config/theme";
 import { useNexusTheme } from "./ThemeProvider";
 
 const OPTIONS: Array<{ theme: NexusTheme; icon: typeof MoonStar }> = [
-  { theme: "black-pink", icon: MoonStar },
+  { theme: "crypto-universal", icon: MoonStar },
   { theme: "wikipedia-glass", icon: BookOpen },
 ];
 

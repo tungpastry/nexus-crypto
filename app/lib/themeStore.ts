@@ -1,5 +1,6 @@
 import {
   DEFAULT_NEXUS_THEME,
+  LEGACY_NEXUS_THEME,
   NEXUS_THEMES,
   NEXUS_THEME_STORAGE_KEY,
   parseNexusTheme,
@@ -22,8 +23,16 @@ function applyTheme(theme: NexusTheme) {
 }
 
 function handleStorage(event: StorageEvent) {
-  if (event.key !== NEXUS_THEME_STORAGE_KEY) return;
-  applyTheme(parseNexusTheme(event.newValue));
+  if (event.key !== NEXUS_THEME_STORAGE_KEY && event.key !== null) return;
+  const theme = parseNexusTheme(event.newValue);
+  applyTheme(theme);
+  if (event.newValue === LEGACY_NEXUS_THEME) {
+    try {
+      window.localStorage.setItem(NEXUS_THEME_STORAGE_KEY, theme);
+    } catch {
+      // Apply the migration even when persistence is unavailable.
+    }
+  }
   emitThemeChange();
 }
 

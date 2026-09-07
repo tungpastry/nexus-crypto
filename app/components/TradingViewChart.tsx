@@ -103,7 +103,7 @@ export default function TradingViewChart({
           theme,
           style: "1",
           locale: "en",
-          toolbar_bg: theme === "dark" ? "#0b0710" : "#f8fafc",
+          toolbar_bg: theme === "dark" ? "#080D18" : "#f8fafc",
           enable_publishing: false,
           hide_legend: false,
           hide_top_toolbar: false,
@@ -145,7 +145,7 @@ export default function TradingViewChart({
   return (
     <div
       ref={hostRef}
-      className="overflow-hidden rounded-2xl border border-[var(--border-strong)] shadow-[var(--shadow-panel),var(--shadow-pink)]"
+      className="overflow-hidden rounded-2xl border border-[var(--border-strong)] shadow-[var(--shadow-panel),var(--shadow-brand)]"
       style={{ width: "100%", height }}
     />
   );

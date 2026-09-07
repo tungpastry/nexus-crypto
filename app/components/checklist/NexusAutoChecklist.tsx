@@ -232,12 +232,12 @@ export default function NexusAutoChecklist({
       <div className="grid gap-4 p-5 lg:grid-cols-[200px_1fr]">
         <div className="rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-4 shadow-[0_12px_32px_rgba(0,0,0,0.24)]">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-muted)]">Nexus Score</p>
-          <p className="mt-2 nexus-title-gradient bg-clip-text font-mono text-5xl font-bold text-transparent drop-shadow-[0_0_16px_rgba(255,95,162,0.2)]">
+          <p className="mt-2 nexus-title-gradient bg-clip-text font-mono text-5xl font-bold text-transparent drop-shadow-[var(--title-shadow-score)]">
             {signal.score}
           </p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--border-strong)]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-pink-500 to-cyan-300"
+              className="h-full rounded-full nexus-score-progress"
               style={{ width: `${signal.score}%` }}
             />
           </div>
