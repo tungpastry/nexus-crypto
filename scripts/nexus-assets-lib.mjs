@@ -45,6 +45,31 @@ function assertImageUrl(value) {
   }
 }
 
+export function getTickSizeFractionDigits(tickSize) {
+  if (typeof tickSize !== "string" || !/^\d+(?:\.\d+)?$/.test(tickSize)) {
+    throw new Error(`Invalid Binance price tick size: ${tickSize}`);
+  }
+  if (!Number.isFinite(Number(tickSize)) || Number(tickSize) <= 0) {
+    throw new Error(`Invalid Binance price tick size: ${tickSize}`);
+  }
+
+  const fraction = tickSize.split(".")[1] || "";
+  const digits = fraction.replace(/0+$/, "").length;
+  if (digits > 20) {
+    throw new Error(`Unsupported Binance price tick precision: ${tickSize}`);
+  }
+  return digits;
+}
+
+function getSymbolPriceTickSize(symbolInfo) {
+  const priceFilter = symbolInfo?.filters?.find(
+    (filter) => filter?.filterType === "PRICE_FILTER"
+  );
+  const tickSize = priceFilter?.tickSize;
+  getTickSizeFractionDigits(tickSize);
+  return tickSize;
+}
+
 export function validateGeneratedCatalog(catalog) {
   if (!catalog || typeof catalog !== "object") throw new Error("Catalog must be an object");
   if (!Array.isArray(catalog.assets) || catalog.assets.length !== 100) {
@@ -77,7 +102,10 @@ export function validateGeneratedCatalog(catalog) {
       if (binanceSymbols.has(asset.binanceSymbol)) {
         throw new Error(`Duplicate Binance symbol: ${asset.binanceSymbol}`);
       }
+      getTickSizeFractionDigits(asset.binancePriceTickSize);
       binanceSymbols.add(asset.binanceSymbol);
+    } else if (asset.binancePriceTickSize !== undefined) {
+      throw new Error(`Market-only asset cannot have Binance price metadata: ${asset.id}`);
     }
 
     if (asset.enableChecklist) {
@@ -120,7 +148,7 @@ export function buildNexusCatalog({ coins, exchangeInfo, overrides, generatedAt 
     symbolCounts.set(symbol, (symbolCounts.get(symbol) || 0) + 1);
   }
 
-  const tradingUsdt = new Set(
+  const tradingUsdt = new Map(
     exchangeInfo.symbols
       .filter(
         (item) =>
@@ -128,7 +156,7 @@ export function buildNexusCatalog({ coins, exchangeInfo, overrides, generatedAt 
           item?.quoteAsset === "USDT" &&
           item?.isSpotTradingAllowed !== false
       )
-      .map((item) => String(item.symbol))
+      .map((item) => [String(item.symbol), item])
   );
   const stablecoinIds = new Set(overrides.stablecoinIds || []);
   const forceMarketOnlyIds = new Set(overrides.forceMarketOnlyIds || []);
@@ -166,6 +194,9 @@ export function buildNexusCatalog({ coins, exchangeInfo, overrides, generatedAt 
     }
 
     const enabled = Boolean(binanceSymbol) && !stablecoin && !forcedMarketOnly;
+    const binancePriceTickSize = enabled
+      ? getSymbolPriceTickSize(tradingUsdt.get(binanceSymbol))
+      : undefined;
     const marketOnlyReason = enabled
       ? undefined
       : stablecoin
@@ -184,7 +215,13 @@ export function buildNexusCatalog({ coins, exchangeInfo, overrides, generatedAt 
       iconUrl: image,
       category,
       coingeckoId,
-      ...(enabled ? { binanceSymbol, tradingViewSymbol: `BINANCE:${binanceSymbol}` } : {}),
+      ...(enabled
+        ? {
+            binanceSymbol,
+            binancePriceTickSize,
+            tradingViewSymbol: `BINANCE:${binanceSymbol}`,
+          }
+        : {}),
       quote: enabled ? "USDT" : "USD",
       enablePrice: true,
       enableChart: enabled,

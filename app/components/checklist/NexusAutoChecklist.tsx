@@ -11,6 +11,7 @@ import {
   type NexusSignal,
 } from "../../lib/nexusAlgorithm";
 import { getMarketOnlyReason } from "../../lib/assetCapabilities";
+import { formatBinancePrice } from "../../lib/priceFormat";
 import RetroPanel from "../layout/RetroPanel";
 import DataFreshnessBadge from "../market/DataFreshnessBadge";
 
@@ -32,13 +33,6 @@ type MetricTone =
   | "volatilityHigh"
   | "volatilityUnknown"
   | "volume";
-
-function formatNumber(value: number) {
-  if (!Number.isFinite(value)) return "--";
-  return value.toLocaleString("en-US", {
-    maximumFractionDigits: value < 1 ? 6 : 2,
-  });
-}
 
 function formatPercent(value: number) {
   if (!Number.isFinite(value)) return "--";
@@ -278,12 +272,36 @@ export default function NexusAutoChecklist({
         </div>
 
         <div className="space-y-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--text-soft)]">
+            Binance {signal.symbol} candle data · {timeframe.label} · refreshes every 60 seconds ·
+            tick-size precision
+          </p>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard label="Price" value={formatNumber(signal.price)} tone="price" />
-            <MetricCard label="MA20" value={formatNumber(signal.ma20)} tone="ma20" />
-            <MetricCard label="MA50" value={formatNumber(signal.ma50)} tone="ma50" />
-            <MetricCard label="MA200" value={formatNumber(signal.ma200)} tone="ma200" />
-            <MetricCard label="ATR14" value={formatNumber(signal.atr14)} tone="atr" />
+            <MetricCard
+              label="Kline Close"
+              value={formatBinancePrice(signal.price, asset.binancePriceTickSize)}
+              tone="price"
+            />
+            <MetricCard
+              label="MA20"
+              value={formatBinancePrice(signal.ma20, asset.binancePriceTickSize)}
+              tone="ma20"
+            />
+            <MetricCard
+              label="MA50"
+              value={formatBinancePrice(signal.ma50, asset.binancePriceTickSize)}
+              tone="ma50"
+            />
+            <MetricCard
+              label="MA200"
+              value={formatBinancePrice(signal.ma200, asset.binancePriceTickSize)}
+              tone="ma200"
+            />
+            <MetricCard
+              label="ATR14"
+              value={formatBinancePrice(signal.atr14, asset.binancePriceTickSize)}
+              tone="atr"
+            />
             <MetricCard
               label="ATR %"
               value={formatPercent(signal.atrPercent)}

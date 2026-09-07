@@ -15,6 +15,7 @@ export type NexusAsset = {
   category: NexusAssetCategory;
   coingeckoId: string;
   binanceSymbol?: string;
+  binancePriceTickSize?: string;
   tradingViewSymbol?: string;
   quote?: "USDT" | "USD";
   enablePrice: boolean;

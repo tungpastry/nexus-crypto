@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { NexusAsset } from "../config/assets";
 import { getMarketOnlyReason } from "../lib/assetCapabilities";
+import { formatBinancePrice, formatUsdPrice } from "../lib/priceFormat";
 import DataFreshnessBadge from "./market/DataFreshnessBadge";
 
 type PriceWidgetProps = {
@@ -86,8 +87,12 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
     return () => clearInterval(interval);
   }, [asset.binanceSymbol, fetchPrice]);
 
-  const formatPrice = (p: number | null) =>
-    p ? `$${p.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "Loading...";
+  const formattedPrice =
+    price === null
+      ? "Loading..."
+      : asset.binanceSymbol
+        ? formatBinancePrice(price, asset.binancePriceTickSize)
+        : formatUsdPrice(price);
 
   const ringColor =
     direction === "up"
@@ -127,13 +132,13 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.p
+          <motion.div
             key={price}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className={`text-4xl font-extrabold leading-snug ${
+            className={`flex flex-wrap items-baseline gap-2 text-4xl font-extrabold leading-snug ${
               direction === "up"
                 ? "text-[var(--mint-positive)] drop-shadow-[0_0_6px_rgba(94,234,212,0.7)]"
                 : direction === "down"
@@ -141,8 +146,13 @@ export default function PriceWidget({ asset }: PriceWidgetProps) {
                 : "text-[var(--yellow-accent)]"
             }`}
           >
-            {formatPrice(price)}
-          </motion.p>
+            <span>{formattedPrice}</span>
+            {price !== null && asset.binanceSymbol && (
+              <span className="font-mono text-sm font-semibold text-[var(--text-muted)]">
+                {asset.quote || "USDT"}
+              </span>
+            )}
+          </motion.div>
         </AnimatePresence>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
           {error ||

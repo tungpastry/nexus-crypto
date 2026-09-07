@@ -23,6 +23,7 @@ describe("Nexus 100 asset catalog", () => {
     for (const asset of NEXUS_ASSETS) {
       if (asset.enableChecklist) {
         expect(asset.binanceSymbol).toBeTruthy();
+        expect(asset.binancePriceTickSize).toMatch(/^\d+(?:\.\d+)?$/);
         expect(asset.tradingViewSymbol).toBe(`BINANCE:${asset.binanceSymbol}`);
         expect(asset.enableChart).toBe(true);
         expect(asset.enableMA).toBe(true);
@@ -30,6 +31,9 @@ describe("Nexus 100 asset catalog", () => {
       if (asset.category === "stablecoin") {
         expect(asset.marketOnlyReason).toBe("stablecoin");
         expect(asset.enableChecklist).toBe(false);
+      }
+      if (!asset.binanceSymbol) {
+        expect(asset.binancePriceTickSize).toBeUndefined();
       }
     }
   });

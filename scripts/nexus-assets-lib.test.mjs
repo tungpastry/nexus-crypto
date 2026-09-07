@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildNexusCatalog, fetchJsonWithRetry } from "./nexus-assets-lib.mjs";
+import {
+  buildNexusCatalog,
+  fetchJsonWithRetry,
+  getTickSizeFractionDigits,
+} from "./nexus-assets-lib.mjs";
 
 function fixtures() {
   const coins = Array.from({ length: 100 }, (_, index) => ({
@@ -18,11 +22,19 @@ function fixtures() {
     deepHealthCanaryIds: coins.slice(0, 8).map((coin) => coin.id),
   };
   const exchangeInfo = {
-    symbols: coins.slice(0, 8).map((coin) => ({
+    symbols: coins.slice(0, 8).map((coin, index) => ({
       symbol: `${coin.symbol.toUpperCase()}USDT`,
       quoteAsset: "USDT",
       status: "TRADING",
       isSpotTradingAllowed: true,
+      filters: [
+        {
+          filterType: "PRICE_FILTER",
+          minPrice: "0.00000001",
+          maxPrice: "1000000.00000000",
+          tickSize: index === 0 ? "0.01000000" : "0.00010000",
+        },
+      ],
     })),
   };
   return { coins, overrides, exchangeInfo };
@@ -37,6 +49,23 @@ describe("Nexus asset catalog generator", () => {
     expect(catalog.assets).toHaveLength(100);
     expect(catalog.assets.filter((asset) => asset.enableChecklist)).toHaveLength(8);
     expect(catalog.assets.filter((asset) => asset.deepHealthCanary)).toHaveLength(8);
+    expect(catalog.assets[0].binancePriceTickSize).toBe("0.01000000");
+  });
+
+  it("derives display precision from Binance tick size", () => {
+    expect(getTickSizeFractionDigits("0.01000000")).toBe(2);
+    expect(getTickSizeFractionDigits("0.00000001")).toBe(8);
+    expect(() => getTickSizeFractionDigits("0.00000000")).toThrow(
+      /Invalid Binance price tick size/
+    );
+  });
+
+  it("rejects an enabled symbol without valid PRICE_FILTER metadata", () => {
+    const input = fixtures();
+    input.exchangeInfo.symbols[0].filters = [];
+    expect(() =>
+      buildNexusCatalog({ ...input, generatedAt: "2026-09-06T00:00:00.000Z" })
+    ).toThrow(/Invalid Binance price tick size/);
   });
 
   it("rejects an untrusted image host", () => {
