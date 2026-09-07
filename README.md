@@ -5,6 +5,9 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/tungpastry/nexus-crypto/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/tungpastry/nexus-crypto/actions/workflows/ci.yml/badge.svg?branch=main">
+  </a>
   <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.3.4-000000?logo=nextdotjs&logoColor=white">
   <img alt="React 19" src="https://img.shields.io/badge/React-19.2.0-149ECA?logo=react&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white">
