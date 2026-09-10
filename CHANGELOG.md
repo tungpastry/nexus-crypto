@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Replaced the TifaWidget avatar with the new happy robot artwork across the launcher, chat header, and assistant messages.
 - Replaced the default Black Pink theme with Crypto Universal 2026: midnight surfaces, electric-blue actions, and semantic brand tokens across the dashboard, workspaces, Ops, Login, and TifaWidget.
 - Migrated legacy theme preferences before hydration and across tabs while preserving Wikipedia Glass, trading metric colors, and TradingView dark/light selection.
 

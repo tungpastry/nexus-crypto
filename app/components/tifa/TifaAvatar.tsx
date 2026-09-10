@@ -11,7 +11,7 @@ type TifaAvatarProps = {
   alt?: string;
 };
 
-const AVATAR_SRC = "/tifa-avatar.jpg";
+const AVATAR_SRC = "/tifa-avatar.png";
 
 const SIZE_CLASS: Record<TifaAvatarSize, { outer: string; image: string; text: string }> = {
   sm: {
