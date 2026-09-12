@@ -75,7 +75,7 @@ export default function ProviderHealthPanel() {
   const degraded = Boolean(error || health?.status === "degraded");
 
   return (
-    <RetroPanel title="Provider Health" eyebrow="Zenora-compatible checks">
+    <RetroPanel title="Provider Health" eyebrow="Runtime provider checks">
       <div className="grid gap-4 p-5 lg:grid-cols-[240px_1fr]">
         <div className="rounded-2xl border border-[var(--border-soft)] nexus-card-surface p-4">
           <div className="flex items-center gap-2">

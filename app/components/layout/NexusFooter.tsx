@@ -18,7 +18,7 @@ export default function NexusFooter() {
           </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-[rgba(94,234,212,0.32)] bg-[rgba(94,234,212,0.08)] px-3 py-1 text-xs text-[var(--text-main)]">
             <ShieldCheck className="h-3.5 w-3.5 text-[var(--mint-positive)]" />
-            Zenora Health Ready
+            Provider Health Ready
           </span>
         </div>
 
@@ -43,7 +43,7 @@ export default function NexusFooter() {
 
         <p className="inline-flex items-center gap-2 text-xs text-[var(--text-soft)]">
           <Github className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-          © 2026 Nexus Crypto / Built for Nexus × Zenora workflow / tungpastry/nexus-crypto
+          © 2026 Nexus Crypto / Built for Nexus operations / tungpastry/nexus-crypto
         </p>
       </div>
     </footer>

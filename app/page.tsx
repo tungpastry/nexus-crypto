@@ -38,7 +38,7 @@ export default function Home() {
                 className="rounded-xl border border-[var(--border-soft)] bg-[var(--bg-panel-strong)] p-3 shadow-[var(--shadow-brand)] transition hover:border-[var(--border-brand)] hover:bg-[var(--bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
               >
                 <ShieldCheck className="mb-2 h-4 w-4 text-[var(--mint-positive)]" />
-                Zenora Ops Center
+                Nexus Ops Center
               </Link>
             </div>
           </div>
