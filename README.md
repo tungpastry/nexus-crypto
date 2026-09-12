@@ -21,7 +21,7 @@ Nexus Crypto is market-data-first decision-support software. It does not execute
 
 ## Web App Screenshots
 
-These screenshots were captured from the verified Ubuntu runtime at commit `b2647f6` in Wikipedia Glass mode after the Crypto Universal 2026 rollout. Market values are point-in-time and do not represent current prices.
+These screenshots were captured from the verified Ubuntu runtime at commit `b9a2076` in Wikipedia Glass mode after the Crypto Universal 2026 rollout. Market values are point-in-time and do not represent current prices.
 
 ### Home Dashboard
 
